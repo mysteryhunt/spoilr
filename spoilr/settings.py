@@ -1,5 +1,3 @@
-import os.path
-
 # TODO: SETUP: point this somewhere safe (from the web server) 
 # hunt_data structure, basically:
 #   top/
@@ -9,10 +7,10 @@ import os.path
 #       puzzle/
 #   puzzle/
 #     [puzzle_id]/
-HUNT_DATA_DIR = os.path.join(os.path.dirname(__file__), '/home', 'hunt_data')
+HUNT_DATA_DIR = '/home/hunt_data'
 
 # TODO: SETUP: point this to where team directories will live (and be served by the web server)
-TEAMS_DIR = os.path.join(os.path.dirname(__file__), '/var/www/spoilr', 'teams')
+TEAMS_DIR = '/var/www/spoilr/teams'
 
 # TODO: RUNTIME: set this to false
 DEBUG = True
