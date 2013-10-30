@@ -1,3 +1,5 @@
+from django.conf import settings
+
 import logging
 import csv
 import shutil
@@ -10,7 +12,7 @@ def get_team_path(team):
 
 def load_rounds():
     print("Loading rounds from rounds.csv...")
-    with open('rounds.csv', 'r') as team_file:
+    with open(os.path.join(settings.LOAD_DIR, 'rounds.csv'), 'r') as team_file:
         for row in csv.DictReader(team_file, delimiter='\t'):
             if Round.objects.filter(url=row["url"]).exists():
                 continue
@@ -21,7 +23,7 @@ def load_rounds():
 
 def load_puzzles():
     print("Loading puzzles from puzzles.csv...")
-    with open('puzzles.csv', 'r') as team_file:
+    with open(os.path.join(settings.LOAD_DIR, 'puzzles.csv'), 'r') as team_file:
         for row in csv.DictReader(team_file, delimiter='\t'):
             if Puzzle.objects.filter(url=row["url"]).exists():
                 continue
@@ -33,7 +35,7 @@ def load_puzzles():
 
 def load_teams():
     print("Loading teams from teams.csv...")
-    with open('teams.csv', 'r') as team_file:
+    with open(os.path.join(settings.LOAD_DIR, 'teams.csv'), 'r') as team_file:
         for row in csv.DictReader(team_file, delimiter='\t'):
             if Team.objects.filter(url=row["url"]).exists():
                 continue

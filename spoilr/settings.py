@@ -7,10 +7,13 @@
 #       puzzle/
 #   puzzle/
 #     [puzzle_id]/
-HUNT_DATA_DIR = '/home/hunt_data'
+HUNT_DATA_DIR = '/home/hunt/hunt_data'
 
 # TODO: SETUP: point this to where team directories will live (and be served by the web server)
 TEAMS_DIR = '/var/www/spoilr/teams'
+
+# TODO: SETUP: point this to where the initial data tables will live
+LOAD_DIR = '/home/hunt'
 
 # TODO: RUNTIME: set this to false
 DEBUG = True
@@ -79,7 +82,7 @@ STATIC_ROOT = ''
 
 # URL prefix for static files.
 # Example: "http://example.com/static/", "http://static.example.com/"
-STATIC_URL = '/'
+STATIC_URL = '/static/'
 
 # Additional locations of static files
 STATICFILES_DIRS = (

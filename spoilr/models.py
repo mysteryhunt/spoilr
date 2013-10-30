@@ -35,6 +35,7 @@ class Team(models.Model):
     url = models.CharField(max_length=50, unique=True, verbose_name="id")
     username = models.CharField(max_length=50, unique=True)
     name = models.CharField(max_length=200, unique=True)
+    password = models.CharField(max_length=200)
     rounds = models.ManyToManyField(Round, through='RoundAccess')
     puzzles = models.ManyToManyField(Puzzle, through='PuzzleAccess')
 
