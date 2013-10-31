@@ -26,7 +26,7 @@ class Puzzle(models.Model):
 
     class Meta:
         unique_together = ('round', 'order')
-        ordering = ['order']
+        ordering = ['round__order', 'order']
         order_with_respect_to = 'round'
 
 Round.puzzles = models.ManyToManyField(Puzzle)
@@ -79,3 +79,34 @@ class PuzzleAccess(models.Model):
     class Meta:
         unique_together = ('team', 'puzzle')
         verbose_name_plural = 'Puzzle access'
+
+# ----------------------- 2014-specific stuff ---------------------
+
+class Y2014MitPuzzleData(models.Model):
+    puzzle = models.ForeignKey(Puzzle, unique=True, limit_choices_to = {'round__url': 'mit'})
+
+    CARD_CHOICES = []
+    for n in [2,3,4,5,6,7,8,9]: # dormouse
+        CARD_CHOICES.append((str(n)+'_spades', str(n)+' of spades (dormouse)'))
+    for n in [2,4,5,7,9,'J','Q','K']: # caterpillar
+        CARD_CHOICES.append((str(n)+'_clubs', str(n)+' of clubs (caterpillar)'))
+    for n in ['A',2,3,4,8,9,10,'J']: # tweedle
+        CARD_CHOICES.append((str(n)+'_diamonds', str(n)+' of diamonds (tweedle)'))
+    card = models.CharField(max_length=12, choices=CARD_CHOICES, unique=True)
+
+    def __str__(self):
+        return '%s (%s)' % (self.puzzle.name, self.card)
+
+    def mit_meta(self):
+        if 'spades' in self.card:
+            return 'dormouse'
+        if 'clubs' in self.card:
+            return 'caterpillar'
+        if 'diamonds' in self.card:
+            return 'tweedle'
+
+    class Meta:
+        ordering = ['puzzle__order', 'card']
+        order_with_respect_to = 'puzzle'
+        verbose_name = '2014 MIT meta puzzle data'
+        verbose_name_plural = '2014 MIT meta puzzle data'

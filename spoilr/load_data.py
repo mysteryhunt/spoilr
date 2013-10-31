@@ -44,10 +44,30 @@ def load_teams():
             team.save() 
     print("Done loading teams")
 
+def load_mit_data(): # 2014-specific
+    print("Loading mit cards from mit_cards.csv...")
+    with open(os.path.join(settings.LOAD_DIR, 'mit_cards.csv'), 'r') as team_file:
+        for row in csv.DictReader(team_file, delimiter='\t'):
+            try:
+                puzzle = Puzzle.objects.get(url=row["url"])
+            except:
+                print('ERROR: no such puzzle "%s"' % row["url"])
+                continue
+            if puzzle.round.url != "mit":
+                print('ERROR: puzzle "%s" isn\'t in round "mit"' % row["url"])
+                continue
+            Y2014MitPuzzleData.objects.filter(card=row["card"]).delete()
+            Y2014MitPuzzleData.objects.filter(puzzle=puzzle).delete()
+            mitdata = Y2014MitPuzzleData.objects.create(puzzle=puzzle, card=row["card"])
+            mitdata.save()
+
+    print("Done loading mit cards")
+
 def load_all():
     load_teams()
     load_rounds()
     load_puzzles()
+    load_mit_data() # 2014-specific
 
 def wipe_database_i_really_mean_it():
     print("Wiping the hunt database...")
@@ -59,6 +79,7 @@ def wipe_database_i_really_mean_it():
     Team.objects.all().delete()
     Round.objects.all().delete()
     Puzzle.objects.all().delete()
+    Y2014MitPuzzleData.objects.all().delete() # 2014-specific
     print("Done wiping database")
 
 def everybody_can_see_everything():

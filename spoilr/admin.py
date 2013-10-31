@@ -103,3 +103,15 @@ class PuzzleAccessAdmin(admin.ModelAdmin):
 
 admin.site.register(RoundAccess,RoundAccessAdmin)
 admin.site.register(PuzzleAccess,PuzzleAccessAdmin)
+
+# ----------------------- 2014-specific stuff ---------------------
+
+class Y2014MitPuzzleDataAdmin(admin.ModelAdmin):
+    def mit_meta(data):
+        return data.mit_meta()
+    mit_meta.short_description = 'MIT Meta'
+    list_display = ('card', mit_meta, 'puzzle')
+    search_fields = ['card', 'puzzle__name']
+    ordering = ['card']
+
+admin.site.register(Y2014MitPuzzleData, Y2014MitPuzzleDataAdmin)
