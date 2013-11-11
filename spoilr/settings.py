@@ -15,6 +15,8 @@ TEAMS_DIR = '/var/www/spoilr/teams'
 # TODO: SETUP: point this to where the initial data tables will live
 LOAD_DIR = '/home/hunt'
 
+HTPASSWD_FILE = '/home/hunt/htpasswd/htpasswd'
+
 # TODO: RUNTIME: set this to false
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
@@ -157,14 +159,14 @@ LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
     'filters': {
-        'require_debug_false': {
-            '()': 'django.utils.log.RequireDebugFalse'
-        }
+#      'require_debug_false': {
+#          '()': 'django.utils.log.RequireDebugFalse'
+#        }
     },
     'handlers': {
         'mail_admins': {
             'level': 'ERROR',
-            'filters': ['require_debug_false'],
+            #'filters': ['require_debug_false'],
             'class': 'django.utils.log.AdminEmailHandler'
         }
     },

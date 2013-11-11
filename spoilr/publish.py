@@ -25,7 +25,7 @@ def prestart_team(team, suffix=None):
             htaccess_file.write('''AuthType Basic
 AuthName "Mystery Hunt"
 AuthUserFile %s
-Require User %s''' % ('???', team.username))
+Require User %s''' % (settings.HTPASSWD_FILE, team.username))
             htaccess_file.close()
     except IOError as e:
         logger.error('Failed to initialize team directory %s, IT MAY BE IN AN INVALID STATE: %s', team_path, str(e))
