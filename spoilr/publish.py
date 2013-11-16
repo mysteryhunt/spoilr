@@ -162,7 +162,7 @@ def publish_team(team, suffix=None):
         if os.path.isfile(os.path.join(puzzle_source, 'puzzle.js')):
             with open(os.path.join(puzzle_source, 'puzzle.js'), 'r') as puzzle_js_file:
                 puzzle_context['puzzle_js'] = puzzle_js_file.read()
-        publish_dir(puzzle_context, os.path.join(settings.HUNT_DATA_DIR, 'round', round.url, 'puzzle'), puzzle_dir, '../..')
+        publish_dir(puzzle_context, os.path.join(settings.HUNT_DATA_DIR, 'round', puzzle.round.url, 'puzzle'), puzzle_dir, '../..')
         # --- 2014-specific ---
         if puzzle.round.url == 'mit':
             try:
