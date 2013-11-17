@@ -160,57 +160,77 @@ def publish_dir(context, source_path, dest_path, root_path, except_for=[]):
                 logger.error('can\'t create directory "%s": %s', os.path.abspath(dest_dir), str(e))
                 continue
 
-def publish_team(team, suffix=None):
-    print('    Top...')
+def ensure_team_dir(team, suffix=None):
     team_path = team.get_path(suffix)
     if not os.path.exists(team_path):
-        if not prestart_team(team, suffix):
-            return
+        return prestart_team(team, suffix)
+    return True
+
+def publish_team_top(team, suffix=None):
+    if not ensure_team_dir(team, suffix):
+        return
+    team_path = team.get_path(suffix)
     top_context = TopContext(team)
     publish_dir(top_context, os.path.join(settings.HUNT_DATA_DIR, 'top'), team_path, '.')
+
+def publish_team_round(team, round, suffix=None):
+    if not ensure_team_dir(team, suffix):
+        return
+    team_path = team.get_path(suffix)
+    round_dir = os.path.join(team_path, 'round', round.url)
+    try:
+        os.makedirs(os.path.abspath(round_dir))
+    except OSError as e:
+        logger.error('couldn\'t create directory "%s": %s', round_dir, str(e))
+        return
+    round_context = RoundContext(team, round)
+    publish_dir(round_context, os.path.join(settings.HUNT_DATA_DIR, 'round', round.url, 'round'), round_dir, '../..')
+
+def publish_team_puzzle(team, puzzle, suffix=None):
+    if not ensure_team_dir(team, suffix):
+        return
+    team_path = team.get_path(suffix)
+    puzzle_dir = os.path.join(team_path, 'puzzle', puzzle.url)
+    try:
+        os.makedirs(os.path.abspath(puzzle_dir))
+    except OSError as e:
+        logger.error('couldn\'t create directory "%s": %s', puzzle_dir, str(e))
+        return
+    puzzle_context = PuzzleContext(team, puzzle)
+    puzzle_source = os.path.join(settings.HUNT_DATA_DIR, 'puzzle', puzzle.url)
+    publish_dir(puzzle_context, puzzle_source, puzzle_dir, '../..', ['index.html', 'puzzle.css', 'puzzle.js'])
+    try:
+        with open(os.path.join(puzzle_source, 'index.html'), 'r') as index_html_file:
+            puzzle_context['index_html'] = index_html_file.read()
+    except Exception as e:
+        logger.error('couldn\'t read puzzle html: %s', puzzle_dir, str(e))
+        return
+    if os.path.isfile(os.path.join(puzzle_source, 'puzzle.css')):
+        with open(os.path.join(puzzle_source, 'puzzle.css'), 'r') as puzzle_css_file:
+            puzzle_context['puzzle_css'] = puzzle_css_file.read()
+    if os.path.isfile(os.path.join(puzzle_source, 'puzzle.js')):
+        with open(os.path.join(puzzle_source, 'puzzle.js'), 'r') as puzzle_js_file:
+            puzzle_context['puzzle_js'] = puzzle_js_file.read()
+    publish_dir(puzzle_context, os.path.join(settings.HUNT_DATA_DIR, 'round', puzzle.round.url, 'puzzle'), puzzle_dir, '../..')
+    # --- 2014-specific ---
+    if puzzle.round.url == 'mit':
+        try:
+            card = Y2014MitPuzzleData.objects.get(puzzle=puzzle).card
+            source_file = os.path.join(settings.HUNT_DATA_DIR, 'round', 'mit', 'cards', card+'.png')
+            dest_file = os.path.join(puzzle_dir, 'card.png')
+            shutil.copyfile(source_file, dest_file)
+        except:
+            logger.error('puzzle "%s" doesn\'t have a playing card assigned' % puzzle.url)
+
+def publish_team(team, suffix=None):
+    print('    Top...')
+    publish_team_top(team, suffix)
     for round in team.rounds.all():
         print('    Round %s...' % round.url)
-        round_dir = os.path.join(team_path, 'round', round.url)
-        try:
-            os.makedirs(os.path.abspath(round_dir))
-        except OSError as e:
-            logger.error('couldn\'t create directory "%s": %s', round_dir, str(e))
-            continue
-        round_context = RoundContext(team, round)
-        publish_dir(round_context, os.path.join(settings.HUNT_DATA_DIR, 'round', round.url, 'round'), round_dir, '../..')
+        publish_team_round(team, round, suffix)
     for puzzle in team.puzzles.all():
         print('    Puzzle %s...' % puzzle.url)
-        puzzle_dir = os.path.join(team_path, 'puzzle', puzzle.url)
-        try:
-            os.makedirs(os.path.abspath(puzzle_dir))
-        except OSError as e:
-            logger.error('couldn\'t create directory "%s": %s', puzzle_dir, str(e))
-            continue
-        puzzle_context = PuzzleContext(team, puzzle)
-        puzzle_source = os.path.join(settings.HUNT_DATA_DIR, 'puzzle', puzzle.url)
-        publish_dir(puzzle_context, puzzle_source, puzzle_dir, '../..', ['index.html', 'puzzle.css', 'puzzle.js'])
-        try:
-            with open(os.path.join(puzzle_source, 'index.html'), 'r') as index_html_file:
-                puzzle_context['index_html'] = index_html_file.read()
-        except Exception as e:
-            logger.error('couldn\'t read puzzle html: %s', puzzle_dir, str(e))
-            continue
-        if os.path.isfile(os.path.join(puzzle_source, 'puzzle.css')):
-            with open(os.path.join(puzzle_source, 'puzzle.css'), 'r') as puzzle_css_file:
-                puzzle_context['puzzle_css'] = puzzle_css_file.read()
-        if os.path.isfile(os.path.join(puzzle_source, 'puzzle.js')):
-            with open(os.path.join(puzzle_source, 'puzzle.js'), 'r') as puzzle_js_file:
-                puzzle_context['puzzle_js'] = puzzle_js_file.read()
-        publish_dir(puzzle_context, os.path.join(settings.HUNT_DATA_DIR, 'round', puzzle.round.url, 'puzzle'), puzzle_dir, '../..')
-        # --- 2014-specific ---
-        if puzzle.round.url == 'mit':
-            try:
-                card = Y2014MitPuzzleData.objects.get(puzzle=puzzle).card
-                source_file = os.path.join(settings.HUNT_DATA_DIR, 'round', 'mit', 'cards', card+'.png')
-                dest_file = os.path.join(puzzle_dir, 'card.png')
-                shutil.copyfile(source_file, dest_file)
-            except:
-                logger.error('puzzle "%s" doesn\'t have a playing card assigned' % puzzle.url)
+        publish_team_puzzle(team, puzzle, suffix)
 
 def publish_all():
     teams = Team.objects.all()
