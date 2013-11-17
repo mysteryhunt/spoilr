@@ -19,6 +19,7 @@ class Puzzle(models.Model):
     round = models.ForeignKey(Round)
     url = models.CharField(max_length=50, unique=True, verbose_name="id")
     name = models.CharField(max_length=200, unique=True)
+    answer = models.CharField(max_length=50)
     order = models.IntegerField()
 
     def __str__(self):
