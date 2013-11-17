@@ -16,6 +16,8 @@ TEAMS_DIR = '/var/www/spoilr/teams'
 LOAD_DIR = '/home/hunt'
 
 HTPASSWD_FILE = '/home/hunt/htpasswd/htpasswd'
+HTACCESS_FILE = '/var/www/spoilr/.htaccess'
+HTACCESS_PREAMBLE_FILE = '/home/hunt/htaccess-preamble'
 
 # TODO: RUNTIME: set this to false
 DEBUG = True
