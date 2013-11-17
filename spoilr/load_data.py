@@ -50,14 +50,14 @@ def load_teams():
             mitround = Round.objects.get(url='mit')
             print("    Granting access to %s" % mitround.name)
             RoundAccess.objects.create(team=team, round=mitround).save()
-            team_log(team, ROUND_ACCESS, 'Round "%s" released for hunt start' % mitround.name, object_id=mitround.url, link='/round/%s' % mitround.url)
+            team_log_round_access(team, mitround, "hunt start")
             teamdata = Y2014TeamData.objects.create(team=team)
             teamdata.save()
             for mitdata in Y2014MitPuzzleData.objects.all():
                 if mitdata.location.start:
                     print("    Granting access to %s" % mitdata.puzzle.name)
                     PuzzleAccess.objects.create(team=team, puzzle=mitdata.puzzle).save()
-                    team_log(team, PUZZLE_ACCESS, 'Puzzle "%s" released for hunt start' % mitdata.puzzle.name, object_id=mitdata.puzzle.url, link='/puzzle/%s' % mitdata.puzzle.url)
+                    team_log_puzzle_access(team, mitdata.puzzle, "hunt start")
     print("Done loading teams")
 
 def load_mit_nodes(): # 2014-specific
