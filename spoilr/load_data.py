@@ -43,8 +43,15 @@ def load_teams():
             team = Team.objects.create(**row)
             team.save() 
             # 2014-specific:
+            mitround = Round.objects.get(url='mit')
+            print("    Granting access to %s" % mitround.name)
+            RoundAccess.objects.create(team=team, round=mitround).save()
             teamdata = Y2014TeamData.objects.create(team=team)
             teamdata.save()
+            for mitdata in Y2014MitPuzzleData.objects.all():
+                if mitdata.location.start:
+                    print("    Granting access to %s" % mitdata.puzzle.name)
+                    PuzzleAccess.objects.create(team=team, puzzle=mitdata.puzzle).save()
     print("Done loading teams")
 
 def load_mit_nodes(): # 2014-specific
@@ -101,12 +108,12 @@ def load_mit_data(): # 2014-specific
     print("Done loading mit data")
 
 def load_all():
-    load_teams()
     load_rounds()
     load_puzzles()
     load_mit_nodes() # 2014-specific
-    load_mit_edges() # 2014-specific
-    load_mit_data() # 2014-specific
+    load_mit_edges() # 2014-specific / must load after mit_nodes
+    load_mit_data() # 2014-specific / must load after mit_nodes and puzzles
+    load_teams()
 
 def wipe_database_i_really_mean_it():
     print("Wiping the hunt database...")
