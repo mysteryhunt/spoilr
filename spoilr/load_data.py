@@ -121,19 +121,6 @@ def load_all():
     load_mit_data() # 2014-specific / must load after mit_nodes and puzzles, and must load before teams
     load_teams()
 
-def wipe_database_i_really_mean_it():
-    print("Wiping the hunt database...")
-    for team in Team.objects.all():
-        team_path = get_team_path(team)
-        if os.path.isdir(team_path) and os.path.isfile(os.path.join(team_path, '.team-dir-marker')):
-            print("  Removing \"%s\"..." % os.path.abspath(team_path))
-            shutil.rmtree(team_path)
-    Team.objects.all().delete()
-    Round.objects.all().delete()
-    Puzzle.objects.all().delete()
-    Y2014MitPuzzleData.objects.all().delete() # 2014-specific
-    print("Done wiping database")
-
 def everybody_can_see_everything():
     print("Granting full access to every team...")
     for team in Team.objects.all():
