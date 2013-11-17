@@ -11,8 +11,8 @@ def get_team_path(team):
     return os.path.join(settings.TEAMS_DIR, team.url)
 
 def load_rounds():
-    print("Loading rounds from rounds.csv...")
-    with open(os.path.join(settings.LOAD_DIR, 'rounds.csv'), 'r') as team_file:
+    print("Loading rounds from rounds.txt...")
+    with open(os.path.join(settings.LOAD_DIR, 'rounds.txt'), 'r') as team_file:
         for row in csv.DictReader(team_file, delimiter='\t'):
             if Round.objects.filter(url=row["url"]).exists():
                 continue
@@ -22,8 +22,8 @@ def load_rounds():
     print("Done loading rounds")
 
 def load_puzzles():
-    print("Loading puzzles from puzzles.csv...")
-    with open(os.path.join(settings.LOAD_DIR, 'puzzles.csv'), 'r') as team_file:
+    print("Loading puzzles from puzzles.txt...")
+    with open(os.path.join(settings.LOAD_DIR, 'puzzles.txt'), 'r') as team_file:
         for row in csv.DictReader(team_file, delimiter='\t'):
             if Puzzle.objects.filter(url=row["url"]).exists():
                 continue
@@ -34,8 +34,8 @@ def load_puzzles():
     print("Done loading puzzles")
 
 def load_teams():
-    print("Loading teams from teams.csv...")
-    with open(os.path.join(settings.LOAD_DIR, 'teams.csv'), 'r') as team_file:
+    print("Loading teams from teams.txt...")
+    with open(os.path.join(settings.LOAD_DIR, 'teams.txt'), 'r') as team_file:
         for row in csv.DictReader(team_file, delimiter='\t'):
             if Team.objects.filter(url=row["url"]).exists():
                 continue
@@ -45,8 +45,8 @@ def load_teams():
     print("Done loading teams")
 
 def load_mit_nodes(): # 2014-specific
-    print("Loading mit map nodes from mit_nodes.csv...")
-    with open(os.path.join(settings.LOAD_DIR, 'mit_nodes.csv'), 'r') as node_file:
+    print("Loading mit map nodes from mit_nodes.txt...")
+    with open(os.path.join(settings.LOAD_DIR, 'mit_nodes.txt'), 'r') as node_file:
         for row in csv.DictReader(node_file, delimiter='\t'):
             Y2014MitMapNode.objects.filter(name=row["name"]).delete()
             mitnode = Y2014MitMapNode.objects.create(**row)
@@ -54,8 +54,8 @@ def load_mit_nodes(): # 2014-specific
     print("Done loading mit nodes")
 
 def load_mit_edges(): # 2014-specific
-    print("Loading mit map edges from mit_edges.csv...")
-    with open(os.path.join(settings.LOAD_DIR, 'mit_edges.csv'), 'r') as edge_file:
+    print("Loading mit map edges from mit_edges.txt...")
+    with open(os.path.join(settings.LOAD_DIR, 'mit_edges.txt'), 'r') as edge_file:
         for row in csv.DictReader(edge_file, delimiter='\t'):
             try:
                 node1 = Y2014MitMapNode.objects.get(name=row["node1"])
@@ -73,8 +73,8 @@ def load_mit_edges(): # 2014-specific
     print("Done loading mit edges")
 
 def load_mit_data(): # 2014-specific
-    print("Loading mit data from mit_data.csv...")
-    with open(os.path.join(settings.LOAD_DIR, 'mit_data.csv'), 'r') as data_file:
+    print("Loading mit data from mit_data.txt...")
+    with open(os.path.join(settings.LOAD_DIR, 'mit_data.txt'), 'r') as data_file:
         for row in csv.DictReader(data_file, delimiter='\t'):
             try:
                 location = Y2014MitMapNode.objects.get(name=row["location"])
