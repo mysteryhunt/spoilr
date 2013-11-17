@@ -110,8 +110,25 @@ class Y2014MitPuzzleDataAdmin(admin.ModelAdmin):
     def mit_meta(data):
         return data.mit_meta()
     mit_meta.short_description = 'MIT Meta'
-    list_display = ('card', mit_meta, 'puzzle')
-    search_fields = ['card', 'puzzle__name']
+    def puzzle_name(data):
+        return data.puzzle.name
+    puzzle_name.short_description = 'Puzzle Name'
+    list_display = ('card', mit_meta, 'location', puzzle_name)
+    search_fields = ['card', 'puzzle__name', 'location__name']
     ordering = ['card']
 
 admin.site.register(Y2014MitPuzzleData, Y2014MitPuzzleDataAdmin)
+
+class Y2014MitMapNodeAdmin(admin.ModelAdmin):
+    list_display = ('name',)
+    search_fields = ['name']
+    ordering = ['order']
+
+admin.site.register(Y2014MitMapNode, Y2014MitMapNodeAdmin)
+
+class Y2014MitMapEdgeAdmin(admin.ModelAdmin):
+    list_display = ('__str__', 'node1', 'node2')
+    search_fields = ['node1', 'node2']
+    ordering = ['node1__order', 'node2__order']
+
+admin.site.register(Y2014MitMapEdge, Y2014MitMapEdgeAdmin)

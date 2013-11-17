@@ -44,10 +44,43 @@ def load_teams():
             team.save() 
     print("Done loading teams")
 
+def load_mit_nodes(): # 2014-specific
+    print("Loading mit map nodes from mit_nodes.csv...")
+    with open(os.path.join(settings.LOAD_DIR, 'mit_nodes.csv'), 'r') as node_file:
+        for row in csv.DictReader(node_file, delimiter='\t'):
+            Y2014MitMapNode.objects.filter(name=row["name"]).delete()
+            mitnode = Y2014MitMapNode.objects.create(**row)
+            mitnode.save()
+    print("Done loading mit nodes")
+
+def load_mit_edges(): # 2014-specific
+    print("Loading mit map edges from mit_edges.csv...")
+    with open(os.path.join(settings.LOAD_DIR, 'mit_edges.csv'), 'r') as edge_file:
+        for row in csv.DictReader(edge_file, delimiter='\t'):
+            try:
+                node1 = Y2014MitMapNode.objects.get(name=row["node1"])
+            except:
+                print('ERROR: no such node "%s"' % row["node1"])
+                continue
+            try:
+                node2 = Y2014MitMapNode.objects.get(name=row["node2"])
+            except:
+                print('ERROR: no such node "%s"' % row["node2"])
+                continue
+            Y2014MitMapEdge.objects.filter(node1=node1, node2=node2).delete()
+            mitedge = Y2014MitMapEdge.objects.create(node1=node1, node2=node2)
+            mitedge.save()
+    print("Done loading mit edges")
+
 def load_mit_data(): # 2014-specific
-    print("Loading mit cards from mit_cards.csv...")
-    with open(os.path.join(settings.LOAD_DIR, 'mit_cards.csv'), 'r') as team_file:
-        for row in csv.DictReader(team_file, delimiter='\t'):
+    print("Loading mit data from mit_data.csv...")
+    with open(os.path.join(settings.LOAD_DIR, 'mit_data.csv'), 'r') as data_file:
+        for row in csv.DictReader(data_file, delimiter='\t'):
+            try:
+                location = Y2014MitMapNode.objects.get(name=row["location"])
+            except:
+                print('ERROR: no such puzzle "%s"' % row["url"])
+                continue
             try:
                 puzzle = Puzzle.objects.get(url=row["url"])
             except:
@@ -57,16 +90,18 @@ def load_mit_data(): # 2014-specific
                 print('ERROR: puzzle "%s" isn\'t in round "mit"' % row["url"])
                 continue
             Y2014MitPuzzleData.objects.filter(card=row["card"]).delete()
+            Y2014MitPuzzleData.objects.filter(location=location).delete()
             Y2014MitPuzzleData.objects.filter(puzzle=puzzle).delete()
-            mitdata = Y2014MitPuzzleData.objects.create(puzzle=puzzle, card=row["card"])
+            mitdata = Y2014MitPuzzleData.objects.create(puzzle=puzzle, card=row["card"], location=location)
             mitdata.save()
-
-    print("Done loading mit cards")
+    print("Done loading mit data")
 
 def load_all():
     load_teams()
     load_rounds()
     load_puzzles()
+    load_mit_nodes() # 2014-specific
+    load_mit_edges() # 2014-specific
     load_mit_data() # 2014-specific
 
 def wipe_database_i_really_mean_it():

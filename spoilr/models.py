@@ -82,6 +82,31 @@ class PuzzleAccess(models.Model):
 
 # ----------------------- 2014-specific stuff ---------------------
 
+class Y2014MitMapNode(models.Model):
+    name = models.CharField(max_length=50, unique=True)
+    order = models.IntegerField()
+
+    def __str__(self):
+        return '%s' % (self.name)
+
+    class Meta:
+        ordering = ['order']
+        verbose_name = '2014 MIT map node'
+        verbose_name_plural = '2014 MIT map nodes'
+
+class Y2014MitMapEdge(models.Model):
+    node1 = models.ForeignKey(Y2014MitMapNode, related_name='+')
+    node2 = models.ForeignKey(Y2014MitMapNode, related_name='+')
+
+    def __str__(self):
+        return '%s <-> %s' % (self.node1.name, self.node2.name)
+
+    class Meta:
+        unique_together = ('node1', 'node2')
+        ordering = ['node1__order', 'node2__order']
+        verbose_name = '2014 MIT map edge'
+        verbose_name_plural = '2014 MIT map edges'
+
 class Y2014MitPuzzleData(models.Model):
     puzzle = models.ForeignKey(Puzzle, unique=True, limit_choices_to = {'round__url': 'mit'})
 
@@ -93,9 +118,10 @@ class Y2014MitPuzzleData(models.Model):
     for n in ['A',2,3,4,8,9,10,'J']: # tweedle
         CARD_CHOICES.append((str(n)+'_diamonds', str(n)+' of diamonds (tweedle)'))
     card = models.CharField(max_length=12, choices=CARD_CHOICES, unique=True)
+    location = models.ForeignKey(Y2014MitMapNode, unique=True)
 
     def __str__(self):
-        return '%s (%s)' % (self.puzzle.name, self.card)
+        return '%s (%s, %s)' % (self.puzzle.name, self.card, self.location.name)
 
     def mit_meta(self):
         if 'spades' in self.card:
@@ -108,5 +134,5 @@ class Y2014MitPuzzleData(models.Model):
     class Meta:
         ordering = ['puzzle__order', 'card']
         order_with_respect_to = 'puzzle'
-        verbose_name = '2014 MIT meta puzzle data'
-        verbose_name_plural = '2014 MIT meta puzzle data'
+        verbose_name = '2014 MIT puzzle data'
+        verbose_name_plural = '2014 MIT puzzle data'
