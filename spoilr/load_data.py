@@ -52,6 +52,7 @@ def load_mit_nodes(): # 2014-specific
     with open(os.path.join(settings.LOAD_DIR, 'mit_nodes.txt'), 'r') as node_file:
         for row in csv.DictReader(node_file, delimiter='\t'):
             Y2014MitMapNode.objects.filter(name=row["name"]).delete()
+            row['start'] = (row['start'] == 'yes')
             mitnode = Y2014MitMapNode.objects.create(**row)
             mitnode.save()
     print("Done loading mit nodes")

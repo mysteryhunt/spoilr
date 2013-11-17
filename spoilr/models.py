@@ -97,9 +97,13 @@ class Y2014TeamData(models.Model):
 class Y2014MitMapNode(models.Model):
     name = models.CharField(max_length=50, unique=True)
     order = models.IntegerField()
+    start = models.BooleanField(default=False, verbose_name="Access Granted at Start of Hunt")
 
     def __str__(self):
-        return '%s' % (self.name)
+        if self.start:
+            return '%s (START)' % (self.name)
+        else:
+            return '%s' % (self.name)
 
     class Meta:
         ordering = ['order']

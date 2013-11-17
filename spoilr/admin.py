@@ -126,7 +126,7 @@ class Y2014MitPuzzleDataAdmin(admin.ModelAdmin):
 admin.site.register(Y2014MitPuzzleData, Y2014MitPuzzleDataAdmin)
 
 class Y2014MitMapNodeAdmin(admin.ModelAdmin):
-    list_display = ('name',)
+    list_display = ('name', 'start')
     search_fields = ['name']
     ordering = ['order']
 
