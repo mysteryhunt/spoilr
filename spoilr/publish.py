@@ -9,6 +9,21 @@ from .models import *
 
 logger = logging.getLogger(__name__)
 
+def publish_htpasswd():
+    try:
+        import crypt
+    except ImportError:
+        return
+    print('Writing htpasswd file...')
+    try:
+        with open(settings.HTPASSWD_FILE, 'w') as htpasswd_file:
+            for team in Team.objects.all():
+                htpasswd_file.write('%s:%s' % (team.username, crypt.crypt(team.password)))
+    except IOError as e:
+        logger.error('Failed to write htpasswd file %s, IT MAY BE IN AN INVALID STATE: %s', settings.HTPASSWD_FILE, str(e))
+        raise e
+    print('Done writing htpasswd file')
+
 def prestart_team(team, suffix=None):
     team_path = team.get_path(suffix)
     if not os.path.exists(team_path):
@@ -213,6 +228,7 @@ def republish_team(team):
     republish_team_finish(team)
 
 def republish_all():
+    publish_htpasswd()
     teams = Team.objects.all()
     print('Republishing hunt for %d teams...' % len(teams))
     for team in teams:
