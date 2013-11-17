@@ -99,6 +99,7 @@ class TopContext(Context):
             round_puzzles = [x.puzzle for x in PuzzleAccess.objects.filter(puzzle__round=round,team=team).order_by('puzzle__order')]
             rounds.append({"round": round, "puzzles": round_puzzles})
         self['rounds'] = rounds
+        self['log_entries'] = TeamLog.objects.filter(team=team).order_by('timestamp')
 
 class RoundContext(TopContext):
     def __init__(self, team, round):

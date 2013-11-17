@@ -48,10 +48,33 @@ class Team(models.Model):
     def __str__(self):
         return '%s' % (self.name)
 
+class SystemLog(models.Model):
+    timestamp = models.DateTimeField(default=datetime.now)
+    event_type = models.CharField(max_length=50)
+    team = models.ForeignKey(Team, blank=True, null=True)
+    object_id = models.CharField(max_length=50, blank=True)
+    message = models.CharField(max_length=1000)
+
+    def __str__(self):
+        return '%s: %s' % (timestamp, message)
+
+    class Meta:
+        verbose_name_plural = "System log"
+
+class TeamLog(models.Model):
+    team = models.ForeignKey(Team)
+    timestamp = models.DateTimeField(default=datetime.now)
+    event_type = models.CharField(max_length=50)
+    object_id = models.CharField(max_length=50, blank=True)
+    link = models.CharField(max_length=200, blank=True)
+    message = models.CharField(max_length=1000)
+
+    def __str__(self):
+        return '[%s] %s: %s' % (team, timestamp, message)
+
 class RoundAccess(models.Model):
     team = models.ForeignKey(Team)
     round = models.ForeignKey(Round)
-    start_time = models.DateTimeField(default=datetime.now)
     solved = models.BooleanField(default=False)
 
     def __str__(self):
@@ -67,7 +90,6 @@ class RoundAccess(models.Model):
 class PuzzleAccess(models.Model):
     team = models.ForeignKey(Team)
     puzzle = models.ForeignKey(Puzzle)
-    start_time = models.DateTimeField(default=datetime.now)
     solved = models.BooleanField(default=False)
 
     def __str__(self):

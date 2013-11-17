@@ -3,6 +3,7 @@ from django.conf import settings
 import logging
 import csv
 import shutil
+from .log import *
 from .models import *
 
 logger = logging.getLogger(__name__)
@@ -19,6 +20,7 @@ def load_rounds():
             print("  Round \"%s\"..." % row["name"])
             round = Round.objects.create(**row)
             round.save() 
+            system_log('load_round', 'Loaded round "%s"' % round.name, object_id=round.url)
     print("Done loading rounds")
 
 def load_puzzles():
@@ -31,6 +33,7 @@ def load_puzzles():
             row["round"] = Round.objects.get(url=row["round"])
             puzzle = Puzzle.objects.create(**row)
             puzzle.save() 
+            system_log('load_puzzle', 'Loaded puzzle "%s" into round "%s"' % (puzzle.name, puzzle.round.name), object_id=puzzle.url)
     print("Done loading puzzles")
 
 def load_teams():
@@ -42,16 +45,19 @@ def load_teams():
             print("  Team \"%s\"..." % row["name"])
             team = Team.objects.create(**row)
             team.save() 
+            system_log('load_team', 'Loaded team "%s"' % team.name, object_id=team.url)
             # 2014-specific:
             mitround = Round.objects.get(url='mit')
             print("    Granting access to %s" % mitround.name)
             RoundAccess.objects.create(team=team, round=mitround).save()
+            team_log(team, ROUND_ACCESS, 'Round "%s" released for hunt start' % mitround.name, object_id=mitround.url, link='/round/%s' % mitround.url)
             teamdata = Y2014TeamData.objects.create(team=team)
             teamdata.save()
             for mitdata in Y2014MitPuzzleData.objects.all():
                 if mitdata.location.start:
                     print("    Granting access to %s" % mitdata.puzzle.name)
                     PuzzleAccess.objects.create(team=team, puzzle=mitdata.puzzle).save()
+                    team_log(team, PUZZLE_ACCESS, 'Puzzle "%s" released for hunt start' % mitdata.puzzle.name, object_id=mitdata.puzzle.url, link='/puzzle/%s' % mitdata.puzzle.url)
     print("Done loading teams")
 
 def load_mit_nodes(): # 2014-specific

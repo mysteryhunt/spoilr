@@ -37,13 +37,11 @@ admin.site.register(Puzzle, PuzzleAdmin)
 
 class TeamRoundInline(admin.TabularInline):
     model = Team.rounds.through
-    exclude = ('start_time',)
     extra = 0
     ordering = ['round__order']
 
 class TeamPuzzleInline(admin.TabularInline):
     model = Team.puzzles.through
-    exclude = ('start_time',)
     extra = 0
     ordering = ['puzzle__round__order', 'puzzle__order']
 
@@ -69,6 +67,37 @@ class TeamAdmin(admin.ModelAdmin):
 
 admin.site.register(Team, TeamAdmin)
 
+class LogTeamFilter(admin.SimpleListFilter):
+    title = 'team'
+    parameter_name = 'team'
+    def lookups(self, request, model_admin):
+        return [(x.name, x.name) for x in Team.objects.all()]
+    def queryset(self, request, queryset):
+        if self.value() is None:
+            return queryset
+        return queryset.filter(team__name=self.value())
+
+class SystemLogAdmin(admin.ModelAdmin):
+    def team_name(data):
+        if data.team:
+            return data.team.name
+        else:
+            return ''
+    list_display = ('timestamp', 'event_type', team_name, 'object_id', 'message')
+    list_filter = ('event_type', LogTeamFilter, 'object_id')
+    search_fields = [team_name, 'event_type', 'object_id', 'message']
+
+admin.site.register(SystemLog, SystemLogAdmin)
+
+class TeamLogAdmin(admin.ModelAdmin):
+    def team_name(data):
+        return data.team.name
+    list_display = ('timestamp', team_name, 'event_type', 'object_id', 'message')
+    list_filter = (LogTeamFilter, 'event_type', 'object_id')
+    search_fields = [team_name, 'event_type', 'object_id', 'message']
+
+admin.site.register(TeamLog, TeamLogAdmin)
+
 class RoundAccessRoundFilter(admin.SimpleListFilter):
     title = 'round'
     parameter_name = 'round'
@@ -80,7 +109,7 @@ class RoundAccessRoundFilter(admin.SimpleListFilter):
         return queryset.filter(round__name=self.value())
 
 class RoundAccessAdmin(admin.ModelAdmin):
-    list_display = ('__str__', 'team', 'round', 'start_time', 'solved')
+    list_display = ('__str__', 'team', 'round', 'solved')
     list_filter = ('team__name', RoundAccessRoundFilter, 'solved')
     search_fields = ['team__name', 'round__name']
     ordering = ['team__name', 'round__order']
@@ -96,7 +125,7 @@ class PuzzleAccessRoundFilter(admin.SimpleListFilter):
         return queryset.filter(puzzle__round__name=self.value())
 
 class PuzzleAccessAdmin(admin.ModelAdmin):
-    list_display = ('__str__', 'team', 'puzzle', 'start_time', 'solved')
+    list_display = ('__str__', 'team', 'puzzle', 'solved')
     list_filter = ('team__name', PuzzleAccessRoundFilter, 'solved')
     search_fields = ['team__name', 'puzzle__name', 'puzzle__round__name']
     ordering = ['team__name', 'puzzle__round__order', 'puzzle__order']
