@@ -5,6 +5,8 @@ import time
 import logging
 import os
 import shutil
+import string
+import random
 from .models import *
 
 logger = logging.getLogger(__name__)
@@ -14,11 +16,13 @@ def publish_htpasswd():
         import crypt
     except ImportError:
         return
+    saltchars = string.ascii_letters + string.digits
     print('Writing htpasswd file...')
     try:
         with open(settings.HTPASSWD_FILE, 'w') as htpasswd_file:
             for team in Team.objects.all():
-                htpasswd_file.write('%s:%s' % (team.username, crypt.crypt(team.password)))
+                salt = random.choice(saltchars) + random.choice(saltchars)
+                htpasswd_file.write('%s:%s' % (team.username, crypt.crypt(team.password, salt)))
     except IOError as e:
         logger.error('Failed to write htpasswd file %s, IT MAY BE IN AN INVALID STATE: %s', settings.HTPASSWD_FILE, str(e))
         raise e
