@@ -42,6 +42,9 @@ def load_teams():
             print("  Team \"%s\"..." % row["name"])
             team = Team.objects.create(**row)
             team.save() 
+            # 2014-specific:
+            teamdata = Y2014TeamData.objects.create(team=team)
+            teamdata.save()
     print("Done loading teams")
 
 def load_mit_nodes(): # 2014-specific

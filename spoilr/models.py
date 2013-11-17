@@ -82,6 +82,18 @@ class PuzzleAccess(models.Model):
 
 # ----------------------- 2014-specific stuff ---------------------
 
+class Y2014TeamData(models.Model):
+    team = models.ForeignKey(Team, unique=True)
+    drink_points = models.IntegerField(default=0, verbose_name='Drink-Me Points')
+    train_points = models.IntegerField(default=0, verbose_name='Train Ticket Points')
+
+    def __str__(self):
+        return '%s (%d, %d)' % (self.team.name, drink_points, train_points)
+
+    class Meta:
+        verbose_name = '2014 team data'
+        verbose_name_plural = '2014 team data'
+
 class Y2014MitMapNode(models.Model):
     name = models.CharField(max_length=50, unique=True)
     order = models.IntegerField()

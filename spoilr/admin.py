@@ -106,6 +106,12 @@ admin.site.register(PuzzleAccess,PuzzleAccessAdmin)
 
 # ----------------------- 2014-specific stuff ---------------------
 
+class Y2014TeamDataAdmin(admin.ModelAdmin):
+    list_display = ('team', 'drink_points', 'train_points')
+    search_fields = ['team__name']
+
+admin.site.register(Y2014TeamData, Y2014TeamDataAdmin)
+
 class Y2014MitPuzzleDataAdmin(admin.ModelAdmin):
     def mit_meta(data):
         return data.mit_meta()
