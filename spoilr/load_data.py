@@ -112,7 +112,7 @@ def load_all():
     load_puzzles()
     load_mit_nodes() # 2014-specific
     load_mit_edges() # 2014-specific / must load after mit_nodes
-    load_mit_data() # 2014-specific / must load after mit_nodes and puzzles
+    load_mit_data() # 2014-specific / must load after mit_nodes and puzzles, and must load before teams
     load_teams()
 
 def wipe_database_i_really_mean_it():
