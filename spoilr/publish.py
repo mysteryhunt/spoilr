@@ -45,7 +45,7 @@ RewriteRule ^(.*)$ /teams/%s/$1 [NS,L]
     except IOError as e:
         logger.error('Failed to write htpasswd file %s, IT MAY BE IN AN INVALID STATE: %s', settings.HTPASSWD_FILE, str(e))
         raise e
-    print('Done writing htpasswd file')
+    print('Done writing htaccess file')
 
 def prestart_team(team, suffix=None):
     team_path = team.get_path(suffix)
