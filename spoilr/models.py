@@ -128,7 +128,7 @@ class Y2014TeamData(models.Model):
     train_points = models.IntegerField(default=0, verbose_name='Train Ticket Points')
 
     def __str__(self):
-        return '%s (%d, %d)' % (self.team.name, drink_points, train_points)
+        return '%s (%d, %d)' % (self.team.name, self.drink_points, self.train_points)
 
     class Meta:
         verbose_name = '2014 team data'

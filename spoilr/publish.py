@@ -9,6 +9,7 @@ import string
 import random
 import re
 from .models import *
+from .constants import *
 
 logger = logging.getLogger(__name__)
 
@@ -98,12 +99,15 @@ class TopContext(Context):
         Context.__init__(self)
         self['team'] = team
         self['rounds'] = [self.round_obj(x) for x in RoundAccess.objects.filter(team=team).order_by('round__order')]
+        self['solved_metas'] = [x.metapuzzle for x in MetapuzzleSolve.objects.filter(team=team).order_by('metapuzzle__order')]
         self['log_entries'] = [{"entry": x} for x in TeamLog.objects.filter(team=team).order_by('timestamp')]
         for entry in self['log_entries']:
             msg = entry['entry'].message
             if "[[" in msg:
                 entry['protected_message'] = log_entry_protect.sub('[hidden]', msg)
                 entry['unprotected_message'] = log_entry_protect.sub(r'\1', msg)
+        # ----- 2014-specific -----
+        self['team_data'] = Y2014TeamData.objects.get(team=team)
     def round_obj(self, access):
         ret = {"round": access.round}
         ret["puzzles"] = [self.puzzle_obj(x) for x in PuzzleAccess.objects.filter(puzzle__round=access.round, team=access.team).order_by('puzzle__order')]
@@ -127,6 +131,20 @@ class RoundContext(TopContext):
             return
         self['round'] = self.round_obj(RoundAccess.objects.get(team=team, round=round))
         self['puzzles'] = self['round']['puzzles']
+        if round.url == 'mit': # 2014-specific
+            count = 0
+            for x in self['solved_metas']:
+                if x.name == "The Dormouse" or x.name == "The Caterpillar" or x.name == "Tweedledee and Tweedledum":
+                    count = count + 1
+            points = self['team_data'].drink_points
+            self['vial1'] = self['vial2'] = self['vial3'] = -1
+            if count < 3:
+                self['vial3'] = min(14,max(0, points - (DRINK_COST * 2)))
+            if count < 2:
+                self['vial2'] = min(14,max(0, points - (DRINK_COST * 1)))
+            if count < 1:
+                self['vial1'] = min(14,max(0, points - (DRINK_COST * 0)))
+            #self['meta_ready'] = (points - 14 - (DRINK_COST * count)) >= 0
 
 class PuzzleContext(RoundContext):
     def __init__(self, team, puzzle):
