@@ -94,11 +94,9 @@ class TopContext(Context):
     def __init__(self, team):
         Context.__init__(self)
         self['team'] = team
-        rounds = []
-        for round in team.rounds.all():
-            round_puzzles = [x.puzzle for x in PuzzleAccess.objects.filter(puzzle__round=round,team=team).order_by('puzzle__order')]
-            rounds.append({"round": round, "puzzles": round_puzzles})
-        self['rounds'] = rounds
+        self['rounds'] = [{"round": x} for x in team.rounds.all()]
+        for round in self['rounds']:
+            round["puzzles"] = [x.puzzle for x in PuzzleAccess.objects.filter(puzzle__round=round["round"],team=team).order_by('puzzle__order')]
         self['log_entries'] = TeamLog.objects.filter(team=team).order_by('timestamp')
 
 class RoundContext(TopContext):
@@ -110,7 +108,14 @@ class RoundContext(TopContext):
             logger.error('[bug] team "%s" doesn\'t have access to round "%s"', team.url, round.url)
             return
         self['round'] = round
-        self['puzzles'] = [x.puzzle for x in PuzzleAccess.objects.filter(puzzle__round=round,team=team).order_by('puzzle__order')]
+        self['puzzles'] = [{"puzzle": x.puzzle} for x in PuzzleAccess.objects.filter(puzzle__round=round,team=team).order_by('puzzle__order')]
+        # --- 2014-specific ---
+        if round.url == 'mit':
+            for puzzle in self['puzzles']:
+                try:
+                    puzzle["location"] = Y2014MitPuzzleData.objects.get(puzzle=puzzle["puzzle"]).location
+                except:
+                    logger.error('puzzle "%s" doesn\'t have a location assigned' % puzzle.url)
 
 class PuzzleContext(RoundContext):
     def __init__(self, team, puzzle):

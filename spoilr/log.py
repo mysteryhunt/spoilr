@@ -3,7 +3,7 @@ from .models import *
 PUZZLE_ACCESS = 'puzzle-access'
 ROUND_ACCESS = 'round-access'
 PUZZLE_SOLVED = 'puzzle-solved'
-ROUND_SOLVED = 'round-solved'
+PUZZLE_INCORRECT = 'puzzle-incorrect'
 
 def system_log(event_type, message, team=None, object_id=''):
     SystemLog.objects.create(event_type=event_type, message=message, team=team, object_id=object_id).save()
@@ -19,3 +19,9 @@ def team_log_round_access(team, round, reason):
 
 def team_log_puzzle_access(team, puzzle, reason):
     team_log(team, PUZZLE_ACCESS, 'Released puzzle "%s" (%s)' % (puzzle.name, reason), object_id=puzzle.url, link="/puzzle/%s" % puzzle.url)
+
+def team_log_puzzle_solved(team, puzzle):
+    team_log(team, PUZZLE_SOLVED, 'Solved puzzle "%s" (answer "[[%s]]")' % (puzzle.name, puzzle.answer), object_id=puzzle.url, link="/puzzle/%s" % puzzle.url)
+
+def team_log_puzzle_incorrect(team, puzzle, answer):
+    team_log(team, PUZZLE_INCORRECT, 'Incorrect answer "[[%s]]" for puzzle "%s"' % (answer, puzzle.name), object_id=puzzle.url)
