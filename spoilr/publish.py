@@ -7,6 +7,7 @@ import os
 import shutil
 import string
 import random
+import re
 from .models import *
 
 logger = logging.getLogger(__name__)
@@ -90,12 +91,19 @@ def start_all():
         start_team(team)
     print('Done starting hunt')
 
+log_entry_protect = re.compile(r"\[\[([^\]]*)\]\]")
+
 class TopContext(Context):
     def __init__(self, team):
         Context.__init__(self)
         self['team'] = team
         self['rounds'] = [self.round_obj(x) for x in RoundAccess.objects.filter(team=team).order_by('round__order')]
-        self['log_entries'] = TeamLog.objects.filter(team=team).order_by('timestamp')
+        self['log_entries'] = [{"entry": x} for x in TeamLog.objects.filter(team=team).order_by('timestamp')]
+        for entry in self['log_entries']:
+            msg = entry['entry'].message
+            if "[[" in msg:
+                entry['protected_message'] = log_entry_protect.sub('XXXXX', msg)
+                entry['unprotected_message'] = log_entry_protect.sub(r'\1', msg)
     def round_obj(self, access):
         ret = {"round": access.round}
         ret["puzzles"] = [self.puzzle_obj(x) for x in PuzzleAccess.objects.filter(puzzle__round=access.round, team=access.team).order_by('puzzle__order')]
