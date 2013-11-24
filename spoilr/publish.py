@@ -102,7 +102,7 @@ class TopContext(Context):
         for entry in self['log_entries']:
             msg = entry['entry'].message
             if "[[" in msg:
-                entry['protected_message'] = log_entry_protect.sub('XXXXX', msg)
+                entry['protected_message'] = log_entry_protect.sub('[hidden]', msg)
                 entry['unprotected_message'] = log_entry_protect.sub(r'\1', msg)
     def round_obj(self, access):
         ret = {"round": access.round}
@@ -169,11 +169,12 @@ def publish_dir(context, source_path, dest_path, root_path, except_for=[]):
             if relpath == '.' and dirname in except_for:
                 continue
             dest_dir = os.path.join(dest_path, relpath, dirname)
-            try:
-                os.mkdir(dest_dir)
-            except OSError as e:
-                logger.error('can\'t create directory "%s": %s', os.path.abspath(dest_dir), str(e))
-                continue
+            if not os.path.isdir(dest_dir):
+                try:
+                    os.mkdir(dest_dir)
+                except OSError as e:
+                    logger.error('can\'t create directory "%s": %s', os.path.abspath(dest_dir), str(e))
+                    continue
 
 def ensure_team_dir(team, suffix=None):
     team_path = team.get_path(suffix)
@@ -193,11 +194,12 @@ def publish_team_round(team, round, suffix=None):
         return
     team_path = team.get_path(suffix)
     round_dir = os.path.join(team_path, 'round', round.url)
-    try:
-        os.makedirs(os.path.abspath(round_dir))
-    except OSError as e:
-        logger.error('couldn\'t create directory "%s": %s', round_dir, str(e))
-        return
+    if not os.path.isdir(os.path.abspath(round_dir)):
+        try:
+            os.makedirs(os.path.abspath(round_dir))
+        except OSError as e:
+            logger.error('couldn\'t create directory "%s": %s', round_dir, str(e))
+            return
     round_context = RoundContext(team, round)
     publish_dir(round_context, os.path.join(settings.HUNT_DATA_DIR, 'round', round.url, 'round'), round_dir, '../..')
 
@@ -206,11 +208,12 @@ def publish_team_puzzle(team, puzzle, suffix=None):
         return
     team_path = team.get_path(suffix)
     puzzle_dir = os.path.join(team_path, 'puzzle', puzzle.url)
-    try:
-        os.makedirs(os.path.abspath(puzzle_dir))
-    except OSError as e:
-        logger.error('couldn\'t create directory "%s": %s', puzzle_dir, str(e))
-        return
+    if not os.path.isdir(os.path.abspath(puzzle_dir)):
+        try:
+            os.makedirs(os.path.abspath(puzzle_dir))
+        except OSError as e:
+            logger.error('couldn\'t create directory "%s": %s', puzzle_dir, str(e))
+            return
     puzzle_context = PuzzleContext(team, puzzle)
     puzzle_source = os.path.join(settings.HUNT_DATA_DIR, 'puzzle', puzzle.url)
     publish_dir(puzzle_context, puzzle_source, puzzle_dir, '../..', ['index.html', 'puzzle.css', 'puzzle.js'])
