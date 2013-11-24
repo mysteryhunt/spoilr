@@ -1,6 +1,14 @@
 from django.contrib import admin
 from .models import *
 
+class MetapuzzleAdmin(admin.ModelAdmin):
+    def teams_solved(metapuzzle):
+        return len(MetapuzzleSolve.objects.filter(metapuzzle=metapuzzle))
+    teams_solved.short_description = 'Teams Solved'
+    list_display = ('__str__', teams_solved)
+    search_fields = ['name']
+    ordering = ['order']
+
 class RoundPuzzleInline(admin.TabularInline):
     model = Puzzle
     extra = 0
@@ -10,12 +18,10 @@ class RoundAdmin(admin.ModelAdmin):
     def teams_open(round):
         return len(RoundAccess.objects.filter(round=round))
     teams_open.short_description = 'Teams Open'
-    def teams_solved(round):
-        return len(RoundAccess.objects.filter(round=round,solved=True))
     def puzzles(round):
         return len(Puzzle.objects.filter(round=round))
     puzzles.short_description = 'Puzzles'
-    list_display = ('__str__', puzzles, teams_open, teams_solved)
+    list_display = ('__str__', puzzles, teams_open)
     search_fields = ['url', 'name']
     inlines = [RoundPuzzleInline]
     ordering = ['order']
@@ -32,6 +38,7 @@ class PuzzleAdmin(admin.ModelAdmin):
     search_fields = ['url', 'name']
     ordering = ['order']
 
+admin.site.register(Metapuzzle, MetapuzzleAdmin)
 admin.site.register(Round, RoundAdmin)
 admin.site.register(Puzzle, PuzzleAdmin)
 
@@ -49,9 +56,9 @@ class TeamAdmin(admin.ModelAdmin):
     def rounds_open(team):
         return len(team.rounds.all())
     rounds_open.short_description = 'Rounds Open'
-    def rounds_solved(team):
-        return len(team.rounds.filter(roundaccess__solved=True))
-    rounds_solved.short_description = 'Rounds Solved'
+    def metapuzzles_solved(team):
+        return len(MetapuzzleSolve.objects.filter(team=team))
+    metapuzzles_solved.short_description = 'Metapuzzles Solved'
     def puzzles_open(team):
         return len(team.puzzles.all())
     puzzles_open.short_description = 'Puzzles Open'
@@ -62,7 +69,7 @@ class TeamAdmin(admin.ModelAdmin):
         return len(team.puzzles.filter(puzzleaccess__solved=False))
     puzzles_unsolved.short_description = 'Puzzles Unsolved'
     inlines = [TeamRoundInline, TeamPuzzleInline]
-    list_display = ('__str__', 'username', rounds_open, rounds_solved, puzzles_open, puzzles_solved, puzzles_unsolved)
+    list_display = ('__str__', 'username', rounds_open, metapuzzles_solved, puzzles_open, puzzles_solved, puzzles_unsolved)
     search_fields = ['name', 'username']
 
 admin.site.register(Team, TeamAdmin)
@@ -125,8 +132,8 @@ class RoundAccessRoundFilter(admin.SimpleListFilter):
         return queryset.filter(round__name=self.value())
 
 class RoundAccessAdmin(admin.ModelAdmin):
-    list_display = ('__str__', 'team', 'round', 'solved')
-    list_filter = ('team__name', RoundAccessRoundFilter, 'solved')
+    list_display = ('__str__', 'team', 'round')
+    list_filter = ('team__name', RoundAccessRoundFilter)
     search_fields = ['team__name', 'round__name']
     ordering = ['team__name', 'round__order']
     

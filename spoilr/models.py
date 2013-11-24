@@ -97,13 +97,9 @@ class MetapuzzleSolve(models.Model):
 class RoundAccess(models.Model):
     team = models.ForeignKey(Team)
     round = models.ForeignKey(Round)
-    solved = models.BooleanField(default=False)
 
     def __str__(self):
-        s = 'can see'
-        if self.solved:
-            s = 'has solved'
-        return '%s %s %s' % (str(self.team), s, str(self.round))
+        return '%s can see %s' % (str(self.team), str(self.round))
 
     class Meta:
         unique_together = ('team', 'round')
