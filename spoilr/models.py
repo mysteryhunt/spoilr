@@ -15,6 +15,17 @@ class Round(models.Model):
     class Meta:
         ordering = ['order']
 
+class Metapuzzle(models.Model):
+    name = models.CharField(max_length=200, unique=True)
+    answer = models.CharField(max_length=100)
+    order = models.IntegerField(unique=True)
+
+    def __str__(self):
+        return '%s' % (self.name)
+
+    class Meta:
+        ordering = ['order']
+
 class Puzzle(models.Model):
     round = models.ForeignKey(Round)
     url = models.CharField(max_length=50, unique=True, verbose_name="id")
@@ -72,6 +83,16 @@ class TeamLog(models.Model):
 
     def __str__(self):
         return '[%s] %s: %s' % (team, timestamp, message)
+
+class MetapuzzleSolve(models.Model):
+    team = models.ForeignKey(Team)
+    metapuzzle = models.ForeignKey(Metapuzzle)
+
+    def __str__(self):
+        return '%s has solved %s' % (str(self.team), str(self.metapuzzle))
+
+    class Meta:
+        unique_together = ('team', 'metapuzzle')
 
 class RoundAccess(models.Model):
     team = models.ForeignKey(Team)

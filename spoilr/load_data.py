@@ -11,6 +11,18 @@ logger = logging.getLogger(__name__)
 def get_team_path(team):
     return os.path.join(settings.TEAMS_DIR, team.url)
 
+def load_metapuzzles():
+    print("Loading metapuzzles from metapuzzles.txt...")
+    with open(os.path.join(settings.LOAD_DIR, 'metapuzzles.txt'), 'r') as team_file:
+        for row in csv.DictReader(team_file, delimiter='\t'):
+            if Metapuzzle.objects.filter(name=row["name"]).exists():
+                continue
+            print("  Metapuzzle \"%s\"..." % row["name"])
+            metapuzzle = Metapuzzle.objects.create(**row)
+            metapuzzle.save() 
+            system_log('load_metapuzzle', 'Loaded metapuzzle "%s"' % metapuzzle.name, object_id=metapuzzle.name)
+    print("Done loading metapuzzles")
+
 def load_rounds():
     print("Loading rounds from rounds.txt...")
     with open(os.path.join(settings.LOAD_DIR, 'rounds.txt'), 'r') as team_file:
@@ -114,6 +126,7 @@ def load_mit_data(): # 2014-specific
     print("Done loading mit data")
 
 def load_all():
+    load_metapuzzles()
     load_rounds()
     load_puzzles()
     load_mit_nodes() # 2014-specific

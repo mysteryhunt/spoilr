@@ -98,6 +98,22 @@ class TeamLogAdmin(admin.ModelAdmin):
 
 admin.site.register(TeamLog, TeamLogAdmin)
 
+class MetapuzzleSolveMetapuzzleFilter(admin.SimpleListFilter):
+    title = 'metapuzzle'
+    parameter_name = 'metapuzzle'
+    def lookups(self, request, model_admin):
+        return [(x.name, x.name) for x in Metapuzzle.objects.all()]
+    def queryset(self, request, queryset):
+        if self.value() is None:
+            return queryset
+        return queryset.filter(metapuzzle__name=self.value())
+
+class MetapuzzleSolveAdmin(admin.ModelAdmin):
+    list_display = ('__str__', 'team', 'metapuzzle')
+    list_filter = ('team__name', MetapuzzleSolveMetapuzzleFilter)
+    search_fields = ['team__name', 'metapuzzle__name']
+    ordering = ['team__name', 'metapuzzle__order']
+
 class RoundAccessRoundFilter(admin.SimpleListFilter):
     title = 'round'
     parameter_name = 'round'
@@ -130,6 +146,7 @@ class PuzzleAccessAdmin(admin.ModelAdmin):
     search_fields = ['team__name', 'puzzle__name', 'puzzle__round__name']
     ordering = ['team__name', 'puzzle__round__order', 'puzzle__order']
 
+admin.site.register(MetapuzzleSolve,MetapuzzleSolveAdmin)
 admin.site.register(RoundAccess,RoundAccessAdmin)
 admin.site.register(PuzzleAccess,PuzzleAccessAdmin)
 

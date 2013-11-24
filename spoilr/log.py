@@ -4,6 +4,8 @@ PUZZLE_ACCESS = 'puzzle-access'
 ROUND_ACCESS = 'round-access'
 PUZZLE_SOLVED = 'puzzle-solved'
 PUZZLE_INCORRECT = 'puzzle-incorrect'
+METAPUZZLE_SOLVED = 'metapuzzle-solved'
+METAPUZZLE_INCORRECT = 'metapuzzle-incorrect'
 
 def system_log(event_type, message, team=None, object_id=''):
     SystemLog.objects.create(event_type=event_type, message=message, team=team, object_id=object_id).save()
@@ -25,3 +27,9 @@ def team_log_puzzle_solved(team, puzzle):
 
 def team_log_puzzle_incorrect(team, puzzle, answer):
     team_log(team, PUZZLE_INCORRECT, 'Incorrect answer "[[%s]]" for puzzle "%s"' % (answer, puzzle.name), object_id=puzzle.url)
+
+def team_log_metapuzzle_solved(team, metapuzzle):
+    team_log(team, METAPUZZLE_SOLVED, 'Solved metapuzzle "%s" (answer "[[%s]]")' % (metapuzzle.name, metapuzzle.answer), object_id=metapuzzle.name)
+
+def team_log_metapuzzle_incorrect(team, metapuzzle, answer):
+    team_log(team, METAPUZZLE_INCORRECT, 'Incorrect answer "[[%s]]" for metapuzzle "%s"' % (answer, metapuzzle.name), object_id=metapuzzle.name)
