@@ -118,7 +118,7 @@ class TopContext(Context):
             try:
                 ret["location"] = Y2014MitPuzzleData.objects.get(puzzle=access.puzzle).location
             except:
-                logger.error('puzzle "%s" doesn\'t have a location assigned' % puzzle.url)
+                logger.error('puzzle "%s" doesn\'t have a location assigned' % access.puzzle.url)
         return ret
 
 class RoundContext(TopContext):
