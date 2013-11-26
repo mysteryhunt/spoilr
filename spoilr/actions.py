@@ -13,6 +13,7 @@ def release_round(team, round, reason):
     RoundAccess.objects.create(team=team, round=round).save()
     team_log_round_access(team, round, reason)
     publish_team_round(team, round)
+    publish_team_top(team)
 
 def release_puzzle(team, puzzle, reason):
     if PuzzleAccess.objects.filter(team=team, puzzle=puzzle).exists():
@@ -21,6 +22,7 @@ def release_puzzle(team, puzzle, reason):
     team_log_puzzle_access(team, puzzle, reason)
     publish_team_puzzle(team, puzzle)
     publish_team_round(team, puzzle.round)
+    publish_team_top(team)
 
 def grant_drink_points(team, amount, reason): # 2014-specific
     td = Y2014TeamData.objects.get(team=team)
