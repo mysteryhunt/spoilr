@@ -1,0 +1,35 @@
+# rm hunt.db
+# python manage.py syncdb --traceback
+# python manage.py load_data --traceback
+# python manage.py republish --traceback
+# python manage.py shell
+#
+from spoilr.models import *
+from spoilr.actions import *
+
+t = Team.objects.get(url='spoiler_alert')
+
+p = Puzzle.objects.get(url='sneaky_fox')
+puzzle_answer_incorrect(t, p, 'NOPE')
+puzzle_answer_correct(t, p)
+
+p = Puzzle.objects.get(url='the_despair_of_cooking')
+puzzle_answer_incorrect(t, p, 'NOPE')
+puzzle_answer_correct(t, p)
+
+p = Puzzle.objects.get(url='build_your_own_sudoku')
+puzzle_answer_correct(t, p)
+p = Puzzle.objects.get(url='down_the_rabbit_hole_2')
+puzzle_answer_correct(t, p)
+p = Puzzle.objects.get(url='a_meta_puzzle')
+puzzle_answer_correct(t, p)
+p = Puzzle.objects.get(url='zoinks')
+puzzle_answer_correct(t, p)
+p = Puzzle.objects.get(url='how_puzzling_all_these_changes_are')
+puzzle_answer_correct(t, p)
+p = Puzzle.objects.get(url='opposites_are_not_downbeats')
+puzzle_answer_correct(t, p)
+
+m = Metapuzzle.objects.get(name='The Caterpillar')
+metapuzzle_answer_incorrect(t, m, 'NOPE')
+metapuzzle_answer_correct(t, m)

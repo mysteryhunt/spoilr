@@ -134,7 +134,26 @@ class RoundContext(TopContext):
         if round.url == 'mit': # 2014-specific
             count = 0
             for x in self['solved_metas']:
-                if x.name == "The Dormouse" or x.name == "The Caterpillar" or x.name == "Tweedledee and Tweedledum":
+                if x.name == "The Dormouse":
+                    self['portal1'] = 'visible'
+                    count = count + 1
+                if x.name == "The Caterpillar":
+                    self['portal2'] = 'visible'
+                    count = count + 1
+                if x.name == "Tweedledee and Tweedledum":
+                    self['portal3'] = 'visible'
+                    count = count + 1
+            self['bait_ready'] = count < 3
+            count = 0
+            for x in self['rounds']:
+                if x['round'].url == "tea_party":
+                    self['portal1'] = 'open'
+                    count = count + 1
+                if x['round'].url == "mock_turtle":
+                    self['portal2'] = 'open'
+                    count = count + 1
+                if x['round'].url == "white_queen":
+                    self['portal3'] = 'open'
                     count = count + 1
             points = self['team_data'].drink_points
             self['vial1'] = self['vial2'] = self['vial3'] = -1

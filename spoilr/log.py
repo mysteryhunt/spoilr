@@ -33,3 +33,9 @@ def team_log_metapuzzle_solved(team, metapuzzle):
 
 def team_log_metapuzzle_incorrect(team, metapuzzle, answer):
     team_log(team, METAPUZZLE_INCORRECT, 'Incorrect answer "[[%s]]" for metapuzzle "%s"' % (answer, metapuzzle.name), object_id=metapuzzle.name)
+
+def team_log_hole_discovered_no_vial(team):
+    team_log(team, 'story', 'You found a small hole, but you don\'t yet have enough drink-me potion to jump in there.')
+
+def team_log_vial_filled_no_hole(team):
+    team_log(team, 'story', 'You filled a vial of drink-me potion, but you haven\'t found any small holes to jump into.')
