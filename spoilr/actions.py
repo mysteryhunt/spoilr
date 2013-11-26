@@ -12,12 +12,15 @@ def release_round(team, round, reason):
         return
     RoundAccess.objects.create(team=team, round=round).save()
     team_log_round_access(team, round, reason)
+    publish_team_round(team, round)
 
 def release_puzzle(team, puzzle, reason):
     if PuzzleAccess.objects.filter(team=team, puzzle=puzzle).exists():
         return
     PuzzleAccess.objects.create(team=team, puzzle=puzzle).save()
     team_log_puzzle_access(team, puzzle, reason)
+    publish_team_puzzle(team, puzzle)
+    publish_team_round(team, puzzle.round)
 
 def grant_drink_points(team, amount, reason): # 2014-specific
     td = Y2014TeamData.objects.get(team=team)
@@ -70,19 +73,13 @@ def puzzle_answer_correct(team, puzzle):
         for edge in Y2014MitMapEdge.objects.filter(node1=node):
             try:
                 other_puzzle = Y2014MitPuzzleData.objects.get(location=edge.node2).puzzle
-                if not PuzzleAccess.objects.filter(team=team, puzzle=other_puzzle).exists():
-                    team_log_puzzle_access(team, other_puzzle, 'connected to "%s"' % puzzle.name)
-                    PuzzleAccess.objects.create(team=team, puzzle=other_puzzle).save()
-                    publish_team_puzzle(team, other_puzzle)
+                release_puzzle(team, other_puzzle, 'connected to "%s"' % puzzle.name)
             except Exception as e:
                 logger.error('error releasing connecting puzzle at %s: %s' % (edge.node2, e))
         for edge in Y2014MitMapEdge.objects.filter(node2=node):
             try:
                 other_puzzle = Y2014MitPuzzleData.objects.get(location=edge.node1).puzzle
-                if not PuzzleAccess.objects.filter(team=team, puzzle=other_puzzle).exists():
-                    team_log_puzzle_access(team, other_puzzle, 'connected to "%s"' % puzzle.name)
-                    PuzzleAccess.objects.create(team=team, puzzle=other_puzzle).save()
-                    publish_team_puzzle(team, other_puzzle)
+                release_puzzle(team, other_puzzle, 'connected to "%s"' % puzzle.name)
             except Exception as e:
                 logger.error('error releasing connecting puzzle at %s: %s' % (edge.node1, e))
     publish_team_top(team)
@@ -123,6 +120,8 @@ def metapuzzle_answer_correct(team, metapuzzle):
         else:
             team_log_hole_discovered_no_vial(team)
         publish_team_round(team, Round.objects.get(url='mit'))
+    if metapuzzle.name == 'The White Queen (Gift)': # 2014-specific
+        publish_team_round(team, Round.objects.get(url='white_queen'))
     publish_team_top(team)
 
 def metapuzzle_answer_incorrect(team, metapuzzle, answer):

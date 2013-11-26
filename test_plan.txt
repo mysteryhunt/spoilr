@@ -33,3 +33,9 @@ puzzle_answer_correct(t, p)
 m = Metapuzzle.objects.get(name='The Caterpillar')
 metapuzzle_answer_incorrect(t, m, 'NOPE')
 metapuzzle_answer_correct(t, m)
+
+m = Metapuzzle.objects.get(name='The Dormouse')
+metapuzzle_answer_incorrect(t, m, 'NOPE')
+metapuzzle_answer_correct(t, m)
+
+grant_drink_points(t, 14, 'because reasons')
