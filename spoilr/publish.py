@@ -166,6 +166,50 @@ class RoundContext(TopContext):
             #self['meta_ready'] = (points - 14 - (DRINK_COST * count)) >= 0
         if round.url == 'white_queen': # 2014-specific
             self['herring_ok'] = MetapuzzleSolve.objects.filter(team=team, metapuzzle__name='The White Queen (Gift)').exists()
+            pwa = 'puzzle_with_answer_'
+            answers = [
+                ['WILLIAMS', 'Nowhere Man', 'LYNN'],
+                ['', '', ''],
+                ['', '', 'SULLIVAN'],
+                ['I Want To Hold Your Hand', '', ''],
+                ['', '', ''],
+                ['', '', 'SULLIVAN'],
+                ['And I Love Her', '', ''],
+                ];
+            urls = [
+                [pwa+'williams', pwa+'nowhere_man', pwa+'lynn'],
+                [pwa+'', pwa+'', pwa+''],
+                [pwa+'', pwa+'', pwa+'sullivan'],
+                [pwa+'', pwa+'', pwa+''],
+                [pwa+'', pwa+'', 'another_'+pwa+'sullivan'],
+                [pwa+'', pwa+'', pwa+''],
+                ];
+            letters = [
+                ['I', 'T', 'S'],
+                ['J', 'U', 'S'],
+                ['T', 'A', 'R'],
+                ['E', 'D', 'H'],
+                ['E', 'R', 'R'],
+                ['I', 'N', 'G'],
+                ];
+            self['rows'] = [r for r in range(6)]
+            self['columns'] = [c for c in range(3)]
+            cells = [];
+            for r in range(6):
+                for c in range(3):
+                    answer = None
+                    url = None
+                    if PuzzleAccess.objects.filter(team=team, puzzle__url=urls[r][c]).exists():
+                        answer = answers[r][c]
+                        url = urls[r][c]
+                    cells.append({
+                        'row': r+1,
+                        'column': c+1,
+                        'letter': letters[r][c],
+                        'answer': answer,
+                        'url': url,
+                        });
+            self['cells'] = cells
 
 class PuzzleContext(RoundContext):
     def __init__(self, team, puzzle):
