@@ -12,6 +12,24 @@ def release_round(team, round, reason):
         return
     RoundAccess.objects.create(team=team, round=round).save()
     team_log_round_access(team, round, reason)
+    if round.url != 'mit': # 2014-specific
+        # it's a wonderland round, let's release some puzzles in it...
+        count = WL_RELEASE_INIT
+        def release_initial(puzzle):
+            # we could call release_puzzle, but since we're going to 
+            # release top and round later anyway we can skip that here
+            if PuzzleAccess.objects.filter(team=team, puzzle=puzzle).exists():
+                return
+            PuzzleAccess.objects.create(team=team, puzzle=puzzle).save()
+            team_log_puzzle_access(team, puzzle, 'round "%s" released' % round.name)
+            publish_team_puzzle(team, puzzle)
+        for puzzle in Puzzle.objects.filter(round=round):
+            if count > 0:
+                try:
+                    release_initial(puzzle)
+                except Exception as e:
+                    logger.error('error releasing connecting puzzle at %s: %s' % (edge.node2, e))
+                count = count - 1
     publish_team_round(team, round)
     publish_team_top(team)
 
@@ -72,16 +90,22 @@ def puzzle_answer_correct(team, puzzle):
         grant_drink_points(team, DRINK_INCR_MIT, 'solved an MIT puzzle')
         # mit map: release all puzzles connected to the solved one
         node = Y2014MitPuzzleData.objects.get(puzzle=puzzle).location
+        def release_connected(other_puzzle):
+            # we could call release_puzzle, but since we're going to 
+            # release top and round later anyway we can skip that here
+            if PuzzleAccess.objects.filter(team=team, puzzle=other_puzzle).exists():
+                return
+            PuzzleAccess.objects.create(team=team, puzzle=other_puzzle).save()
+            team_log_puzzle_access(team, other_puzzle, 'connected to "%s"' % puzzle.name)
+            publish_team_puzzle(team, other_puzzle)
         for edge in Y2014MitMapEdge.objects.filter(node1=node):
             try:
-                other_puzzle = Y2014MitPuzzleData.objects.get(location=edge.node2).puzzle
-                release_puzzle(team, other_puzzle, 'connected to "%s"' % puzzle.name)
+                release_connected(Y2014MitPuzzleData.objects.get(location=edge.node2).puzzle)
             except Exception as e:
                 logger.error('error releasing connecting puzzle at %s: %s' % (edge.node2, e))
         for edge in Y2014MitMapEdge.objects.filter(node2=node):
             try:
-                other_puzzle = Y2014MitPuzzleData.objects.get(location=edge.node1).puzzle
-                release_puzzle(team, other_puzzle, 'connected to "%s"' % puzzle.name)
+                release_connected(Y2014MitPuzzleData.objects.get(location=edge.node1).puzzle)
             except Exception as e:
                 logger.error('error releasing connecting puzzle at %s: %s' % (edge.node1, e))
     publish_team_top(team)

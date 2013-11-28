@@ -39,4 +39,7 @@ metapuzzle_answer_correct(t, m)
 m = Metapuzzle.objects.get(name='Tweedledee and Tweedledum')
 metapuzzle_answer_correct(t, m)
 
+m = Metapuzzle.objects.get(name='The White Queen (Gift)')
+metapuzzle_answer_correct(t, m)
+
 #grant_drink_points(t, 14, 'because reasons')
