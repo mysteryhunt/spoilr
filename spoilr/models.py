@@ -68,7 +68,7 @@ class SystemLog(models.Model):
     message = models.CharField(max_length=1000)
 
     def __str__(self):
-        return '%s: %s' % (timestamp, message)
+        return '%s: %s' % (self.timestamp, self.message)
 
     class Meta:
         verbose_name_plural = "System log"
@@ -82,7 +82,7 @@ class TeamLog(models.Model):
     message = models.CharField(max_length=1000)
 
     def __str__(self):
-        return '[%s] %s: %s' % (team, timestamp, message)
+        return '[%s] %s: %s' % (self.team, self.timestamp, self.message)
 
 class MetapuzzleSolve(models.Model):
     team = models.ForeignKey(Team)

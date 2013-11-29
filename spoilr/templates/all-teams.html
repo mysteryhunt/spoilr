@@ -1,5 +1,25 @@
+<div style="font: 10pt monospace">
+<div>
+{{ teams|length }} teams,
+{{ puzzle_count }} puzzles
+</div>
 {% for team in teams %}
 <div>
-{{ team.team.name }}
+{{ team.team.name }}<br>
+{% for section in team.sections %}
+{% if section.solved %}+{% elif section.released %}-{% else %}.{% endif %}:
+{% for puzzle in section.puzzles %}
+{% if puzzle.solved %}+{% elif puzzle.released %}-{% else %}.{% endif %}
+{% endfor %}
+<br />
+{% endfor %}
+<div id="team_log1_{{ team.team.url }}">
+{{ team.log1.timestamp|date:'Y-m-d H:i:s' }}: {{ team.log1.message }}
+</div>
+<div id="team_logn_{{ team.team.url }}">
+{% for log in team.logn %}
+{{ log.timestamp|date:'Y-m-d H:i:s' }}: {{ log.message }}<br />
+{% endfor %}
+</div>
 </div>
 {% endfor %}
