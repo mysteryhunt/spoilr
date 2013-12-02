@@ -143,4 +143,7 @@ def everybody_can_see_everything():
         for puzzle in Puzzle.objects.all():
             if not PuzzleAccess.objects.filter(team=team, puzzle=puzzle).exists():
                 PuzzleAccess.objects.create(team=team, puzzle=puzzle).save()
+        for metapuzzle in Metapuzzle.objects.all():
+            if not MetapuzzleSolve.objects.filter(team=team, metapuzzle=metapuzzle).exists():
+                MetapuzzleSolve.objects.create(team=team, metapuzzle=metapuzzle).save()
     print("Done granting full access")
