@@ -121,7 +121,7 @@ class TopContext(Context):
                 logger.error('puzzle "%s" doesn\'t have a location assigned' % access.puzzle.url)
         return ret
 
-class RoundContext(TopContext):
+class RoundContext(TopContext): # todo don't inherit, it'll just slow things down and we don't need all that context
     def __init__(self, team, round):
         TopContext.__init__(self, team)
         try:
@@ -167,31 +167,16 @@ class RoundContext(TopContext):
         if round.url == 'white_queen': # 2014-specific
             self['herring_ok'] = MetapuzzleSolve.objects.filter(team=team, metapuzzle__name='The White Queen (Gift)').exists()
             pwa = 'puzzle_with_answer_'
-            answers = [
-                ['WILLIAMS', 'Nowhere Man', 'LYNN'],
-                ['', '', ''],
-                ['', '', 'SULLIVAN'],
-                ['I Want To Hold Your Hand', '', ''],
-                ['', '', ''],
-                ['', '', 'SULLIVAN'],
-                ['And I Love Her', '', ''],
-                ];
-            urls = [
-                [pwa+'williams', pwa+'nowhere_man', pwa+'lynn'],
-                [pwa+'', pwa+'', pwa+''],
-                [pwa+'', pwa+'', pwa+'sullivan'],
-                [pwa+'', pwa+'', pwa+''],
-                [pwa+'', pwa+'', 'another_'+pwa+'sullivan'],
-                [pwa+'', pwa+'', pwa+''],
-                ];
-            letters = [
-                ['I', 'T', 'S'],
-                ['J', 'U', 'S'],
-                ['T', 'A', 'R'],
-                ['E', 'D', 'H'],
-                ['E', 'R', 'R'],
-                ['I', 'N', 'G'],
-                ];
+            answers = []
+            urls = []
+            for meta in Metapuzzle.objects.all():
+                if meta.name.startswith('The White Queen (Answer '):
+                    if meta.answer in answers:
+                        urls.append('another_'+pwa+meta.answer.lower().replace(' ','_'))
+                    else:
+                        urls.append(pwa+meta.answer.lower().replace(' ','_'))
+                    answers.append(meta.answer)
+            letters = 'ITSJUSTAREDHERRING'
             self['rows'] = [r for r in range(6)]
             self['columns'] = [c for c in range(3)]
             cells = [];
@@ -199,19 +184,19 @@ class RoundContext(TopContext):
                 for c in range(3):
                     answer = None
                     url = None
-                    if PuzzleAccess.objects.filter(team=team, puzzle__url=urls[r][c]).exists():
-                        answer = answers[r][c]
-                        url = urls[r][c]
+                    if PuzzleAccess.objects.filter(team=team, puzzle__url=urls[r*3+c]).exists():
+                        answer = answers[r*3+c]
+                        url = urls[r*3+c]
                     cells.append({
                         'row': r+1,
                         'column': c+1,
-                        'letter': letters[r][c],
+                        'letter': letters[r*3+c],
                         'answer': answer,
                         'url': url,
                         });
             self['cells'] = cells
 
-class PuzzleContext(RoundContext):
+class PuzzleContext(RoundContext): # todo don't inherit, it'll just slow things down and we don't need all that context
     def __init__(self, team, puzzle):
         try:
             round = team.rounds.get(url=puzzle.round.url)
