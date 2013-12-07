@@ -58,6 +58,10 @@ class Team(models.Model):
             path = path + suffix
         return path
 
+    def get_symlink(self):
+        symlink = os.path.join(settings.TEAMS_DIR, self.username)
+        return symlink
+
     def __str__(self):
         return '%s' % (self.name)
 
