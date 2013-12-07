@@ -232,7 +232,8 @@ def publish_dir(context, source_path, dest_path, root_path, except_for=[]):
                         file_out.write(result)
             else:
                 dest_file = os.path.join(dest_path, relpath, filename)
-                shutil.copyfile(source_file, dest_file)
+                if not os.path.exists(dest_file) or os.path.getmtime(dest_file) < os.path.getmtime(source_file):
+                    shutil.copyfile(source_file, dest_file)
         for dirname in dirnames:
             if relpath == '.' and dirname in except_for:
                 continue
