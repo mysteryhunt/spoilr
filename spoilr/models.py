@@ -61,6 +61,14 @@ class Team(models.Model):
     def __str__(self):
         return '%s' % (self.name)
 
+class TeamPhone(models.Model):
+    team = models.ForeignKey(Team)
+    phone = models.CharField(max_length=100, unique=True)
+    def __str__(self):
+        return '%s [%s]' % (self.team.name, self.phone)
+
+Team.phones = models.ManyToManyField(TeamPhone)
+
 class SystemLog(models.Model):
     timestamp = models.DateTimeField(default=datetime.now)
     event_type = models.CharField(max_length=50)
@@ -123,6 +131,7 @@ class PuzzleAccess(models.Model):
 
 class PuzzleSubmission(models.Model):
     team = models.ForeignKey(Team)
+    phone = models.CharField(max_length=100)
     puzzle = models.ForeignKey(Puzzle)
     timestamp = models.DateTimeField(default=datetime.now)
     answer = models.CharField(max_length=50)

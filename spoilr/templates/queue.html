@@ -1,0 +1,37 @@
+{% load humanize %}
+<html>
+  <head>
+    <!--<meta http-equiv="refresh" content="8">-->
+    <style type="text/css">
+      body, td, input {
+        font: 10pt Verdana;
+      }
+      table {
+        border-collapse: collapse;
+        padding: 0px;
+        margin: 0px;
+      }
+      td {
+        vertical-align: top;
+        padding: 2px 6px;
+      }
+    </style>
+  </head>
+  <body>
+    <table>
+      {% for t in teams %}
+      <tr><td>{{ t.team.name }}
+	<td style="padding: 0px;">
+	  <table>
+	    {% for s in t.puzzle_submissions %}
+	    <tr><td>{{ s.timestamp|naturaltime }}
+	      <td>Puzzle Answer
+	      <td><i>{{s.puzzle}}</i>
+	    </tr>
+	    {% endfor %}
+	  </table>
+      </tr>
+      {% endfor %}
+    </table>
+  </body>
+</html>

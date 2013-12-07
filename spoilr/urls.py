@@ -6,6 +6,7 @@ admin.autodiscover()
 
 from .dashboard import all_teams
 from .submit import submit_puzzle
+from .submit import queue
 
 urlpatterns = patterns('',
     # Uncomment the admin/doc line below to enable admin documentation:
@@ -17,4 +18,5 @@ urlpatterns = patterns('',
     url(r'^submit/puzzle/(\w+)/$', submit_puzzle),
 
     url(r'^hq/all-teams/$', all_teams),
+    url(r'^hq/queue/$', queue),
 )

@@ -72,6 +72,19 @@ def load_teams():
                     team_log_puzzle_access(team, mitdata.puzzle, "hunt start")
     print("Done loading teams")
 
+def load_team_phones():
+    print("Loading team phones from team_phones.txt...")
+    with open(os.path.join(settings.LOAD_DIR, 'team_phones.txt'), 'r') as team_file:
+        for row in csv.DictReader(team_file, delimiter='\t'):
+            try:
+                team = Team.objects.get(url=row["team"])
+            except:
+                print('ERROR: no such node "%s"' % row["node1"])
+                continue
+            TeamPhone.objects.filter(phone=row["phone"]).delete()
+            TeamPhone.objects.create(team=team, phone=row["phone"]).save()
+    print("Done loading team phones")
+
 def load_mit_nodes(): # 2014-specific
     print("Loading mit map nodes from mit_nodes.txt...")
     with open(os.path.join(settings.LOAD_DIR, 'mit_nodes.txt'), 'r') as node_file:
@@ -133,6 +146,7 @@ def load_all():
     load_mit_edges() # 2014-specific / must load after mit_nodes
     load_mit_data() # 2014-specific / must load after mit_nodes and puzzles, and must load before teams
     load_teams()
+    load_team_phones()
 
 def everybody_can_see_everything():
     print("Granting full access to every team...")
