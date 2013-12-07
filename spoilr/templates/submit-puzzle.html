@@ -1,0 +1,22 @@
+<html>
+  <body>
+  <div style="
+    white-space: nowrap;
+    overflow-x: hidden;
+">
+    Team: {{ team.name }}<br>
+    Puzzle: {{ puzzle.name }}<br>
+    <form action="." method="POST">
+      {% csrf_token %}
+      <input type="submit" value="Submit" style="float: right;">
+      <input type="text" name="answer" size="40">
+      <div>
+	ALPHA<br>
+	BETA<br>
+	GAMMA<br>
+	DELTA<br>
+      </div>
+    </form>
+  </div>
+</body>
+</html>

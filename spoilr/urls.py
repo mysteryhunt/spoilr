@@ -5,6 +5,7 @@ from django.contrib import admin
 admin.autodiscover()
 
 from .dashboard import all_teams
+from .submit import submit_puzzle
 
 urlpatterns = patterns('',
     # Uncomment the admin/doc line below to enable admin documentation:
@@ -12,6 +13,8 @@ urlpatterns = patterns('',
 
     # Uncomment the next line to enable the admin:
     url(r'^admin/', include(admin.site.urls)),
+
+    url(r'^submit/puzzle/(\w+)/$', submit_puzzle),
 
     url(r'^hq/all-teams/$', all_teams),
 )
