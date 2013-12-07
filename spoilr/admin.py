@@ -6,7 +6,7 @@ class MetapuzzleAdmin(admin.ModelAdmin):
         return len(MetapuzzleSolve.objects.filter(metapuzzle=metapuzzle))
     teams_solved.short_description = 'Teams Solved'
     list_display = ('__str__', teams_solved)
-    search_fields = ['name']
+    search_fields = ['url', 'name']
     ordering = ['order']
 
 class RoundPuzzleInline(admin.TabularInline):
@@ -156,6 +156,14 @@ class PuzzleAccessAdmin(admin.ModelAdmin):
 admin.site.register(MetapuzzleSolve,MetapuzzleSolveAdmin)
 admin.site.register(RoundAccess,RoundAccessAdmin)
 admin.site.register(PuzzleAccess,PuzzleAccessAdmin)
+
+class PuzzleSubmissionAdmin(admin.ModelAdmin):
+    list_display = ('__str__', 'timestamp', 'team', 'puzzle', 'resolved')
+    list_filter = ('team__name', PuzzleAccessRoundFilter, 'resolved')
+    search_fields = ['team__name', 'puzzle__name', 'puzzle__round__name']
+    ordering = ['timestamp']
+
+admin.site.register(PuzzleSubmission,PuzzleSubmissionAdmin)
 
 # ----------------------- 2014-specific stuff ---------------------
 

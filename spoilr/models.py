@@ -16,6 +16,7 @@ class Round(models.Model):
         ordering = ['order']
 
 class Metapuzzle(models.Model):
+    url = models.CharField(max_length=50, unique=True, verbose_name="id")
     name = models.CharField(max_length=200, unique=True)
     answer = models.CharField(max_length=100)
     order = models.IntegerField(unique=True)
@@ -119,6 +120,20 @@ class PuzzleAccess(models.Model):
     class Meta:
         unique_together = ('team', 'puzzle')
         verbose_name_plural = 'Puzzle access'
+
+class PuzzleSubmission(models.Model):
+    team = models.ForeignKey(Team)
+    puzzle = models.ForeignKey(Puzzle)
+    timestamp = models.DateTimeField(default=datetime.now)
+    answer = models.CharField(max_length=50)
+    resolved = models.BooleanField(default=False)
+
+    def __str__(self):
+        return '%s: %s submitted for %s' % (str(self.timestamp), str(self.team), str(self.puzzle))
+
+    class Meta:
+        ordering = ['-timestamp']
+    
 
 # ----------------------- 2014-specific stuff ---------------------
 

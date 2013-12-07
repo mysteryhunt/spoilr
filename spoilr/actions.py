@@ -63,11 +63,11 @@ def grant_drink_points(team, amount, reason): # 2014-specific
     if undrunk >= DRINK_COST:
         # ...and they've solved a metapuzzle but haven't released the round, release the round (causing the vial to be drunk)
         next_round = None
-        if MetapuzzleSolve.objects.filter(team=team, metapuzzle__name='The Dormouse').exists() and not RoundAccess.objects.filter(team=team, round__url='tea_party').exists():
+        if MetapuzzleSolve.objects.filter(team=team, metapuzzle__url='dormouse').exists() and not RoundAccess.objects.filter(team=team, round__url='tea_party').exists():
             next_round = 'tea_party'
-        elif MetapuzzleSolve.objects.filter(team=team, metapuzzle__name='The Caterpillar').exists() and not RoundAccess.objects.filter(team=team, round__url='mock_turtle').exists():
+        elif MetapuzzleSolve.objects.filter(team=team, metapuzzle__url='caterpillar').exists() and not RoundAccess.objects.filter(team=team, round__url='mock_turtle').exists():
             next_round = 'mock_turtle'
-        elif MetapuzzleSolve.objects.filter(team=team, metapuzzle__name='Tweedledee and Tweedledum').exists() and not RoundAccess.objects.filter(team=team, round__url='white_queen').exists():
+        elif MetapuzzleSolve.objects.filter(team=team, metapuzzle__url='tweedles').exists() and not RoundAccess.objects.filter(team=team, round__url='white_queen').exists():
             next_round = 'white_queen'
         if not next_round is None:
             release_round(team, Round.objects.get(url=next_round), 'You filled a drink-me vial, drank it and jumped into a small hole.')
@@ -123,7 +123,7 @@ def metapuzzle_answer_correct(team, metapuzzle):
         return
     team_log_metapuzzle_solved(team, metapuzzle)
     MetapuzzleSolve.objects.create(team=team, metapuzzle=metapuzzle).save()
-    if metapuzzle.name in ['The Dormouse', 'The Caterpillar', 'Tweedledee and Tweedledum']: # 2014-specific
+    if metapuzzle.url in ['dormouse', 'caterpillar', 'tweedles']: # 2014-specific
         # mit meta: if they have a full vial...
         td = Y2014TeamData.objects.get(team=team)
         undrunk = td.drink_points
@@ -133,11 +133,11 @@ def metapuzzle_answer_correct(team, metapuzzle):
         if undrunk >= DRINK_COST:
             # ...release the corresponding round (which causes the vial to be drunk)
             next_round = None
-            if metapuzzle.name == 'The Dormouse':
+            if metapuzzle.name == 'dormouse':
                 next_round = 'tea_party'
-            elif metapuzzle.name == 'The Caterpillar':
+            elif metapuzzle.name == 'caterpillar':
                 next_round = 'mock_turtle'
-            elif metapuzzle.name == 'Tweedledee and Tweedledum':
+            elif metapuzzle.name == 'tweedles':
                 next_round = 'white_queen'
             else:
                 logger.error('bug in mit round release: %s' % metapuzzle.name)
@@ -146,7 +146,7 @@ def metapuzzle_answer_correct(team, metapuzzle):
         else:
             team_log_hole_discovered_no_vial(team)
         publish_team_round(team, Round.objects.get(url='mit'))
-    if metapuzzle.name == 'The White Queen (Gift)': # 2014-specific
+    if metapuzzle.name == 'white_queen_gift': # 2014-specific
         publish_team_round(team, Round.objects.get(url='white_queen'))
     publish_team_top(team)
 

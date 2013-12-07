@@ -1,3 +1,4 @@
+{% load humanize %}
 <html>
   <body>
   <div style="
@@ -10,11 +11,16 @@
       {% csrf_token %}
       <input type="submit" value="Submit" style="float: right;">
       <input type="text" name="answer" size="40">
-      <div>
-	ALPHA<br>
-	BETA<br>
-	GAMMA<br>
-	DELTA<br>
+      <table>
+	<tr><th>Answer Attempt
+	    <th>Time
+	    <th>In Queue
+        {% for a in answers %}
+	<tr><td>{{ a.answer }}
+	    <td>{{ a.timestamp|naturaltime }}
+	    <td>{% if not a.resolved %}Yes{% else %}No{% endif %}
+	      {% endfor %}
+      </table>
       </div>
     </form>
   </div>

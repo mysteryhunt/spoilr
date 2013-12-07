@@ -165,12 +165,12 @@ class RoundContext(TopContext): # todo don't inherit, it'll just slow things dow
                 self['vial1'] = min(14,max(0, points - (DRINK_COST * 0)))
             #self['meta_ready'] = (points - 14 - (DRINK_COST * count)) >= 0
         if round.url == 'white_queen': # 2014-specific
-            self['herring_ok'] = MetapuzzleSolve.objects.filter(team=team, metapuzzle__name='The White Queen (Gift)').exists()
+            self['herring_ok'] = MetapuzzleSolve.objects.filter(team=team, metapuzzle__url='white_queen_gift').exists()
             pwa = 'puzzle_with_answer_'
             answers = []
             urls = []
             for meta in Metapuzzle.objects.all():
-                if meta.name.startswith('The White Queen (Answer '):
+                if meta.url.startswith('white_queen_a'):
                     if meta.answer in answers:
                         urls.append('another_'+pwa+meta.answer.lower().replace(' ','_'))
                     else:

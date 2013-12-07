@@ -23,16 +23,18 @@ def team_log_puzzle_access(team, puzzle, reason):
     team_log(team, PUZZLE_ACCESS, 'Released puzzle "%s" (%s)' % (puzzle.name, reason), object_id=puzzle.url, link="/puzzle/%s" % puzzle.url)
 
 def team_log_puzzle_solved(team, puzzle):
-    team_log(team, PUZZLE_SOLVED, 'Solved puzzle "%s" (answer "[[%s]]")' % (puzzle.name, puzzle.answer), object_id=puzzle.url, link="/puzzle/%s" % puzzle.url)
+    team_log(team, PUZZLE_SOLVED, 'Solved puzzle "%s"' % puzzle.name, object_id=puzzle.url, link="/puzzle/%s" % puzzle.url)
 
 def team_log_puzzle_incorrect(team, puzzle, answer):
-    team_log(team, PUZZLE_INCORRECT, 'Incorrect answer "[[%s]]" for puzzle "%s"' % (answer, puzzle.name), object_id=puzzle.url)
+    pass
+    #team_log(team, PUZZLE_INCORRECT, 'Incorrect answer "[[%s]]" for puzzle "%s"' % (answer, puzzle.name), object_id=puzzle.url)
 
 def team_log_metapuzzle_solved(team, metapuzzle):
-    team_log(team, METAPUZZLE_SOLVED, 'Solved metapuzzle "%s" (answer "[[%s]]")' % (metapuzzle.name, metapuzzle.answer), object_id=metapuzzle.name)
+    team_log(team, METAPUZZLE_SOLVED, 'Solved metapuzzle "%s"' % metapuzzle.name, object_id=metapuzzle.name)
 
 def team_log_metapuzzle_incorrect(team, metapuzzle, answer):
-    team_log(team, METAPUZZLE_INCORRECT, 'Incorrect answer "[[%s]]" for metapuzzle "%s"' % (answer, metapuzzle.name), object_id=metapuzzle.name)
+    pass
+    #team_log(team, METAPUZZLE_INCORRECT, 'Incorrect answer "[[%s]]" for metapuzzle "%s"' % (answer, metapuzzle.name), object_id=metapuzzle.name)
 
 def team_log_hole_discovered_no_vial(team):
     team_log(team, 'story', 'You found a small hole, but you don\'t yet have enough drink-me potion to jump in there.')
