@@ -9,8 +9,10 @@
 #     [puzzle_id]/
 HUNT_DATA_DIR = '/home/hunt/hunt_data'
 
-# TODO: SETUP: point this to where team directories will live (and be served by the web server)
+# TODO: SETUP: point this to where team directories will live
 TEAMS_DIR = '/var/www/spoilr/teams'
+# TODO: SETUP: point this to where user symlinks will live (they will symlink to the team directories)
+USERS_DIR = '/var/www/spoilr/users'
 
 # TODO: SETUP: point this to where the initial data tables will live
 LOAD_DIR = '/home/hunt'
