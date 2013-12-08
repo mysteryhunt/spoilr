@@ -23,10 +23,18 @@
       <tr><td>{{ t.team.name }}
 	<td style="padding: 0px;">
 	  <table>
-	    {% for s in t.puzzle_submissions %}
+	    {% for s in t.submissions %}
 	    <tr><td>{{ s.timestamp|naturaltime }}
-	      <td>Puzzle Answer
-	      <td><i>{{s.puzzle}}</i>
+	      <td>{% if s.type == "puzzle" %}
+		Puzzle Answer
+		{% elif s.type == "metapuzzle" %}
+		Metapuzzle Answer
+		{% comment %} 2014-specific... {% endcomment %}
+		{% elif s.type == "mit-metapuzzle" %}
+		MIT Bait
+		{% comment %} ...end 2014-specific {% endcomment %}
+		{% endif %}
+	      <td><i>{{s.thing}}</i>
 	    </tr>
 	    {% endfor %}
 	  </table>

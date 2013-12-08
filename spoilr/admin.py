@@ -177,6 +177,14 @@ class PuzzleSubmissionAdmin(admin.ModelAdmin):
 
 admin.site.register(PuzzleSubmission,PuzzleSubmissionAdmin)
 
+class MetapuzzleSubmissionAdmin(admin.ModelAdmin):
+    list_display = ('__str__', 'timestamp', 'team', 'metapuzzle', 'phone', 'resolved')
+    list_filter = ('team__name', 'metapuzzle__name', 'resolved')
+    search_fields = ['team__name', 'metapuzzle__name']
+    ordering = ['timestamp']
+
+admin.site.register(MetapuzzleSubmission,MetapuzzleSubmissionAdmin)
+
 # ----------------------- 2014-specific stuff ---------------------
 
 class Y2014TeamDataAdmin(admin.ModelAdmin):
@@ -211,3 +219,11 @@ class Y2014MitMapEdgeAdmin(admin.ModelAdmin):
     ordering = ['node1__order', 'node2__order']
 
 admin.site.register(Y2014MitMapEdge, Y2014MitMapEdgeAdmin)
+
+class Y2014MitMetapuzzleSubmissionAdmin(admin.ModelAdmin):
+    list_display = ('__str__', 'timestamp', 'team', 'phone', 'resolved')
+    list_filter = ('team__name', 'resolved')
+    search_fields = ['team__name']
+    ordering = ['timestamp']
+
+admin.site.register(Y2014MitMetapuzzleSubmission,Y2014MitMetapuzzleSubmissionAdmin)

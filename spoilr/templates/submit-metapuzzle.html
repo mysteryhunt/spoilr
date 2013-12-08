@@ -3,9 +3,9 @@
   <body>
     <div style="white-space: nowrap; overflow-x: hidden;">
       Team: {{ team.name }}<br>
-      Puzzle: {{ puzzle.name }}<br>
+      Thing: {{ metapuzzle.name }}<br>
       {% if solved %}
-      Solved! Answer: <b>{{ puzzle.answer }}</b><br>
+      Solved! Answer: <b>{{ metapuzzle.answer }}</b><br>
       {% else %}
       <form action="." method="POST">
 	{% csrf_token %}
