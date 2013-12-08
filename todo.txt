@@ -88,10 +88,11 @@ HQ:
     needs lots of work [dev]
 
 Testing:
+  remove submit username hack for demo [dev]
   need to make a testable demo [dev]
   need to test the testable demo [test]
   review [all]
 
 Other:
   confirm that no code is needed for runarounds [???]
-  custom round urls?
+  custom round urls? [dev]
