@@ -52,14 +52,14 @@ class Team(models.Model):
     rounds = models.ManyToManyField(Round, through='RoundAccess')
     puzzles = models.ManyToManyField(Puzzle, through='PuzzleAccess')
 
-    def get_path(self, suffix=None):
+    def get_team_dir(self, suffix=None):
         path = os.path.join(settings.TEAMS_DIR, self.url)
         if suffix:
             path = path + suffix
         return path
 
-    def get_symlink(self):
-        symlink = os.path.join(settings.TEAMS_DIR, self.username)
+    def get_user_symlink(self):
+        symlink = os.path.join(settings.USERS_DIR, self.username)
         return symlink
 
     def __str__(self):
