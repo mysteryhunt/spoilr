@@ -46,7 +46,6 @@ def prestart_team(team, suffix=None):
             os.symlink(team.get_team_dir(), user_symlink)
         except OSError as e:
             logger.error('Failed to create symlink at %s to %s: %s', user_symlink, team.get_team_dir(), str(e))
-            return False
     try:
         team_htaccess_path = os.path.join(team_path, '.htaccess')
         with open(team_htaccess_path, 'w') as htaccess_file:
