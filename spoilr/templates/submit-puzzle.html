@@ -4,6 +4,9 @@
     <div style="white-space: nowrap; overflow-x: hidden;">
       Team: {{ team.name }}<br>
       Puzzle: {{ puzzle.name }}<br>
+      {% if solved %}
+      Solved! Answer: <b>{{ puzzle.answer }}</b><br>
+      {% else %}
       <form action="." method="POST">
 	{% csrf_token %}
 	Answer: <input type="text" name="answer" size="38"><br />
@@ -13,19 +16,20 @@
 	  {% endfor %}
 	</select>
 	<input type="submit" value="Submit">
-	<table>
-	  <tr><th>Answer Attempt
-	    <th>Time
-	    <th>In Queue
-	  </tr>
-          {% for a in answers %}
-	  <tr><td>{{ a.answer }}
-	    <td>{{ a.timestamp|naturaltime }}
-	    <td>{% if not a.resolved %}Yes{% else %}No{% endif %}
-	  </tr>
-	  {% endfor %}
-	</table>
       </form>
+      {% endif %}
+      <table>
+	<tr><th>Answer Attempt
+	  <th>Time
+	  <th>In Queue
+	</tr>
+        {% for a in answers %}
+	<tr><td>{{ a.answer }}
+	  <td>{{ a.timestamp|naturaltime }}
+	  <td>{% if not a.resolved %}Yes{% else %}No{% endif %}
+	</tr>
+	{% endfor %}
+      </table>
     </div>
   </body>
 </html>

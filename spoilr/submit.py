@@ -3,6 +3,13 @@ from django.template import RequestContext, loader
 import re
 
 from .models import *
+from .actions import *
+
+def cleanup_answer(answer):
+    return re.sub(r'[^ A-Z0-9]', '', answer.upper()) 
+
+def compare_answers(a, b):
+    return re.sub(r'[^A-Z0-9]', '', a.upper()) == re.sub(r'[^A-Z0-9]', '', b.upper())
 
 def submit_puzzle(request, puzzle_url):
     # TODO SETUP: uncomment, make sure user auth works here
@@ -18,14 +25,21 @@ def submit_puzzle(request, puzzle_url):
         return HttpResponseBadRequest('cannot find puzzle for url '+puzzle_url)
     template = loader.get_template('submit-puzzle.html') 
     if request.method == "POST":
-        answer = re.sub(r'[^ A-Z0-9]', '', request.POST["answer"].upper())       
+        answer = cleanup_answer(request.POST["answer"])
         phone = request.POST["phone"]
         PuzzleSubmission.objects.create(team=team, puzzle=puzzle, phone=phone, answer=answer).save()
-        #template = loader.get_template('submit-puzzle-done.html') 
+        # hack for testing:
+        if compare_answers(answer, puzzle.answer):
+            puzzle_answer_correct(team, puzzle)
+            for sub in PuzzleSubmission.objects.filter(team=team, puzzle=puzzle):
+                sub.resolved = True
+                sub.save()
     answers = PuzzleSubmission.objects.filter(team=team, puzzle=puzzle)
+    solved = PuzzleAccess.objects.get(team=team, puzzle=puzzle).solved
     context = RequestContext(request, {
             'team': team,
             'puzzle': puzzle,
+            'solved': solved,
             'answers': answers,
             })
     return HttpResponse(template.render(context))
