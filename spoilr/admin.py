@@ -232,3 +232,9 @@ class Y2014CaucusAnswerDataAdmin(admin.ModelAdmin):
     list_display = ('bird')
 
 admin.site.register(Y2014CaucusAnswerData, Y2014CaucusAnswerDataAdmin)
+
+class Y2014KnightsAnswerDataAdmin(admin.ModelAdmin):
+    list_display = ('piece', 'color', 'order')
+    list_filter = ('piece', 'color')
+
+admin.site.register(Y2014KnightsAnswerData, Y2014KnightsAnswerDataAdmin)
