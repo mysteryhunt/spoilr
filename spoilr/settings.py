@@ -34,13 +34,16 @@ MANAGERS = ADMINS
 
 DATABASES = {
     'default': {
-        # TODO: SETUP: connect to a real database
-        'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': '/var/sqlitedb/hunt.db',
-        'USER': '',
-        'PASSWORD': '',
-        'HOST': '', # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
-        'PORT': '', # Set to empty string for default.
+	# for sqlite
+        #'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
+        #'NAME': '/var/sqlitedb/hunt.db',
+
+	# for mysql
+        'ENGINE': 'django.db.backends.mysql',
+        'OPTIONS': {
+            'init_command': 'SET storage_engine=INNODB',
+            'read_default_file': '/home/djangoapps/spoilr/my.cnf',
+	},
     }
 }
 
