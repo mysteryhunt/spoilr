@@ -3,10 +3,12 @@
 cd /home/djangoapps/spoilr
 MANAGE=../spoilr-env/bin/python\ manage.py
 
-# backup database, just in case
-mv /var/sqlitedb/hunt.db /var/sqlitedb/hunt.db.bak
+#Backup database just in case
+#mv /var/sqlitedb/hunt.db /var/sqlitedb/hunt.db.bak
 /usr/bin/mysqldump --events --all-databases > /home/hunt/spoilr.sql
-cat /home/hunt/mysqlinit.sql | /usr/bin/mysql -u root 
+
+#Wipe mysql db and re-init
+cat mysqlinit.sql | /usr/bin/mysql -u root 
 
 
 # recreate database, this will ask for admin username/password
