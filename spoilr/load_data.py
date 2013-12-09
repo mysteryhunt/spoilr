@@ -148,6 +148,15 @@ def load_caucus_data(): # 2014-specific
             Y2014CaucusAnswerData.objects.create(**row).save()
     print("Done loading caucus data")
 
+def load_knights_data(): # 2014-specific
+    print("Loading knights data from knights_data.txt...")
+    with open(os.path.join(settings.LOAD_DIR, 'knights_data.txt'), 'r') as data_file:
+        for row in csv.DictReader(data_file, delimiter='\t'):
+            if Y2014KnightsAnswerData.objects.filter(piece=row["piece"], order=row["order"]).exists():
+                continue
+            Y2014KnightsAnswerData.objects.create(**row).save()
+    print("Done loading knights data")
+
 def load_all():
     load_metapuzzles()
     load_rounds()
@@ -156,6 +165,7 @@ def load_all():
     load_mit_edges() # 2014-specific / must load after mit_nodes
     load_mit_data() # 2014-specific / must load after mit_nodes and puzzles, and must load before teams
     load_caucus_data() # 2014-specific
+    load_knights_data() # 2014-specific
     load_teams()
     load_team_phones()
 

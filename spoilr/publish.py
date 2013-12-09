@@ -169,6 +169,20 @@ class RoundContext(TopContext): # todo don't inherit, it'll just slow things dow
                     pass
                 birds.append({"yes": yes_puzzle, "no": no_puzzle})
             self['birds'] = birds
+        if round.url == 'knights': # 2014-specific
+            pieces = []
+            for piece in [x[0] for x in Y2014KnightsAnswerData.PIECE_CHOICES]:
+                puzzles = []
+                for data in Y2014KnightsAnswerData.objects.filter(piece=piece):
+                    try:
+                        puzzle = Puzzle.objects.get(round=round, answer=data.answer)
+                        PuzzleAccess.objects.get(puzzle=puzzle, team=team)
+                        puzzles.append({"puzzle": puzzle, "color": data.color, "piece": piece})
+                    except:
+                        pass
+                if len(puzzles) > 0:
+                    pieces.append(puzzles)
+            self['pieces'] = pieces
         if round.url == 'white_queen': # 2014-specific
             self['herring_ok'] = MetapuzzleSolve.objects.filter(team=team, metapuzzle__url='white_queen_gift').exists()
             pwa = 'puzzle_with_answer_'

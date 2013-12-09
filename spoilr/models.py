@@ -261,3 +261,20 @@ class Y2014CaucusAnswerData(models.Model):
         verbose_name = '2014 Caucus answer data'
         verbose_name_plural = '2014 Caucus answer data'
 
+class Y2014KnightsAnswerData(models.Model):
+    PIECE_CHOICES = [('pawn', 'pawn'), ('knight', 'knight'), ('bishop', 'bishop'), ('rook', 'rook'), ('queen', 'queen'), ('king', 'king')]
+    piece = models.CharField(max_length=10, choices=PIECE_CHOICES)
+    COLOR_CHOICES = [('white', 'white'), ('red', 'red')]
+    color = models.CharField(max_length=10, choices=COLOR_CHOICES)
+    order = models.IntegerField()
+    answer = models.CharField(max_length=50)
+
+    def __str__(self):
+        return '%s %s %s' % (self.color, self.piece, self.answer)
+
+    class Meta:
+        unique_together = ('piece', 'order')
+        ordering = ['piece', 'order']
+        verbose_name = '2014 Knights answer data'
+        verbose_name_plural = '2014 Knights answer data'
+
