@@ -3,13 +3,9 @@
   <body>
     <div style="white-space: nowrap; overflow-x: hidden;">
       Team: {{ team.name }}<br>
-      Puzzle: {{ puzzle.name }}<br>
-      {% if solved %}
-      Solved! Answer: <b>{{ puzzle.answer }}</b><br>
-      {% else %}
       <form action="." method="POST">
 	{% csrf_token %}
-	Answer: <input type="text" name="answer" size="38"><br />
+	Bait: <input type="text" name="answer" size="38"><br />
 	Phone: <select name="phone">
 	  {% for p in team.teamphone_set.all %}
 	  <option value="{{ p.phone }}">{{ p.phone }}</option>
@@ -17,10 +13,9 @@
 	</select>
 	<input type="submit" value="Submit">
       </form>
-      {% endif %}
       {% if answers %}
       <table>
-	<tr><th>Answer Attempt
+	<tr><th>Bait Attempt
 	  <th>Time
 	  <th>In Queue
 	</tr>

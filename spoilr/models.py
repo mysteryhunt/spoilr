@@ -146,6 +146,20 @@ class PuzzleSubmission(models.Model):
 
     class Meta:
         ordering = ['-timestamp']
+
+class MetapuzzleSubmission(models.Model):
+    team = models.ForeignKey(Team)
+    phone = models.CharField(max_length=100)
+    metapuzzle = models.ForeignKey(Metapuzzle)
+    timestamp = models.DateTimeField(default=datetime.now)
+    answer = models.CharField(max_length=50)
+    resolved = models.BooleanField(default=False)
+
+    def __str__(self):
+        return '%s: %s submitted for %s' % (str(self.timestamp), str(self.team), str(self.metapuzzle))
+
+    class Meta:
+        ordering = ['-timestamp']
     
 
 # ----------------------- 2014-specific stuff ---------------------
@@ -220,3 +234,30 @@ class Y2014MitPuzzleData(models.Model):
         order_with_respect_to = 'puzzle'
         verbose_name = '2014 MIT puzzle data'
         verbose_name_plural = '2014 MIT puzzle data'
+
+class Y2014MitMetapuzzleSubmission(models.Model):
+    team = models.ForeignKey(Team)
+    phone = models.CharField(max_length=100)
+    timestamp = models.DateTimeField(default=datetime.now)
+    answer = models.CharField(max_length=50)
+    resolved = models.BooleanField(default=False)
+
+    def __str__(self):
+        return '%s: %s submitted for MIT Bait' % (str(self.timestamp), str(self.team))
+
+    class Meta:
+        ordering = ['-timestamp']
+
+class Y2014CaucusAnswerData(models.Model):
+    bird = models.IntegerField(unique=True)
+    yes_answer = models.CharField(max_length=50)
+    no_answer = models.CharField(max_length=50)
+
+    def __str__(self):
+        return 'YES:%s NO:%s' % (self.yes_answer, self.no_answer)
+
+    class Meta:
+        ordering = ['bird']
+        verbose_name = '2014 Caucus answer data'
+        verbose_name_plural = '2014 Caucus answer data'
+
