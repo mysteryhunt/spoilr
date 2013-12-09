@@ -155,6 +155,7 @@ class RoundContext(TopContext): # todo don't inherit, it'll just slow things dow
             self['herring_ok'] = MetapuzzleSolve.objects.filter(team=team, metapuzzle__url='white_queen_gift').exists()
             pwa = 'puzzle_with_answer_'
             answers = []
+            meta_urls = []
             urls = []
             for meta in Metapuzzle.objects.all():
                 if meta.url.startswith('white_queen_a'):
@@ -163,6 +164,7 @@ class RoundContext(TopContext): # todo don't inherit, it'll just slow things dow
                     else:
                         urls.append(pwa+meta.answer.lower().replace(' ','_'))
                     answers.append(meta.answer)
+                    meta_urls.append(meta.url)
             letters = 'ITSJUSTAREDHERRING'
             self['rows'] = [r for r in range(6)]
             self['columns'] = [c for c in range(3)]
@@ -180,6 +182,7 @@ class RoundContext(TopContext): # todo don't inherit, it'll just slow things dow
                         'letter': letters[r*3+c],
                         'answer': answer,
                         'url': url,
+                        'meta_url': meta_urls[r*3+c]
                         });
             self['cells'] = cells
 

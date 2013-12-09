@@ -3,13 +3,13 @@
   <body>
     <div style="white-space: nowrap; overflow-x: hidden;">
       Team: {{ team.name }}<br>
-      Thing: {{ metapuzzle.name }}<br>
+      {{ describe }}<br>
       {% if solved %}
-      Solved! Answer: <b>{{ metapuzzle.answer }}</b><br>
+      Solved! {% if metapuzzle.url == "white_queen" %}Title{% else %}Answer{% endif %}: <b>{{ metapuzzle.answer }}</b><br>
       {% else %}
       <form action="." method="POST">
 	{% csrf_token %}
-	Answer: <input type="text" name="answer" size="38"><br />
+	{% if metapuzzle.url == "white_queen" %}Title{% else %}Answer{% endif %}: <input type="text" name="answer" size="38"><br />
 	Phone: <select name="phone">
 	  {% for p in team.teamphone_set.all %}
 	  <option value="{{ p.phone }}">{{ p.phone }}</option>

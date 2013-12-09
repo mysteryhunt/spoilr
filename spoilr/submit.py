@@ -69,10 +69,14 @@ def submit_metapuzzle(request, metapuzzle_url):
             for sub in MetapuzzleSubmission.objects.filter(team=team, metapuzzle=metapuzzle):
                 sub.resolved = True
                 sub.save()
+    describe = "Round: %s" % metapuzzle.name
+    if metapuzzle.url.startswith("white_queen_a"):
+        describe = "Puzzle: ???"
     answers = MetapuzzleSubmission.objects.filter(team=team, metapuzzle=metapuzzle)
     solved = MetapuzzleSolve.objects.filter(team=team, metapuzzle=metapuzzle).exists()
     context = RequestContext(request, {
             'team': team,
+            'describe': describe,
             'metapuzzle': metapuzzle,
             'solved': solved,
             'answers': answers,
