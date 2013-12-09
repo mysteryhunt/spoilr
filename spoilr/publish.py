@@ -94,7 +94,7 @@ class TopContext(Context):
                 entry['protected_message'] = log_entry_protect.sub('[hidden]', msg)
                 entry['unprotected_message'] = log_entry_protect.sub(r'\1', msg)
         # ----- 2014-specific -----
-        self['has_wl_access'] = (len(self['rounds']) > 1)
+        self['has_wl_access'] = (len(self['rounds']) > 2)
         self['team_data'] = Y2014TeamData.objects.get(team=team)
     def round_obj(self, access):
         ret = {"round": access.round}
