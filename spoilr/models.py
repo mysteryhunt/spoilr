@@ -247,3 +247,17 @@ class Y2014MitMetapuzzleSubmission(models.Model):
 
     class Meta:
         ordering = ['-timestamp']
+
+class Y2014CaucusAnswerData(models.Model):
+    bird = models.IntegerField(unique=True)
+    yes_answer = models.CharField(max_length=50)
+    no_answer = models.CharField(max_length=50)
+
+    def __str__(self):
+        return 'YES:%s NO:%s' % (self.yes_answer, self.no_answer)
+
+    class Meta:
+        ordering = ['bird']
+        verbose_name = '2014 Caucus answer data'
+        verbose_name_plural = '2014 Caucus answer data'
+

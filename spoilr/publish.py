@@ -151,6 +151,23 @@ class RoundContext(TopContext): # todo don't inherit, it'll just slow things dow
             if count < 1:
                 self['vial1'] = min(14,max(0, points - (DRINK_COST * 0)))
             #self['meta_ready'] = (points - 14 - (DRINK_COST * count)) >= 0
+        if round.url == 'caucus_race': # 2014-specific
+            birds = []
+            for bird in Y2014CaucusAnswerData.objects.all():
+                try:
+                    yes_puzzle = Puzzle.objects.get(round=round, answer=bird.yes_answer)
+                    PuzzleAccess.objects.get(puzzle=yes_puzzle, team=team)
+                except:
+                    yes_puzzle = None
+                    pass
+                try:
+                    no_puzzle = Puzzle.objects.get(round=round, answer=bird.no_answer)
+                    PuzzleAccess.objects.get(puzzle=yes_puzzle, team=team)
+                except:
+                    no_puzzle = None
+                    pass
+                birds.append({"yes": yes_puzzle, "no": no_puzzle})
+            self['birds'] = birds
         if round.url == 'white_queen': # 2014-specific
             self['herring_ok'] = MetapuzzleSolve.objects.filter(team=team, metapuzzle__url='white_queen_gift').exists()
             pwa = 'puzzle_with_answer_'
