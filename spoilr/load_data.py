@@ -59,10 +59,11 @@ def load_teams():
             team.save() 
             system_log('load_team', 'Loaded team "%s"' % team.name, object_id=team.url)
             # 2014-specific:
-            mitround = Round.objects.get(url='mit')
-            print("    Granting access to %s" % mitround.name)
-            RoundAccess.objects.create(team=team, round=mitround).save()
-            team_log_round_access(team, mitround, "hunt start")
+	    initial_rounds = [Round.objects.get(url='mit'), Round.objects.get(url='events')]
+            for initial_round in initial_rounds:
+                print("   Granting access to %s" % initial_round.name)
+                RoundAccess.objects.create(team=team, round=initial_round).save()
+                team_log_round_access(team, initial_round, "hunt start")
             teamdata = Y2014TeamData.objects.create(team=team)
             teamdata.save()
             for mitdata in Y2014MitPuzzleData.objects.all():
