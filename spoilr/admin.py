@@ -229,7 +229,7 @@ class Y2014MitMetapuzzleSubmissionAdmin(admin.ModelAdmin):
 admin.site.register(Y2014MitMetapuzzleSubmission,Y2014MitMetapuzzleSubmissionAdmin)
 
 class Y2014CaucusAnswerDataAdmin(admin.ModelAdmin):
-    list_display = ('bird')
+    list_display = ('bird',)
 
 admin.site.register(Y2014CaucusAnswerData, Y2014CaucusAnswerDataAdmin)
 
