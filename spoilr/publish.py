@@ -104,7 +104,9 @@ class TopContext(Context):
         ret = {"puzzle": access.puzzle, "solved": access.solved}
         if access.puzzle.round.url == 'mit': # 2014-specific
             try:
-                ret["location"] = Y2014MitPuzzleData.objects.get(puzzle=access.puzzle).location
+                d = Y2014MitPuzzleData.objects.get(puzzle=access.puzzle)
+                ret["location"] = d.location
+                ret["card"] = d.card
             except:
                 logger.error('puzzle "%s" doesn\'t have a location assigned' % access.puzzle.url)
         return ret
