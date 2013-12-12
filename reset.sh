@@ -1,6 +1,9 @@
 #!/bin/bash
 
+OWNER="www-data"
+
 cd /home/djangoapps/spoilr
+
 MANAGE=../spoilr-env/bin/python\ manage.py
 
 #Backup database just in case
@@ -10,15 +13,13 @@ MANAGE=../spoilr-env/bin/python\ manage.py
 #Wipe mysql db and re-init
 cat mysqlinit.sql | /usr/bin/mysql -u root 
 
-
 # recreate database, this will ask for admin username/password
-$MANAGE syncdb --traceback
+su -c "$MANAGE syncdb --traceback" $OWNER
 
-# until I figure out who apache is running as, let everyone write the hunt db
-chmod a+w /var/sqlitedb/hunt.db
+chown www-data /var/sqlitedb/hunt.db
 
 # load hunt data
-$MANAGE load_data --traceback
+su -c "$MANAGE load_data --traceback" $OWNER
 
 # publish team files
-$MANAGE republish --traceback
+su -c "$MANAGE republish --traceback" $OWNER

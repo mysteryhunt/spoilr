@@ -1,3 +1,5 @@
 #!/bin/sh
 
-/home/djangoapps/spoilr-env/bin/python /home/djangoapps/spoilr/manage.py $* --traceback
+OWNER="www-data"
+
+su -c "/home/djangoapps/spoilr-env/bin/python /home/djangoapps/spoilr/manage.py $* --traceback" $OWNER
