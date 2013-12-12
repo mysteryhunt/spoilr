@@ -6,10 +6,26 @@ from .models import *
 from .actions import *
 
 def cleanup_answer(answer):
-    return re.sub(r'[^ A-Z0-9]', '', answer.upper()) 
+    return re.sub(r'[^ A-Z0-9]', '', answer[:100].upper()) 
 
 def compare_answers(a, b):
     return re.sub(r'[^A-Z0-9]', '', a.upper()) == re.sub(r'[^A-Z0-9]', '', b.upper())
+
+def submit_puzzle_answer(team, puzzle, answer, phone):
+    if len(answer) == 0:
+        return
+    for sub in PuzzleSubmission.objects.filter(team=team, puzzle=puzzle):
+        if compare_answers(sub.answer, answer):
+            return
+    if PuzzleAccess.objects.filter(team=team, puzzle=puzzle, solved=True).exists():
+        return
+    PuzzleSubmission.objects.create(team=team, puzzle=puzzle, phone=phone, answer=answer).save()
+    # hack for testing:
+    if answer == "BENOISY" or compare_answers(answer, puzzle.answer):
+        puzzle_answer_correct(team, puzzle)
+        for sub in PuzzleSubmission.objects.filter(team=team, puzzle=puzzle):
+            sub.resolved = True
+            sub.save()
 
 def submit_puzzle(request, puzzle_url):
     # TODO SETUP: uncomment, make sure user auth works here
@@ -27,13 +43,7 @@ def submit_puzzle(request, puzzle_url):
     if request.method == "POST":
         answer = cleanup_answer(request.POST["answer"])
         phone = request.POST["phone"]
-        PuzzleSubmission.objects.create(team=team, puzzle=puzzle, phone=phone, answer=answer).save()
-        # hack for testing:
-        if answer == "BENOISY" or compare_answers(answer, puzzle.answer):
-            puzzle_answer_correct(team, puzzle)
-            for sub in PuzzleSubmission.objects.filter(team=team, puzzle=puzzle):
-                sub.resolved = True
-                sub.save()
+        submit_puzzle_answer(team, puzzle, answer, phone)
     answers = PuzzleSubmission.objects.filter(team=team, puzzle=puzzle)
     solved = PuzzleAccess.objects.get(team=team, puzzle=puzzle).solved
     context = RequestContext(request, {
@@ -43,6 +53,22 @@ def submit_puzzle(request, puzzle_url):
             'answers': answers,
             })
     return HttpResponse(template.render(context))
+
+def submit_metapuzzle_answer(team, metapuzzle, answer, phone):
+    if len(answer) == 0:
+        return
+    for sub in MetapuzzleSubmission.objects.filter(team=team, metapuzzle=metapuzzle):
+        if compare_answers(sub.answer, answer):
+            return
+    if MetapuzzleSolve.objects.filter(team=team, metapuzzle=metapuzzle).exists():
+        return
+    MetapuzzleSubmission.objects.create(team=team, metapuzzle=metapuzzle, phone=phone, answer=answer).save()
+    # hack for testing:
+    if answer == "BENOISY" or compare_answers(answer, metapuzzle.answer):
+        metapuzzle_answer_correct(team, metapuzzle)
+        for sub in MetapuzzleSubmission.objects.filter(team=team, metapuzzle=metapuzzle):
+            sub.resolved = True
+            sub.save()
 
 def submit_metapuzzle(request, metapuzzle_url):
     # TODO SETUP: uncomment, make sure user auth works here
@@ -62,13 +88,7 @@ def submit_metapuzzle(request, metapuzzle_url):
     if request.method == "POST":
         answer = cleanup_answer(request.POST["answer"])
         phone = request.POST["phone"]
-        MetapuzzleSubmission.objects.create(team=team, metapuzzle=metapuzzle, phone=phone, answer=answer).save()
-        # hack for testing:
-        if answer == "BENOISY" or compare_answers(answer, metapuzzle.answer):
-            metapuzzle_answer_correct(team, metapuzzle)
-            for sub in MetapuzzleSubmission.objects.filter(team=team, metapuzzle=metapuzzle):
-                sub.resolved = True
-                sub.save()
+        submit_metapuzzle_answer(team, metapuzzle, answer, phone)
     describe = "Round: %s" % metapuzzle.name
     if metapuzzle.url.startswith("white_queen_a"):
         describe = "Puzzle: ???"
@@ -83,6 +103,34 @@ def submit_metapuzzle(request, metapuzzle_url):
             })
     return HttpResponse(template.render(context))
 
+def submit_mit_metapuzzle_answer(team, answer, phone): # 2014-specific
+    if len(answer) == 0:
+        return
+    for sub in Y2014MitMetapuzzleSubmission.objects.filter(team=team):
+        if compare_answers(sub.answer, answer):
+            return
+    Y2014MitMetapuzzleSubmission.objects.create(team=team, phone=phone, answer=answer).save()
+    # begin hack for testing:
+    metapuzzle = Metapuzzle.objects.get(url='dormouse')
+    if answer == "DORMOUSE" or compare_answers(answer, metapuzzle.answer):
+        metapuzzle_answer_correct(team, metapuzzle)
+        for sub in Y2014MitMetapuzzleSubmission.objects.filter(team=team):
+            sub.resolved = True
+            sub.save()
+    metapuzzle = Metapuzzle.objects.get(url='caterpillar')
+    if answer == "CATERPILLAR" or compare_answers(answer, metapuzzle.answer):
+        metapuzzle_answer_correct(team, metapuzzle)
+        for sub in Y2014MitMetapuzzleSubmission.objects.filter(team=team):
+            sub.resolved = True
+            sub.save()
+    metapuzzle = Metapuzzle.objects.get(url='tweedles')
+    if answer == "TWEEDLE" or compare_answers(answer, metapuzzle.answer):
+        metapuzzle_answer_correct(team, metapuzzle)
+        for sub in Y2014MitMetapuzzleSubmission.objects.filter(team=team):
+            sub.resolved = True
+            sub.save()
+    # end hack
+
 def submit_mit_metapuzzle(request): # 2014-specific
     # TODO SETUP: uncomment, make sure user auth works here
     username = request.META['REMOTE_USER']
@@ -95,27 +143,20 @@ def submit_mit_metapuzzle(request): # 2014-specific
     if request.method == "POST":
         answer = cleanup_answer(request.POST["answer"])
         phone = request.POST["phone"]
-        Y2014MitMetapuzzleSubmission.objects.create(team=team, phone=phone, answer=answer).save()
-        # hack for testing:
-        if answer == "DORMOUSE" or compare_answers(answer, Metapuzzle.objects.get(url='dormouse').answer):
-            metapuzzle_answer_correct(team, Metapuzzle.objects.get(url='dormouse'))
-            for sub in Y2014MitMetapuzzleSubmission.objects.filter(team=team):
-                sub.resolved = True
-                sub.save()
-        if answer == "CATERPILLAR" or compare_answers(answer, Metapuzzle.objects.get(url='caterpillar').answer):
-            metapuzzle_answer_correct(team, Metapuzzle.objects.get(url='caterpillar'))
-            for sub in Y2014MitMetapuzzleSubmission.objects.filter(team=team):
-                sub.resolved = True
-                sub.save()
-        if answer == "TWEEDLE" or compare_answers(answer, Metapuzzle.objects.get(url='tweedles').answer):
-            metapuzzle_answer_correct(team, Metapuzzle.objects.get(url='tweedles'))
-            for sub in Y2014MitMetapuzzleSubmission.objects.filter(team=team):
-                sub.resolved = True
-                sub.save()
+        submit_mit_metapuzzle_answer(team, answer, phone)
     answers = Y2014MitMetapuzzleSubmission.objects.filter(team=team)
+    solved = []
+    for x in MetapuzzleSolve.objects.filter(team=team, metapuzzle__url='dormouse'):
+        solved.append(x.metapuzzle)
+    for x in MetapuzzleSolve.objects.filter(team=team, metapuzzle__url='caterpillar'):
+        solved.append(x.metapuzzle)
+    for x in MetapuzzleSolve.objects.filter(team=team, metapuzzle__url='tweedles'):
+        solved.append(x.metapuzzle)
     context = RequestContext(request, {
             'team': team,
             'answers': answers,
+            'solved': solved,
+            'notdone': len(solved) != 3,
             })
     return HttpResponse(template.render(context))
 

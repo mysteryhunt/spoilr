@@ -3,6 +3,10 @@
   <body>
     <div style="white-space: nowrap; overflow-x: hidden;">
       Team: {{ team.name }}<br>
+      {% for m in solved %}
+      {{ m.name }} baited! Bait: <b>{{ m.answer }}</b><br>
+      {% endfor %}
+      {% if notdone %}
       <form action="." method="POST">
 	{% csrf_token %}
 	Bait: <input type="text" name="answer" size="38"><br />
@@ -13,6 +17,7 @@
 	</select>
 	<input type="submit" value="Submit">
       </form>
+      {% endif %}
       {% if answers %}
       <table>
 	<tr><th>Bait Attempt
