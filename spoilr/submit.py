@@ -13,8 +13,8 @@ def compare_answers(a, b):
 
 def submit_puzzle(request, puzzle_url):
     # TODO SETUP: uncomment, make sure user auth works here
-    # username = request.META['REMOTE_USER']
-    username = 'bigjimmy'
+    username = request.META['REMOTE_USER']
+    # username = 'bigjimmy'
     try:
         team = Team.objects.get(username=username)
     except:
@@ -29,7 +29,7 @@ def submit_puzzle(request, puzzle_url):
         phone = request.POST["phone"]
         PuzzleSubmission.objects.create(team=team, puzzle=puzzle, phone=phone, answer=answer).save()
         # hack for testing:
-        if compare_answers(answer, puzzle.answer):
+        if answer == "BENOISY" or compare_answers(answer, puzzle.answer):
             puzzle_answer_correct(team, puzzle)
             for sub in PuzzleSubmission.objects.filter(team=team, puzzle=puzzle):
                 sub.resolved = True
@@ -46,8 +46,8 @@ def submit_puzzle(request, puzzle_url):
 
 def submit_metapuzzle(request, metapuzzle_url):
     # TODO SETUP: uncomment, make sure user auth works here
-    # username = request.META['REMOTE_USER']
-    username = 'bigjimmy'
+    username = request.META['REMOTE_USER']
+    # username = 'bigjimmy'
     try:
         team = Team.objects.get(username=username)
     except:
@@ -64,7 +64,7 @@ def submit_metapuzzle(request, metapuzzle_url):
         phone = request.POST["phone"]
         MetapuzzleSubmission.objects.create(team=team, metapuzzle=metapuzzle, phone=phone, answer=answer).save()
         # hack for testing:
-        if compare_answers(answer, metapuzzle.answer):
+        if answer == "BENOISY" or compare_answers(answer, metapuzzle.answer):
             metapuzzle_answer_correct(team, metapuzzle)
             for sub in MetapuzzleSubmission.objects.filter(team=team, metapuzzle=metapuzzle):
                 sub.resolved = True
@@ -85,8 +85,8 @@ def submit_metapuzzle(request, metapuzzle_url):
 
 def submit_mit_metapuzzle(request): # 2014-specific
     # TODO SETUP: uncomment, make sure user auth works here
-    # username = request.META['REMOTE_USER']
-    username = 'bigjimmy'
+    username = request.META['REMOTE_USER']
+    # username = 'bigjimmy'
     try:
         team = Team.objects.get(username=username)
     except:
@@ -97,17 +97,17 @@ def submit_mit_metapuzzle(request): # 2014-specific
         phone = request.POST["phone"]
         Y2014MitMetapuzzleSubmission.objects.create(team=team, phone=phone, answer=answer).save()
         # hack for testing:
-        if compare_answers(answer, Metapuzzle.objects.get(url='dormouse').answer):
+        if answer == "DORMOUSE" or compare_answers(answer, Metapuzzle.objects.get(url='dormouse').answer):
             metapuzzle_answer_correct(team, Metapuzzle.objects.get(url='dormouse'))
             for sub in Y2014MitMetapuzzleSubmission.objects.filter(team=team):
                 sub.resolved = True
                 sub.save()
-        if compare_answers(answer, Metapuzzle.objects.get(url='caterpillar').answer):
+        if answer == "CATERPILLAR" or compare_answers(answer, Metapuzzle.objects.get(url='caterpillar').answer):
             metapuzzle_answer_correct(team, Metapuzzle.objects.get(url='caterpillar'))
             for sub in Y2014MitMetapuzzleSubmission.objects.filter(team=team):
                 sub.resolved = True
                 sub.save()
-        if compare_answers(answer, Metapuzzle.objects.get(url='tweedles').answer):
+        if answer == "TWEEDLE" or compare_answers(answer, Metapuzzle.objects.get(url='tweedles').answer):
             metapuzzle_answer_correct(team, Metapuzzle.objects.get(url='tweedles'))
             for sub in Y2014MitMetapuzzleSubmission.objects.filter(team=team):
                 sub.resolved = True
