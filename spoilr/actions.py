@@ -108,6 +108,8 @@ def puzzle_answer_correct(team, puzzle):
                 release_connected(Y2014MitPuzzleData.objects.get(location=edge.node1).puzzle)
             except Exception as e:
                 logger.error('error releasing connecting puzzle at %s: %s' % (edge.node1, e))
+    if puzzle.round.url != 'mit' and puzzle.round.url != 'events': # 2014-specific
+        grant_drink_points(team, DRINK_INCR_WL, 'solved a Wonderland puzzle')
     publish_team_top(team)
     publish_team_round(team, puzzle.round)
 
