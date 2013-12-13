@@ -258,7 +258,7 @@ def publish_dir(context, source_path, dest_path, root_path, except_for=[]):
                 dest_file = os.path.join(dest_path, relpath, filename)
                 if not os.path.exists(dest_file) or os.path.getmtime(dest_file) < os.path.getmtime(source_file):
                     try:
-                        os.symlink(source_file, dest_file)
+                        os.symlink(source_file, os.path.abspath(dest_file))
                     except OSError as e:
                         #logger.error('Failed to create symlink at %s to %s: %s', dest_file, source_file, str(e))
                         shutil.copyfile(source_file, dest_file)
