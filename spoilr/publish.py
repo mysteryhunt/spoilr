@@ -165,12 +165,13 @@ class RoundContext(TopContext): # todo don't inherit, it'll just slow things dow
                     pass
                 try:
                     no_puzzle = Puzzle.objects.get(round=round, answer=bird.no_answer)
-                    PuzzleAccess.objects.get(puzzle=yes_puzzle, team=team)
+                    PuzzleAccess.objects.get(puzzle=no_puzzle, team=team)
                 except:
                     no_puzzle = None
                     pass
                 birds.append({"yes": yes_puzzle, "no": no_puzzle})
             self['birds'] = birds
+            print(str(birds))
         if round.url == 'knights': # 2014-specific
             pieces = []
             for piece in [x[0] for x in Y2014KnightsAnswerData.PIECE_CHOICES]:
