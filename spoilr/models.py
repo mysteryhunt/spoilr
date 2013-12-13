@@ -247,6 +247,8 @@ class Y2014MitMetapuzzleSubmission(models.Model):
 
     class Meta:
         ordering = ['-timestamp']
+        verbose_name = '2014 MIT metapuzzle submission'
+        verbose_name_plural = '2014 MIT metapuzzle submissions'
 
 class Y2014CaucusAnswerData(models.Model):
     bird = models.IntegerField(unique=True)
