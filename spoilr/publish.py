@@ -171,7 +171,6 @@ class RoundContext(TopContext): # todo don't inherit, it'll just slow things dow
                     pass
                 birds.append({"yes": yes_puzzle, "no": no_puzzle})
             self['birds'] = birds
-            print(str(birds))
         if round.url == 'knights': # 2014-specific
             pieces = []
             for piece in [x[0] for x in Y2014KnightsAnswerData.PIECE_CHOICES]:
