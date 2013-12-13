@@ -9,7 +9,7 @@
       {% else %}
       <form action="." method="POST">
 	{% csrf_token %}
-	{% if metapuzzle.url == "white_queen" %}Title{% else %}Answer{% endif %}: <input type="text" name="answer" size="38"><br />
+	{% if metapuzzle.url == "white_queen" %}Title{% else %}Answer{% endif %}: <input id="answer" type="text" name="answer" size="38" autofocus><br />
 	Phone: <select name="phone">
 	  {% for p in team.teamphone_set.all %}
 	  <option value="{{ p.phone }}">{{ p.phone }}</option>
@@ -17,6 +17,11 @@
 	</select>
 	<input type="submit" value="Submit">
       </form>
+      <script type="text/javascript">
+	window.onload = function() {
+          document.getElementById("answer").focus()
+	};
+      </script>
       {% endif %}
       {% if answers %}
       <table>
