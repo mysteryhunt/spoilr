@@ -6,10 +6,15 @@ from .models import *
 from .actions import *
 
 def cleanup_answer(answer):
-    return re.sub(r'[^ A-Z0-9]', '', answer[:100].upper()) 
+    return re.sub(r'[^ A-Z0-9]', '', answer.upper()) 
 
 def compare_answers(a, b):
     return re.sub(r'[^A-Z0-9]', '', a.upper()) == re.sub(r'[^A-Z0-9]', '', b.upper())
+
+def check_phone(team, phone):
+    if TeamPhone.objects.filter(team=team, phone=phone).exists():
+        return phone
+    return TeamPhone.objects.filter(team=team)[:1].get()
 
 def submit_puzzle_answer(team, puzzle, answer, phone):
     if len(answer) == 0:
@@ -41,8 +46,10 @@ def submit_puzzle(request, puzzle_url):
         return HttpResponseBadRequest('cannot find puzzle for url '+puzzle_url)
     template = loader.get_template('submit-puzzle.html') 
     if request.method == "POST":
-        answer = cleanup_answer(request.POST["answer"])
+        maxlen = Puzzle._meta.get_field('answer').max_length
+        answer = cleanup_answer(request.POST["answer"])[:maxlen]
         phone = request.POST["phone"]
+        phone = check_phone(team, phone)
         submit_puzzle_answer(team, puzzle, answer, phone)
     answers = PuzzleSubmission.objects.filter(team=team, puzzle=puzzle)
     solved = PuzzleAccess.objects.get(team=team, puzzle=puzzle).solved
@@ -86,8 +93,10 @@ def submit_metapuzzle(request, metapuzzle_url):
         return HttpResponseBadRequest('cannot find metapuzzle for url '+metapuzzle_url)
     template = loader.get_template('submit-metapuzzle.html') 
     if request.method == "POST":
-        answer = cleanup_answer(request.POST["answer"])
+        maxlen = Metapuzzle._meta.get_field('answer').max_length
+        answer = cleanup_answer(request.POST["answer"])[:maxlen]
         phone = request.POST["phone"]
+        phone = check_phone(team, phone)
         submit_metapuzzle_answer(team, metapuzzle, answer, phone)
     describe = "Round: %s" % metapuzzle.name
     if metapuzzle.url.startswith("white_queen_a"):
@@ -141,8 +150,10 @@ def submit_mit_metapuzzle(request): # 2014-specific
         return HttpResponseBadRequest('cannot find team for user '+username)
     template = loader.get_template('submit-mit-metapuzzle.html') 
     if request.method == "POST":
-        answer = cleanup_answer(request.POST["answer"])
+        maxlen = Metapuzzle._meta.get_field('answer').max_length
+        answer = cleanup_answer(request.POST["answer"])[:maxlen]
         phone = request.POST["phone"]
+        phone = check_phone(team, phone)
         submit_mit_metapuzzle_answer(team, answer, phone)
     answers = Y2014MitMetapuzzleSubmission.objects.filter(team=team)
     solved = []
