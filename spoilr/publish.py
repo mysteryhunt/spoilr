@@ -336,6 +336,15 @@ def publish_team_puzzle(team, puzzle, suffix=None):
             shutil.copyfile(source_file, dest_file)
         except:
             logger.error('puzzle "%s" doesn\'t have a playing card assigned' % puzzle.url)
+    if puzzle.round.url == 'knights':
+        try:
+            data = Y2014KnightsAnswerData.objects.get(answer=puzzle.answer)
+            source_file = os.path.join(settings.HUNT_DATA_DIR, 'round', 'knights', 'pieces', data.color+'_'+data.piece+'.png')
+            dest_file = os.path.join(puzzle_dir, 'piece.png')
+            shutil.copyfile(source_file, dest_file)
+        except Exception as e:
+            print(str(e))
+            logger.error('puzzle "%s" doesn\'t have a chess piece assigned' % puzzle.url)
 
 def publish_team(team, suffix=None):
     print('    Top...')
