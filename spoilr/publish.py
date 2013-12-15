@@ -121,6 +121,8 @@ class RoundContext(TopContext): # todo don't inherit, it'll just slow things dow
             return
         self['round'] = self.round_obj(RoundAccess.objects.get(team=team, round=round))
         self['puzzles'] = self['round']['puzzles']
+        if MetapuzzleSolve.objects.filter(metapuzzle__url=round.url, team=team).exists(): # 2014-specific
+            self['round']['solved'] = True
         if round.url == 'mit': # 2014-specific
             count = 0
             for x in self['solved_metas']:
