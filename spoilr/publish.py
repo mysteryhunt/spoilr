@@ -87,7 +87,7 @@ class TopContext(Context):
         self['team'] = team
         self['rounds'] = [self.round_obj(x) for x in RoundAccess.objects.filter(team=team).order_by('round__order')]
         self['solved_metas'] = [x.metapuzzle for x in MetapuzzleSolve.objects.filter(team=team).order_by('metapuzzle__order')]
-        self['log_entries'] = [{"entry": x} for x in TeamLog.objects.filter(team=team).order_by('timestamp')]
+        self['log_entries'] = [{"entry": x} for x in TeamLog.objects.filter(team=team).order_by('-timestamp')]
         for entry in self['log_entries']:
             msg = entry['entry'].message
             if "[[" in msg:
