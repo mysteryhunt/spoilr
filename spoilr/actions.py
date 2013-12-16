@@ -12,7 +12,7 @@ def release_round(team, round, reason):
         return
     RoundAccess.objects.create(team=team, round=round).save()
     team_log_round_access(team, round, reason)
-    if round.url != 'mit': # 2014-specific
+    if round.url != 'mit' and round.url != 'white_queen': # 2014-specific
         # it's a wonderland round, let's release some puzzles in it...
         count = WL_RELEASE_INIT
         def release_initial(puzzle):
@@ -148,8 +148,16 @@ def metapuzzle_answer_correct(team, metapuzzle):
         else:
             team_log_hole_discovered_no_vial(team)
         publish_team_round(team, Round.objects.get(url='mit'))
-    if metapuzzle.name == 'white_queen_gift': # 2014-specific
+    if metapuzzle.url == 'white_queen_gift': # 2014-specific
+        pwa = 'puzzle_with_answer_'
+        for p in [pwa+'williams', pwa+'lynn', pwa+'sullivan', 'another_'+pwa+'sullivan']:
+            try:
+                release_puzzle(team, Puzzle.objects.get(url=p), 'You gave the White Queen a gift')
+            except:
+                pass
         publish_team_round(team, Round.objects.get(url='white_queen'))
+    if Round.objects.filter(url=metapuzzle.url).exists(): # 2014-specific
+        publish_team_round(team, Round.objects.get(url=metapuzzle.url))
     publish_team_top(team)
 
 def metapuzzle_answer_incorrect(team, metapuzzle, answer):
