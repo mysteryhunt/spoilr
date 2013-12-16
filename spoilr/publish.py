@@ -241,6 +241,8 @@ class PuzzleContext(RoundContext): # todo don't inherit, it'll just slow things 
 def publish_dir(context, source_path, dest_path, root_path, except_for=[]):
     for dirpath, dirnames, filenames in os.walk(source_path):
         relpath = os.path.relpath(dirpath, source_path)
+        if relpath in except_for:
+            continue
         context['root'] = os.path.relpath(root_path, relpath).replace('\\','/')
         for filename in filenames:
             if relpath == '.' and filename in except_for:
@@ -286,7 +288,10 @@ def publish_team_top(team, suffix=None):
         return
     team_path = team.get_team_dir(suffix)
     top_context = TopContext(team)
-    publish_dir(top_context, os.path.join(settings.HUNT_DATA_DIR, 'top'), team_path, '.')
+    except_for = []
+    if not top_context["has_wl_access"]: # 2014-specific
+        except_for = ['wonderland']
+    publish_dir(top_context, os.path.join(settings.HUNT_DATA_DIR, 'top'), team_path, '.', except_for)
 
 def publish_team_round(team, round, suffix=None):
     if not ensure_team_dir(team, suffix):
