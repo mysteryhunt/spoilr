@@ -135,11 +135,11 @@ def metapuzzle_answer_correct(team, metapuzzle):
         if undrunk >= DRINK_COST:
             # ...release the corresponding round (which causes the vial to be drunk)
             next_round = None
-            if metapuzzle.name == 'dormouse':
+            if metapuzzle.url == 'dormouse':
                 next_round = 'tea_party'
-            elif metapuzzle.name == 'caterpillar':
+            elif metapuzzle.url == 'caterpillar':
                 next_round = 'mock_turtle'
-            elif metapuzzle.name == 'tweedles':
+            elif metapuzzle.url == 'tweedles':
                 next_round = 'white_queen'
             else:
                 logger.error('bug in mit round release: %s' % metapuzzle.name)
