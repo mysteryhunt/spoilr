@@ -15,20 +15,20 @@ def release_round(team, round, reason):
     if round.url != 'mit' and round.url != 'white_queen': # 2014-specific
         # it's a wonderland round, let's release some puzzles in it...
         count = WL_RELEASE_INIT
-        def release_initial(puzzle):
+        def release_initial(apuzzle):
             # we could call release_puzzle, but since we're going to 
             # release top and round later anyway we can skip that here
-            if PuzzleAccess.objects.filter(team=team, puzzle=puzzle).exists():
+            if PuzzleAccess.objects.filter(team=team, apuzzle=puzzle).exists():
                 return
-            PuzzleAccess.objects.create(team=team, puzzle=puzzle).save()
-            team_log_puzzle_access(team, puzzle, 'round "%s" released' % round.name)
+            PuzzleAccess.objects.create(team=team, apuzzle=puzzle).save()
+            team_log_puzzle_access(team, apuzzle, 'round "%s" released' % round.name)
             publish_team_puzzle(team, puzzle)
         for puzzle in Puzzle.objects.filter(round=round):
             if count > 0:
                 try:
                     release_initial(puzzle)
                 except Exception as e:
-                    logger.error('error releasing connecting puzzle at %s: %s' % (edge.node2, e))
+                    logger.error('error releasing initial puzzle %s: %s' % (puzzle.url, e))
                 count = count - 1
     publish_team_round(team, round)
     publish_team_top(team)
@@ -110,6 +110,27 @@ def puzzle_answer_correct(team, puzzle):
                 logger.error('error releasing connecting puzzle at %s: %s' % (edge.node1, e))
     if puzzle.round.url != 'mit' and puzzle.round.url != 'events': # 2014-specific
         grant_drink_points(team, DRINK_INCR_WL, 'solved a Wonderland puzzle')
+    if puzzle.round.url == 'humpty_dumpty': # 2014-specific
+        td = Y2014TeamData.objects.get(team=team)
+        if td.humpty_pieces < 12:
+            td.humpty_pieces = td.humpty_pieces + 1
+            td.save()
+    if puzzle.round.url != 'mit' and puzzle.round.url != 'white_queen':
+        # release more puzzles
+        count = WL_RELEASE_INCR
+        def release_another(apuzzle):
+            # we could call release_puzzle, but since we're going to 
+            # publish top and round later anyway we can skip that here
+            PuzzleAccess.objects.create(team=team, puzzle=apuzzle).save()
+            team_log_puzzle_access(team, apuzzle, 'solved "%s"' % puzzle.name)
+            publish_team_puzzle(team, apuzzle)
+        for puzzle in Puzzle.objects.filter(round=puzzle.round):
+            if count > 0 and not PuzzleAccess.objects.filter(team=team, puzzle=puzzle).exists():
+                try:
+                    release_another(puzzle)
+                except Exception as e:
+                    logger.error('error releasing additional puzzle %s: %s' % (puzzle.url, e))
+                count = count - 1        
     publish_team_top(team)
     publish_team_round(team, puzzle.round)
 

@@ -221,6 +221,9 @@ class RoundContext(TopContext): # todo don't inherit, it'll just slow things dow
                         'meta_url': meta_urls[r*3+c]
                         });
             self['cells'] = cells
+        if round.url == "humpty_dumpty": # 2014-specific
+            jigsaw = Y2014TeamData.objects.get(team=team).humpty_pieces
+            self['jigsaw'] = jigsaw
 
 class PuzzleContext(RoundContext): # todo don't inherit, it'll just slow things down and we don't need all that context
     def __init__(self, team, puzzle):
@@ -306,6 +309,20 @@ def publish_team_round(team, round, suffix=None):
             return
     round_context = RoundContext(team, round)
     publish_dir(round_context, os.path.join(settings.HUNT_DATA_DIR, 'round', round.url, 'round'), round_dir, '../..')
+    # --- 2014-specific ---
+    if round.url == 'humpty_dumpty':
+        jigsaw = Y2014TeamData.objects.get(team=team).humpty_pieces
+        for i in range(1,jigsaw+1):
+            try:
+                source_file = os.path.join(settings.HUNT_DATA_DIR, 'round', round.url, 'jigsaw', "%02d.png" % i)
+                dest_file = os.path.join(round_dir, 'jigsaw', "%02d.png" % i)
+                shutil.copyfile(source_file, dest_file)
+                source_file = os.path.join(settings.HUNT_DATA_DIR, 'round', round.url, 'jigsaw', "%02d-thumb.png" % i)
+                dest_file = os.path.join(round_dir, 'jigsaw', "%02d-thumb.png" % i)
+                shutil.copyfile(source_file, dest_file)
+            except Exception as e:
+                print(str(e))
+                logger.error('couldn\'t copy jigsaw piece %d' % i)
 
 def publish_team_puzzle(team, puzzle, suffix=None):
     if not ensure_team_dir(team, suffix):
@@ -352,6 +369,7 @@ def publish_team_puzzle(team, puzzle, suffix=None):
         except Exception as e:
             print(str(e))
             logger.error('puzzle "%s" doesn\'t have a chess piece assigned' % puzzle.url)
+
 
 def publish_team(team, suffix=None):
     print('    Top...')

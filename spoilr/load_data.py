@@ -173,6 +173,8 @@ def load_all():
 def everybody_can_see_everything():
     print("Granting full access to every team...")
     for team in Team.objects.all():
+        team.humpty_pieces = 12
+        team.save()
         for round in Round.objects.all():
             if not RoundAccess.objects.filter(team=team, round=round).exists():
                 RoundAccess.objects.create(team=team, round=round).save()
