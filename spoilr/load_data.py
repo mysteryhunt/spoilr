@@ -63,14 +63,14 @@ def load_teams():
             for initial_round in initial_rounds:
                 print("   Granting access to %s" % initial_round.name)
                 RoundAccess.objects.create(team=team, round=initial_round).save()
-                team_log_round_access(team, initial_round, "hunt start")
+                team_log_round_access(team, initial_round, "The hunt begins")
             teamdata = Y2014TeamData.objects.create(team=team)
             teamdata.save()
             for mitdata in Y2014MitPuzzleData.objects.all():
                 if mitdata.location.start:
                     print("    Granting access to %s" % mitdata.puzzle.name)
                     PuzzleAccess.objects.create(team=team, puzzle=mitdata.puzzle).save()
-                    team_log_puzzle_access(team, mitdata.puzzle, "hunt start")
+                    team_log_puzzle_access(team, mitdata.puzzle, "The hunt begins")
     print("Done loading teams")
 
 def load_team_phones():

@@ -21,7 +21,7 @@ def release_round(team, round, reason):
             if PuzzleAccess.objects.filter(team=team, puzzle=apuzzle).exists():
                 return
             PuzzleAccess.objects.create(team=team, puzzle=apuzzle).save()
-            team_log_puzzle_access(team, apuzzle, 'round "%s" released' % round.name)
+            team_log_puzzle_access(team, apuzzle, 'Round "%s" released' % round.name)
             publish_team_puzzle(team, apuzzle)
         for apuzzle in Puzzle.objects.filter(round=round):
             if count > 0:
@@ -190,23 +190,24 @@ def metapuzzle_answer_correct(team, metapuzzle):
         else:
             r = Round.objects.get(url='knights')
             if not RoundAccess.objects.filter(team=team, round=r).exists():
-                release_round(team, r)
+                release_round(team, r, reason)
             else:
                 r = Round.objects.get(url='humpty_dumpty')
                 if not RoundAccess.objects.filter(team=team, round=r).exists():
-                    release_round(team, r)
+                    release_round(team, r, reason)
     if metapuzzle.url[:13] == 'white_queen_a': # 2014-specific
         pwa = 'puzzle_with_answer_'
         answers = []
         url = None
         for meta in Metapuzzle.objects.all():
             if meta.url.startswith('white_queen_a'):
-                if meta.answer in answers:
-                    url = 'another_'+pwa+meta.answer.lower().replace(' ','_')
-                else:
-                    url = pwa+meta.answer.lower().replace(' ','_')
+                if meta.url == metapuzzle.url:
+                    if meta.answer in answers:
+                        url = 'another_'+pwa+meta.answer.lower().replace(' ','_')
+                    else:
+                        url = pwa+meta.answer.lower().replace(' ','_')
                 answers.append(meta.answer)
-        release_puzzle(team, Puzzle.objects.get(url=url))
+        release_puzzle(team, Puzzle.objects.get(url=url), 'You backsolved this puzzle\'s answer, now find it\'s title')
         publish_team_round(team, Round.objects.get(url='white_queen'))
     if Round.objects.filter(url=metapuzzle.url).exists(): # 2014-specific
         publish_team_round(team, Round.objects.get(url=metapuzzle.url))
