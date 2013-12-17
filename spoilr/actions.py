@@ -18,9 +18,9 @@ def release_round(team, round, reason):
         def release_initial(apuzzle):
             # we could call release_puzzle, but since we're going to 
             # release top and round later anyway we can skip that here
-            if PuzzleAccess.objects.filter(team=team, apuzzle=puzzle).exists():
+            if PuzzleAccess.objects.filter(team=team, puzzle=apuzzle).exists():
                 return
-            PuzzleAccess.objects.create(team=team, apuzzle=puzzle).save()
+            PuzzleAccess.objects.create(team=team, puzzle=apuzzle).save()
             team_log_puzzle_access(team, apuzzle, 'round "%s" released' % round.name)
             publish_team_puzzle(team, puzzle)
         for puzzle in Puzzle.objects.filter(round=round):
