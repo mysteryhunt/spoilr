@@ -23,12 +23,12 @@ def release_round(team, round, reason):
             PuzzleAccess.objects.create(team=team, puzzle=apuzzle).save()
             team_log_puzzle_access(team, apuzzle, 'round "%s" released' % round.name)
             publish_team_puzzle(team, puzzle)
-        for puzzle in Puzzle.objects.filter(round=round):
+        for apuzzle in Puzzle.objects.filter(round=round):
             if count > 0:
                 try:
-                    release_initial(puzzle)
+                    release_initial(apuzzle)
                 except Exception as e:
-                    logger.error('error releasing initial puzzle %s: %s' % (puzzle.url, e))
+                    logger.error('error releasing initial puzzle %s: %s' % (apuzzle.url, e))
                 count = count - 1
     publish_team_round(team, round)
     publish_team_top(team)
@@ -124,12 +124,12 @@ def puzzle_answer_correct(team, puzzle):
             PuzzleAccess.objects.create(team=team, puzzle=apuzzle).save()
             team_log_puzzle_access(team, apuzzle, 'solved "%s"' % puzzle.name)
             publish_team_puzzle(team, apuzzle)
-        for puzzle in Puzzle.objects.filter(round=puzzle.round):
-            if count > 0 and not PuzzleAccess.objects.filter(team=team, puzzle=puzzle).exists():
+        for apuzzle in Puzzle.objects.filter(round=puzzle.round):
+            if count > 0 and not PuzzleAccess.objects.filter(team=team, puzzle=apuzzle).exists():
                 try:
-                    release_another(puzzle)
+                    release_another(apuzzle)
                 except Exception as e:
-                    logger.error('error releasing additional puzzle %s: %s' % (puzzle.url, e))
+                    logger.error('error releasing additional puzzle %s: %s' % (apuzzle.url, e))
                 count = count - 1        
     publish_team_top(team)
     publish_team_round(team, puzzle.round)
