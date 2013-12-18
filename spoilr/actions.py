@@ -31,6 +31,9 @@ def release_round(team, round, reason):
                 except Exception as e:
                     logger.error('error releasing initial puzzle %s: %s' % (apuzzle.url, e))
                 count = count - 1
+    # TODO remove this hack:
+    if round.url == "white_queen": # HACK for testing, auto-gift
+        metapuzzle_answer_correct(team, Metapuzzle.objects.get(url='white_queen_gift'))
     publish_team_round(team, round)
     publish_team_top(team)
 
