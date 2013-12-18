@@ -188,7 +188,7 @@ admin.site.register(MetapuzzleSubmission,MetapuzzleSubmissionAdmin)
 # ----------------------- 2014-specific stuff ---------------------
 
 class Y2014TeamDataAdmin(admin.ModelAdmin):
-    list_display = ('team', 'drink_points', 'train_points', 'humpty_pieces')
+    list_display = ('team', 'points', 'humpty_pieces')
     search_fields = ['team__name']
 
 admin.site.register(Y2014TeamData, Y2014TeamDataAdmin)

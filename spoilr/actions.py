@@ -8,6 +8,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 def release_round(team, round, reason):
+    print("release %s/round/%s (%s)" % (team.url, round.url, reason))
     if RoundAccess.objects.filter(team=team, round=round).exists():
         return
     RoundAccess.objects.create(team=team, round=round).save()
@@ -34,6 +35,7 @@ def release_round(team, round, reason):
     publish_team_top(team)
 
 def release_puzzle(team, puzzle, reason):
+    print("release %s/puzzle/%s (%s)" % (team.url, puzzle.url, reason))
     if PuzzleAccess.objects.filter(team=team, puzzle=puzzle).exists():
         return
     PuzzleAccess.objects.create(team=team, puzzle=puzzle).save()
@@ -42,25 +44,22 @@ def release_puzzle(team, puzzle, reason):
     publish_team_round(team, puzzle.round)
     publish_team_top(team)
 
-def grant_drink_points(team, amount, reason): # 2014-specific
+def grant_points(team, amount, reason): # 2014-specific
+    print("grant %d points to %s (%s)" % (amount, team.url, reason))
     td = Y2014TeamData.objects.get(team=team)
-    pre = td.drink_points
-    # If they've got all the drink points they'll ever need...
-    if td.drink_points + amount > DRINK_COST * 3:
-        # ...turn the extra into train points
-        extra = td.drink_points + amount - DRINK_COST * 3
-        td.train_points = td.train_points + extra
-        td.drink_points = DRINK_COST * 3
-    else:
-        td.drink_points = td.drink_points + amount
-    post = td.drink_points
+    pre = td.points
+    td.points = td.points + amount
     td.save()
+    if pre < DRINK_READY[-1]:
+        team_log(team, 'points', 'Gained %d drink-me point(s) (%s)' % (min(DRINK_READY[-1], td.points) - pre, reason))
+    if td.points >= DRINK_READY[-1]:
+        team_log(team, 'points', 'Gained %d train ticket point(s) (%s)' % (td.points - max(DRINK_READY[-1], pre), reason))
     # If they've got a full vial now...
-    undrunk = td.drink_points
+    num_wh = 0
     for access in RoundAccess.objects.filter(team=team):
         if access.round.url in ["tea_party", "mock_turtle", "white_queen"]:
-            undrunk = undrunk - DRINK_COST
-    if undrunk >= DRINK_COST:
+            num_wh = num_wh + 1
+    if num_wh < 3 and td.points >= DRINK_READY[num_wh]:
         # ...and they've solved a metapuzzle but haven't released the round, release the round (causing the vial to be drunk)
         next_round = None
         if MetapuzzleSolve.objects.filter(team=team, metapuzzle__url='dormouse').exists() and not RoundAccess.objects.filter(team=team, round__url='tea_party').exists():
@@ -70,13 +69,31 @@ def grant_drink_points(team, amount, reason): # 2014-specific
         elif MetapuzzleSolve.objects.filter(team=team, metapuzzle__url='tweedles').exists() and not RoundAccess.objects.filter(team=team, round__url='white_queen').exists():
             next_round = 'white_queen'
         if not next_round is None:
-            release_round(team, Round.objects.get(url=next_round), 'You filled a drink-me vial, drank it and jumped into a small hole.')
-        elif int(pre/DRINK_COST) != int(post/DRINK_COST):
+            team_log(team, 'story', 'You filled a drink-me vial, drank it and jumped into a small hole.')
+            release_round(team, Round.objects.get(url=next_round), 'Jumped into a rabbit hole')
+            team_log(team, 'points', 'Consumed %d drink-me point(s) (Jumped into a rabbit hole)' % DRINK_COST[num_wh])
+        elif pre < DRINK_READY[num_wh]:
             team_log_vial_filled_no_hole(team)
+    # If they've got a full train ticket now...
+    num_wc = 0
+    for access in RoundAccess.objects.filter(team=team):
+        if access.round.url in ["caucus_race", "knights", "humpty_dumpty"]:
+            num_wc = num_wc + 1
+    if num_wc < 3 and td.points >= TRAIN_READY[num_wc]:
+        # release the next wonderland round
+        next_round = None
+        if not RoundAccess.objects.filter(team=team, round__url='caucus_race').exists():
+            next_round = 'caucus_race'
+        elif not RoundAccess.objects.filter(team=team, round__url='knights').exists():
+            next_round = 'knights'
+        elif not RoundAccess.objects.filter(team=team, round__url='humpty_dumpty').exists():
+            next_round = 'humpty_dumpty'
+        release_round(team, Round.objects.get(url=next_round), 'You completed a train ticket, and gained access to another location.')
     publish_team_round(team, Round.objects.get(url='mit'))
-            
+    publish_team_top(team)            
 
 def puzzle_answer_correct(team, puzzle):
+    print("puzzle answer correct %s/puzzle/%s" % (team.url, puzzle.url))
     if not PuzzleAccess.objects.filter(team=team, puzzle=puzzle).exists():
         return
     pa = PuzzleAccess.objects.get(team=team, puzzle=puzzle)
@@ -87,7 +104,7 @@ def puzzle_answer_correct(team, puzzle):
     pa.save()
     publish_team_puzzle(team, puzzle)
     if puzzle.round.url == 'mit': # 2014-specific
-        grant_drink_points(team, DRINK_INCR_MIT, 'solved an MIT puzzle')
+        grant_points(team, POINT_INCR_MIT, 'solved an MIT puzzle')
         # mit map: release all puzzles connected to the solved one
         node = Y2014MitPuzzleData.objects.get(puzzle=puzzle).location
         def release_connected(other_puzzle):
@@ -109,7 +126,7 @@ def puzzle_answer_correct(team, puzzle):
             except Exception as e:
                 logger.error('error releasing connecting puzzle at %s: %s' % (edge.node1, e))
     if puzzle.round.url != 'mit' and puzzle.round.url != 'events': # 2014-specific
-        grant_drink_points(team, DRINK_INCR_WL, 'solved a Wonderland puzzle')
+        grant_points(team, POINT_INCR_WL, 'solved a Wonderland puzzle')
     if puzzle.round.url == 'humpty_dumpty': # 2014-specific
         td = Y2014TeamData.objects.get(team=team)
         if td.humpty_pieces < 12:
@@ -142,6 +159,7 @@ def puzzle_answer_incorrect(team, puzzle, answer):
     publish_team_top(team)
 
 def metapuzzle_answer_correct(team, metapuzzle):
+    print("metapuzzle answer correct %s/metapuzzle/%s" % (team.url, metapuzzle.url))
     if MetapuzzleSolve.objects.filter(team=team, metapuzzle=metapuzzle).exists():
         return
     team_log_metapuzzle_solved(team, metapuzzle)
@@ -149,11 +167,11 @@ def metapuzzle_answer_correct(team, metapuzzle):
     if metapuzzle.url in ['dormouse', 'caterpillar', 'tweedles']: # 2014-specific
         # mit meta: if they have a full vial...
         td = Y2014TeamData.objects.get(team=team)
-        undrunk = td.drink_points
+        num_wh = 0
         for access in RoundAccess.objects.filter(team=team):
             if access.round.url in ["tea_party", "mock_turtle", "white_queen"]:
-                undrunk = undrunk - DRINK_COST
-        if undrunk >= DRINK_COST:
+                num_wh = num_wh + 1
+        if num_wh < 3 and td.points >= DRINK_READY[num_wh]:
             # ...release the corresponding round (which causes the vial to be drunk)
             next_round = None
             if metapuzzle.url == 'dormouse':
@@ -165,7 +183,9 @@ def metapuzzle_answer_correct(team, metapuzzle):
             else:
                 logger.error('bug in mit round release: %s' % metapuzzle.name)
             if not next_round is None:
-                release_round(team, Round.objects.get(url=next_round), 'You found a small hole, drank a drink-me vial and jumped in.')
+                team_log(team, 'story', 'You found a small hole, drank a drink-me vial and jumped in.')
+                release_round(team, Round.objects.get(url=next_round), 'Jumped into a rabbit hole')
+                team_log(team, 'points', 'Consumed %d drink-me point(s) (Jumped into a rabbit hole)' % DRINK_COST[num_wh])
         else:
             team_log_hole_discovered_no_vial(team)
         publish_team_round(team, Round.objects.get(url='mit'))
@@ -184,17 +204,7 @@ def metapuzzle_answer_correct(team, metapuzzle):
             reason = "Solved the White Queen's problem"
         elif metapuzzle.url == 'mock_turtle':
             reason = "Solved the Mock Turtle's problem"
-        r = Round.objects.get(url='caucus_race')
-        if not RoundAccess.objects.filter(team=team, round=r).exists():
-            release_round(team, r, reason)
-        else:
-            r = Round.objects.get(url='knights')
-            if not RoundAccess.objects.filter(team=team, round=r).exists():
-                release_round(team, r, reason)
-            else:
-                r = Round.objects.get(url='humpty_dumpty')
-                if not RoundAccess.objects.filter(team=team, round=r).exists():
-                    release_round(team, r, reason)
+        grant_points(team, POINT_INCR_WLMETA, reason)
     if metapuzzle.url[:13] == 'white_queen_a': # 2014-specific
         pwa = 'puzzle_with_answer_'
         answers = []

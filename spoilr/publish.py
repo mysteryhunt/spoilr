@@ -147,15 +147,20 @@ class RoundContext(TopContext): # todo don't inherit, it'll just slow things dow
                 if x['round'].url == "white_queen":
                     self['portal3'] = 'open'
                     count = count + 1
-            points = self['team_data'].drink_points
+            points = self['team_data'].points
             self['vial1'] = self['vial2'] = self['vial3'] = -1
+            self['vial1t'] = DRINK_COST[0]
+            self['vial2t'] = DRINK_COST[1]
+            self['vial3t'] = DRINK_COST[2]
             if count < 3:
-                self['vial3'] = min(14,max(0, points - (DRINK_COST * 2)))
+                self['vial3'] = min(DRINK_COST[2],max(0, points - DRINK_READY[1]))
+                self['vial3x'] = self['vial3']*10/DRINK_COST[2]
             if count < 2:
-                self['vial2'] = min(14,max(0, points - (DRINK_COST * 1)))
+                self['vial2'] = min(DRINK_COST[1],max(0, points - DRINK_READY[0]))
+                self['vial2x'] = self['vial2']*10/DRINK_COST[1]
             if count < 1:
-                self['vial1'] = min(14,max(0, points - (DRINK_COST * 0)))
-            #self['meta_ready'] = (points - 14 - (DRINK_COST * count)) >= 0
+                self['vial1'] = min(DRINK_COST[0],max(0, points))
+                self['vial1x'] = self['vial1']*10/DRINK_COST[0]
         if round.url == 'caucus_race': # 2014-specific
             birds = []
             for bird in Y2014CaucusAnswerData.objects.all():
@@ -287,6 +292,7 @@ def ensure_team_dir(team, suffix=None):
     return True
 
 def publish_team_top(team, suffix=None):
+    print("publish %s/top" % team.url)
     if not ensure_team_dir(team, suffix):
         return
     team_path = team.get_team_dir(suffix)
@@ -297,6 +303,7 @@ def publish_team_top(team, suffix=None):
     publish_dir(top_context, os.path.join(settings.HUNT_DATA_DIR, 'top'), team_path, '.', except_for)
 
 def publish_team_round(team, round, suffix=None):
+    print("publish %s/round/%s" % (team.url, round.url))
     if not ensure_team_dir(team, suffix):
         return
     team_path = team.get_team_dir(suffix)
@@ -325,6 +332,7 @@ def publish_team_round(team, round, suffix=None):
                 logger.error('couldn\'t copy jigsaw piece %d' % i)
 
 def publish_team_puzzle(team, puzzle, suffix=None):
+    print("publish %s/puzzle/%s" % (team.url, puzzle.url))
     if not ensure_team_dir(team, suffix):
         return
     team_path = team.get_team_dir(suffix)
@@ -372,20 +380,16 @@ def publish_team_puzzle(team, puzzle, suffix=None):
 
 
 def publish_team(team, suffix=None):
-    print('    Top...')
     publish_team_top(team, suffix)
     for round in team.rounds.all():
-        print('    Round %s...' % round.url)
         publish_team_round(team, round, suffix)
     for puzzle in team.puzzles.all():
-        print('    Puzzle %s...' % puzzle.url)
         publish_team_puzzle(team, puzzle, suffix)
 
 def publish_all():
     teams = Team.objects.all()
     print('Publishing hunt for %d teams...' % len(teams))
     for team in teams:
-        print('  Team "%s"...' % team.url)
         publish_team(team)
     print('Done publishing hunt')
 

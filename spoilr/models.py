@@ -166,12 +166,11 @@ class MetapuzzleSubmission(models.Model):
 
 class Y2014TeamData(models.Model):
     team = models.ForeignKey(Team, unique=True)
-    drink_points = models.IntegerField(default=0, verbose_name='Drink-Me Points')
-    train_points = models.IntegerField(default=0, verbose_name='Train Ticket Points')
+    points = models.IntegerField(default=0, verbose_name='Points')
     humpty_pieces = models.IntegerField(default=0, verbose_name='Humpty Jigsaw Pieces')
 
     def __str__(self):
-        return '%s (%d, %d)' % (self.team.name, self.drink_points, self.train_points)
+        return '%s (%d)' % (self.team.name, self.points)
 
     class Meta:
         verbose_name = '2014 team data'
