@@ -9,6 +9,9 @@ def TeamDict(team, puzzle_objects, puzzle_access, round_objects, round_access):
     log1 = logn[0]
     p_released = sum(1 for a in puzzle_access if a.team == team)
     p_solved = sum(1 for a in puzzle_access if a.team == team and a.solved)
+    q_submissions = sum(1 for a in PuzzleSubmission.objects.filter(team=team))
+    q_submissions += sum(1 for a in MetapuzzleSubmission.objects.filter(team=team))
+    q_submissions += sum(1 for a in Y2014MitMetapuzzleSubmission.objects.filter(team=team)) # 2014-specific
     rounds = dict()
     if True: # 2014-specific
         s_current = Y2014TeamData.objects.get(team=team).points
@@ -75,6 +78,8 @@ def TeamDict(team, puzzle_objects, puzzle_access, round_objects, round_access):
         'r_solved': r_solved,
         'p_released': p_released,
         'p_solved': p_solved,
+        'p_open': p_released - p_solved,
+        'q_submissions': q_submissions,
         }
 
 def all_teams(request):
@@ -83,12 +88,24 @@ def all_teams(request):
     for team in Team.objects.all():
         teams.append(TeamDict(team, Puzzle.objects.all(), PuzzleAccess.objects.all(), Round.objects.all(), RoundAccess.objects.all()))
     teams.sort(key=lambda team: -(team['r_solved'] * 5)-team['p_solved'])
+    q_total = PuzzleSubmission.objects.count()
+    q_total += MetapuzzleSubmission.objects.count()
+    q_total += Y2014MitMetapuzzleSubmission.objects.count() # 2014-specific
+    q_teams = set()
+    for x in PuzzleSubmission.objects.all():
+        q_teams.add(x.team.url)
+    for x in MetapuzzleSubmission.objects.all():
+        q_teams.add(x.team.url)
+    for x in Y2014MitMetapuzzleSubmission.objects.all(): # 2014-specific
+        q_teams.add(x.team.url)
     s_total = MAX_POINTS # 2014-specific
     p_total = Puzzle.objects.count()
     r_total = Round.objects.count()
     r_total = r_total - 1 + 3 # 2014-specific
     context = RequestContext(request, {
         'teams': teams,
+        'q_total': q_total,
+        'q_teams': len(q_teams),
         's_total': s_total, # 2014-specific
         'r_total': r_total,
         'p_total': p_total,
