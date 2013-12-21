@@ -4,40 +4,11 @@ from django.template import RequestContext, loader
 from .models import *
 from .constants import *
 
-def TeamMitData(team): # 2014-specific
-    dormouse_puzzles = []
-    caterpillar_puzzles = []
-    tweedle_puzzles = []
-    for mitdata in Y2014MitPuzzleData.objects.all():
-        released = False
-        solved = False
-        access = PuzzleAccess.objects.filter(team=team, puzzle=mitdata.puzzle)
-        if access.exists():
-            released = True
-            if access[0].solved:
-                solved = True
-        p = {
-            'puzzle': mitdata.puzzle,
-            'released': released,
-            'solved': solved,
-            }
-        if mitdata.mit_meta() == 'dormouse':
-            dormouse_puzzles.append(p)
-        if mitdata.mit_meta() == 'caterpillar':
-            caterpillar_puzzles.append(p)
-        if mitdata.mit_meta() == 'tweedle':
-            tweedle_puzzles.append(p)
-    data = dict()
-    data["dormouse"] = {'puzzles': dormouse_puzzles, 'released': True, 'solved': MetapuzzleSolve.objects.filter(team=team, metapuzzle__url='dormouse').exists()}
-    data["caterpillar"] = {'puzzles': caterpillar_puzzles, 'released': True, 'solved': MetapuzzleSolve.objects.filter(team=team, metapuzzle__url='caterpillar').exists()}
-    data["tweedles"] = {'puzzles': tweedle_puzzles, 'released': True, 'solved': MetapuzzleSolve.objects.filter(team=team, metapuzzle__url='tweedles').exists()}
-    return data
-
-def TeamDict(team):
+def TeamDict(team, puzzle_objects, puzzle_access, round_objects, round_access):
     logn = TeamLog.objects.filter(team=team).order_by('-timestamp')[:10]
     log1 = logn[0]
-    p_released = PuzzleAccess.objects.filter(team=team).count()
-    p_solved = PuzzleAccess.objects.filter(team=team, solved=True).count()
+    p_released = sum(1 for a in puzzle_access if a.team == team)
+    p_solved = sum(1 for a in puzzle_access if a.team == team and a.solved)
     rounds = dict()
     if True: # 2014-specific
         s_current = Y2014TeamData.objects.get(team=team).points
@@ -51,8 +22,8 @@ def TeamDict(team):
         for mitdata in Y2014MitPuzzleData.objects.all():
             released = False
             solved = False
-            access = PuzzleAccess.objects.filter(team=team, puzzle=mitdata.puzzle)
-            if access.exists():
+            access = [a for a in puzzle_access if a.team == team and a.puzzle == mitdata.puzzle]
+            if len(access):
                 released = True
                 if access[0].solved:
                     solved = True
@@ -67,24 +38,24 @@ def TeamDict(team):
                 rounds['caterpillar']['puzzles'].append(p)
             elif mitdata.mit_meta() == 'tweedles':
                 rounds['tweedles']['puzzles'].append(p)
-    for round in Round.objects.all():
+    for round in round_objects:
         if round.url == 'mit': # 2014-specific
             continue
         released = False
         solved = False
-        access = RoundAccess.objects.filter(team=team, round=round)
-        if access.exists():
+        access = [a for a in round_access if a.team == team and a.round == round]
+        if len(access):
             released = True
             r_released += 1
             if MetapuzzleSolve.objects.filter(team=team, metapuzzle__url=round.url).exists():
                 solved = True
                 r_solved += 1
         rounds[round.url] = {'puzzles': [], 'released': released, 'solved': solved}
-        for puzzle in Puzzle.objects.filter(round=round):
+        for puzzle in (p for p in puzzle_objects if p.round == round):
             released = False
             solved = False
-            access = PuzzleAccess.objects.filter(team=team, puzzle=puzzle)
-            if access.exists():
+            access = [a for a in puzzle_access if a.team == team and a.puzzle == puzzle]
+            if len(access):
                 released = True
                 if access[0].solved:
                     solved = True
@@ -110,7 +81,7 @@ def all_teams(request):
     template = loader.get_template('all-teams.html') 
     teams = []
     for team in Team.objects.all():
-        teams.append(TeamDict(team))
+        teams.append(TeamDict(team, Puzzle.objects.all(), PuzzleAccess.objects.all(), Round.objects.all(), RoundAccess.objects.all()))
     teams.sort(key=lambda team: -(team['r_solved'] * 5)-team['p_solved'])
     s_total = MAX_POINTS # 2014-specific
     p_total = Puzzle.objects.count()

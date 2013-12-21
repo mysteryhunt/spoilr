@@ -25,9 +25,9 @@
 	      {% endfor %}
 	    </td>
 	    <td colspan="2">
-	      rounds {{ team.r_solved }}/{{ team.r_released }}/{{ r_total }}
-	      puzzles {{ team.p_solved }}/{{ team.p_released }}/{{ p_total }}
-	      points {{ team.s_current }}/{{ s_total }}
+	      rounds <b title="MIT Metas and Non-MIT Rounds Solved">{{ team.r_solved }}</b><span title="Non-MIT Rounds Released (+3 MIT Metas)">{{ team.r_released }}</span>/{{ r_total }}
+	      puzzles <b title="Puzzles Solved">{{ team.p_solved }}</b>/<span title="Puzzles Released">{{ team.p_released }}</span>/{{ p_total }}
+	      points <b title="Points Gained">{{ team.s_current }}</b>/{{ s_total }}
 	    </td>
 	  </tr>
 	  <tr>
