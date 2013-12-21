@@ -79,7 +79,7 @@ def TeamDict(team):
             if MetapuzzleSolve.objects.filter(team=team, metapuzzle__url=round.url).exists():
                 solved = True
                 r_solved += 1
-        rounds[round.url] = {'puzzles': [], 'released': released, solved: solved}
+        rounds[round.url] = {'puzzles': [], 'released': released, 'solved': solved}
         for puzzle in Puzzle.objects.filter(round=round):
             released = False
             solved = False
