@@ -213,8 +213,8 @@ class Y2014MitPuzzleData(models.Model):
         CARD_CHOICES.append((str(n)+'_spades', str(n)+' of spades (dormouse)'))
     for n in [2,4,5,7,9,'J','Q','K']: # caterpillar
         CARD_CHOICES.append((str(n)+'_clubs', str(n)+' of clubs (caterpillar)'))
-    for n in ['A',2,3,4,8,9,10,'J']: # tweedle
-        CARD_CHOICES.append((str(n)+'_diamonds', str(n)+' of diamonds (tweedle)'))
+    for n in ['A',2,3,4,8,9,10,'J']: # tweedles
+        CARD_CHOICES.append((str(n)+'_diamonds', str(n)+' of diamonds (tweedles)'))
     card = models.CharField(max_length=12, choices=CARD_CHOICES, unique=True)
     location = models.ForeignKey(Y2014MitMapNode, unique=True)
 
@@ -227,7 +227,7 @@ class Y2014MitPuzzleData(models.Model):
         if 'clubs' in self.card:
             return 'caterpillar'
         if 'diamonds' in self.card:
-            return 'tweedle'
+            return 'tweedles'
 
     class Meta:
         ordering = ['puzzle__order', 'card']

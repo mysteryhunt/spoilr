@@ -1,25 +1,139 @@
-<div style="font: 10pt monospace">
-<div>
-{{ teams|length }} teams,
-{{ puzzle_count }} puzzles
-</div>
-{% for team in teams %}
-<div>
-{{ team.team.name }}<br>
-{% for section in team.sections %}
-{% if section.solved %}+{% elif section.released %}-{% else %}.{% endif %}:
-{% for puzzle in section.puzzles %}
-{% if puzzle.solved %}+{% elif puzzle.released %}-{% else %}.{% endif %}
-{% endfor %}
-<br />
-{% endfor %}
-<div id="team_log1_{{ team.team.url }}">
-{{ team.log1.timestamp|date:'Y-m-d H:i:s' }}: {{ team.log1.message }}
-</div>
-<div id="team_logn_{{ team.team.url }}">
-{% for log in team.logn %}
-{{ log.timestamp|date:'Y-m-d H:i:s' }}: {{ log.message }}<br />
-{% endfor %}
-</div>
-</div>
-{% endfor %}
+<!DOCTYPE html>
+{% load staticfiles %}
+<html>
+  <head>
+    <title>All Teams Dashboard</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+  </head>
+  <body>
+    <div style="font: 10pt monospace">
+      <div>
+	{{ teams|length }} teams,
+	{{ r_total }} rounds,
+	{{ p_total }} puzzles
+      </div>
+      {% for team in teams %}
+      <div id="team_{{ team.team.url }}" class="team" style="border: 1px solid black; border-radius 5px; padding: 3px;">
+	<table style="border-collapse: collapse">
+	  <tr>
+	    <td colspan="2" style="overflow: hidden;"><b>{{ team.team.name }}</b></td>
+	    <td>events:</td>
+	    <td>
+	      <img title="Events" src="{% if team.rounds.events.solved %}{% static "r_solved.png" %}{% elif team.rounds.events.released %}{% static "r_released.png" %}{% else %}{% static "r_unreleased.png" %}{% endif %}" />
+	      {% for puzzle in team.rounds.events.puzzles %}
+	      <img title="{{ puzzle.puzzle.name }}" src="{% if puzzle.solved %}{% static "p_solved.png" %}{% elif puzzle.released %}{% static "p_released.png" %}{% else %}{% static "p_unreleased.png" %}{% endif %}" />
+	      {% endfor %}
+	    </td>
+	    <td colspan="2">
+	      rounds {{ team.r_solved }}/{{ team.r_released }}/{{ r_total }}
+	      puzzles {{ team.p_solved }}/{{ team.p_released }}/{{ p_total }}
+	      points {{ team.s_current }}/{{ s_total }}
+	    </td>
+	  </tr>
+	  <tr>
+	    <td>dormouse:</td>
+	    <td>
+	      <img title="The Dormouse" src="{% if team.rounds.dormouse.solved %}{% static "r_solved.png" %}{% elif team.rounds.dormouse.released %}{% static "r_released.png" %}{% else %}{% static "r_unreleased.png" %}{% endif %}" />
+	      {% for puzzle in team.rounds.dormouse.puzzles %}
+	      <img title="{{ puzzle.puzzle.name }}" src="{% if puzzle.solved %}{% static "p_solved.png" %}{% elif puzzle.released %}{% static "p_released.png" %}{% else %}{% static "p_unreleased.png" %}{% endif %}" />
+	      {% endfor %}
+	    </td>
+	    <td>party:</td>
+	    <td>
+	      <img title="The Tea Party" src="{% if team.rounds.tea_party.solved %}{% static "r_solved.png" %}{% elif team.rounds.tea_party.released %}{% static "r_released.png" %}{% else %}{% static "r_unreleased.png" %}{% endif %}" />
+	      {% for puzzle in team.rounds.tea_party.puzzles %}
+	      <img title="{{ puzzle.puzzle.name }}" src="{% if puzzle.solved %}{% static "p_solved.png" %}{% elif puzzle.released %}{% static "p_released.png" %}{% else %}{% static "p_unreleased.png" %}{% endif %}" />
+	      {% endfor %}
+	    </td>
+	    <td>caucus:</td>
+	    <td>
+	      <img title="The Caucus Race" src="{% if team.rounds.caucus_race.solved %}{% static "r_solved.png" %}{% elif team.rounds.caucus_race.released %}{% static "r_released.png" %}{% else %}{% static "r_unreleased.png" %}{% endif %}" />
+	      {% for puzzle in team.rounds.caucus_race.puzzles %}
+	      <img title="{{ puzzle.puzzle.name }}" src="{% if puzzle.solved %}{% static "p_solved.png" %}{% elif puzzle.released %}{% static "p_released.png" %}{% else %}{% static "p_unreleased.png" %}{% endif %}" />
+	      {% endfor %}
+	    </td>
+	  </tr>
+	  <tr>
+	    <td>caterpillar:</td>
+	    <td>
+	      <img title="The Caterpillar" src="{% if team.rounds.caterpillar.solved %}{% static "r_solved.png" %}{% elif team.rounds.caterpillar.released %}{% static "r_released.png" %}{% else %}{% static "r_unreleased.png" %}{% endif %}" />
+	      {% for puzzle in team.rounds.caterpillar.puzzles %}
+	      <img title="{{ puzzle.puzzle.name }}" src="{% if puzzle.solved %}{% static "p_solved.png" %}{% elif puzzle.released %}{% static "p_released.png" %}{% else %}{% static "p_unreleased.png" %}{% endif %}" />
+	      {% endfor %}
+	    </td>
+	    <td>turtle:</td>
+	    <td>
+	      <img title="The Mock Turtle" src="{% if team.rounds.mock_turtle.solved %}{% static "r_solved.png" %}{% elif team.rounds.mock_turtle.released %}{% static "r_released.png" %}{% else %}{% static "r_unreleased.png" %}{% endif %}" />
+	      {% for puzzle in team.rounds.mock_turtle.puzzles %}
+	      <img title="{{ puzzle.puzzle.name }}" src="{% if puzzle.solved %}{% static "p_solved.png" %}{% elif puzzle.released %}{% static "p_released.png" %}{% else %}{% static "p_unreleased.png" %}{% endif %}" />
+	      {% endfor %}
+	    </td>
+	    <td>knights:</td>
+	    <td>
+	      <img title="The Red and White Knights" src="{% if team.rounds.knights.solved %}{% static "r_solved.png" %}{% elif team.rounds.knights.released %}{% static "r_released.png" %}{% else %}{% static "r_unreleased.png" %}{% endif %}" />
+	      {% for puzzle in team.rounds.knights.puzzles %}
+	      <img title="{{ puzzle.puzzle.name }}" src="{% if puzzle.solved %}{% static "p_solved.png" %}{% elif puzzle.released %}{% static "p_released.png" %}{% else %}{% static "p_unreleased.png" %}{% endif %}" />
+	      {% endfor %}
+	    </td>
+	  </tr>
+	  <tr>
+	    <td>tweedles:</td>
+	    <td>
+	      <img title="Tweedledee and Tweedledum" src="{% if team.rounds.tweedles.solved %}{% static "r_solved.png" %}{% elif team.rounds.tweedles.released %}{% static "r_released.png" %}{% else %}{% static "r_unreleased.png" %}{% endif %}" />
+	      {% for puzzle in team.rounds.tweedles.puzzles %}
+	      <img title="{{ puzzle.puzzle.name }}" src="{% if puzzle.solved %}{% static "p_solved.png" %}{% elif puzzle.released %}{% static "p_released.png" %}{% else %}{% static "p_unreleased.png" %}{% endif %}" />
+	      {% endfor %}
+	    </td>
+	    <td>queen:</td>
+	    <td>
+	      <img title="The White Queen" src="{% if team.rounds.white_queen.solved %}{% static "r_solved.png" %}{% elif team.rounds.white_queen.released %}{% static "r_released.png" %}{% else %}{% static "r_unreleased.png" %}{% endif %}" />
+	      {% for puzzle in team.rounds.white_queen.puzzles %}
+	      <img title="{{ puzzle.puzzle.name }}" src="{% if puzzle.solved %}{% static "p_solved.png" %}{% elif puzzle.released %}{% static "p_released.png" %}{% else %}{% static "p_unreleased.png" %}{% endif %}" />
+	      {% endfor %}
+	    </td>
+	    <td>humpty:</td>
+	    <td>
+	      <img title="Humpty Dumpty" src="{% if team.rounds.humpty_dumpty.solved %}{% static "r_solved.png" %}{% elif team.rounds.humpty_dumpty.released %}{% static "r_released.png" %}{% else %}{% static "r_unreleased.png" %}{% endif %}" />
+	      {% for puzzle in team.rounds.humpty_dumpty.puzzles %}
+	      <img title="{{ puzzle.puzzle.name }}" src="{% if puzzle.solved %}{% static "p_solved.png" %}{% elif puzzle.released %}{% static "p_released.png" %}{% else %}{% static "p_unreleased.png" %}{% endif %}" />
+	      {% endfor %}
+	    </td>
+	  </tr>
+	  <tr id="team_log1_{{ team.team.url }}" class="log1">
+	    <td colspan="6">
+	      {{ team.log1.timestamp|date:'Y-m-d H:i:s' }}: {{ team.log1.message }}
+	    </td>
+	  </tr>
+	  <tr id="team_logn_{{ team.team.url }}" class="logn" style="display: none;">
+	    <td colspan="6">
+	      {% for log in team.logn %}
+	      {{ log.timestamp|date:'Y-m-d H:i:s' }}: {{ log.message }}<br />
+	      {% endfor %}
+	    </td>
+	  </tr>
+	</table>
+	<script type="text/javascript">
+	  $('#team_log1_{{ team.team.url }}').click(function () {
+	    $('#team_log1_{{ team.team.url }}').hide()
+	    $('#team_logn_{{ team.team.url }}').show()
+	  });
+	  $('#team_logn_{{ team.team.url }}').click(function () {
+	    $('#team_logn_{{ team.team.url }}').hide()
+	    $('#team_log1_{{ team.team.url }}').show()
+	  });
+	</script>
+      </div>
+      <script type="text/javascript">
+	$('#team_{{ team.team.url }}').hover(function () {
+          $('#team_{{ team.team.url }}').css("background-color", "#ffa");
+	}, function () {
+          $('#team_{{ team.team.url }}').css("background-color", "");
+	});
+      </script>
+      {% endfor %}
+    </div>
+    <script type="text/javascript">
+      $(document).tooltip();
+    </script>
+  </body>
+</html>

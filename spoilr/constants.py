@@ -1,6 +1,8 @@
 PUZZLE_QUEUE_LIMIT = 2
 QUEUE_LIMIT = 5
 
+# ----- 2014-specific -----
+
 DRINK_COST = [12, 16, 20]
 TRAIN_COST = 90
 
