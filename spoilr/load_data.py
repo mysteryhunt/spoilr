@@ -156,7 +156,7 @@ def load_knights_data(): # 2014-specific
             Y2014KnightsAnswerData.objects.create(**row).save()
     print("Done loading knights data")
 
-def load_all():
+def load_all_inner():
     load_metapuzzles()
     load_rounds()
     load_puzzles()
@@ -168,7 +168,16 @@ def load_all():
     load_teams()
     load_team_phones()
 
-def everybody_can_see_everything():
+def load_all():
+    try:
+        from django.db import transaction # Django 1.6 required here
+        with transaction.atomic():
+            load_all_inner();
+    except:
+        load_all_inner();
+
+
+def everybody_can_see_everything_inner():
     print("Granting full access to every team...")
     for team in Team.objects.all():
         td = Y2014TeamData.objects.get(team=team)
@@ -184,3 +193,11 @@ def everybody_can_see_everything():
             if not MetapuzzleSolve.objects.filter(team=team, metapuzzle=metapuzzle).exists():
                 MetapuzzleSolve.objects.create(team=team, metapuzzle=metapuzzle).save()
     print("Done granting full access")
+
+def everybody_can_see_everything():
+    try:
+        from django.db import transaction # Django 1.6 required here
+        with transaction.atomic():
+            everybody_can_see_everything_inner();
+    except:
+        everybody_can_see_everything_inner();
