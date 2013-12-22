@@ -9,9 +9,9 @@ def TeamDict(team, puzzle_objects, puzzle_access, round_objects, round_access):
     log1 = logn[0]
     p_released = sum(1 for a in puzzle_access if a.team == team)
     p_solved = sum(1 for a in puzzle_access if a.team == team and a.solved)
-    q_submissions = sum(1 for a in PuzzleSubmission.objects.filter(team=team))
-    q_submissions += sum(1 for a in MetapuzzleSubmission.objects.filter(team=team))
-    q_submissions += sum(1 for a in Y2014MitMetapuzzleSubmission.objects.filter(team=team)) # 2014-specific
+    q_submissions = sum(1 for a in PuzzleSubmission.objects.filter(team=team, resolved=False))
+    q_submissions += sum(1 for a in MetapuzzleSubmission.objects.filter(team=team, resolved=False))
+    q_submissions += sum(1 for a in Y2014MitMetapuzzleSubmission.objects.filter(team=team, resolved=False)) # 2014-specific
     rounds = dict()
     if True: # 2014-specific
         s_current = Y2014TeamData.objects.get(team=team).points
@@ -88,15 +88,15 @@ def all_teams(request):
     for team in Team.objects.all():
         teams.append(TeamDict(team, Puzzle.objects.all(), PuzzleAccess.objects.all(), Round.objects.all(), RoundAccess.objects.all()))
     teams.sort(key=lambda team: -(team['r_solved'] * 5)-team['p_solved'])
-    q_total = PuzzleSubmission.objects.count()
-    q_total += MetapuzzleSubmission.objects.count()
-    q_total += Y2014MitMetapuzzleSubmission.objects.count() # 2014-specific
+    q_total = PuzzleSubmission.objects.filter(resolved=False).count()
+    q_total += MetapuzzleSubmission.objects.filter(resolved=False).count()
+    q_total += Y2014MitMetapuzzleSubmission.objects.filter(resolved=False).count() # 2014-specific
     q_teams = set()
-    for x in PuzzleSubmission.objects.all():
+    for x in PuzzleSubmission.objects.filter(resolved=False):
         q_teams.add(x.team.url)
-    for x in MetapuzzleSubmission.objects.all():
+    for x in MetapuzzleSubmission.objects.filter(resolved=False):
         q_teams.add(x.team.url)
-    for x in Y2014MitMetapuzzleSubmission.objects.all(): # 2014-specific
+    for x in Y2014MitMetapuzzleSubmission.objects.filter(resolved=False): # 2014-specific
         q_teams.add(x.team.url)
     s_total = MAX_POINTS # 2014-specific
     p_total = Puzzle.objects.count()
