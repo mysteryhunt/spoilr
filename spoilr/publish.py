@@ -319,6 +319,7 @@ def publish_team_round(team, round, suffix=None):
     # --- 2014-specific ---
     if round.url == 'humpty_dumpty':
         jigsaw = Y2014TeamData.objects.get(team=team).humpty_pieces
+        os.makedirs(os.path.join(round_dir, 'jigsaw'))
         for i in range(1,jigsaw+1):
             try:
                 source_file = os.path.join(settings.HUNT_DATA_DIR, 'round', round.url, 'jigsaw', "%02d.png" % i)
