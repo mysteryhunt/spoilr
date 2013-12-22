@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.db import transaction
 
 import logging
 import csv
@@ -156,6 +157,7 @@ def load_knights_data(): # 2014-specific
             Y2014KnightsAnswerData.objects.create(**row).save()
     print("Done loading knights data")
 
+@transaction.atomic
 def load_all():
     load_metapuzzles()
     load_rounds()
@@ -168,6 +170,7 @@ def load_all():
     load_teams()
     load_team_phones()
 
+@transaction.atomic
 def everybody_can_see_everything():
     print("Granting full access to every team...")
     for team in Team.objects.all():
