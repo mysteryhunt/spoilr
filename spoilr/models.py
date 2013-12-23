@@ -160,6 +160,22 @@ class MetapuzzleSubmission(models.Model):
 
     class Meta:
         ordering = ['-timestamp']
+
+class QueueHandler(models.Model):
+    name = models.CharField(max_length=100)
+    email = models.CharField(max_length=100)
+    activity = models.DateTimeField(default=datetime.now)
+    team = models.ForeignKey(Team, blank=True, null=True)
+    team_timestamp = models.DateTimeField(blank=True, null=True)
+    
+    def __str__(self):
+        if self.team:
+            status = 'handling %s since %s' % (str(self.team), str(self.team_timestamp))
+        elif (datetime.now - self.activity).seconds > 5 * 60:
+            status = 'afk'
+        else:
+            status = 'idle'
+        return '%s: %s' % (self.name, status)
     
 
 # ----------------------- 2014-specific stuff ---------------------

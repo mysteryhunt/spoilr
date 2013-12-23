@@ -18,6 +18,23 @@
     </style>
   </head>
   <body>
+    <div style="text-align: right;">
+      {% if handler %}
+      Signed in as {{ handler.name }}:
+      <form action="." method="POST" style="display: inline;">
+	{% csrf_token %}
+	<input type="hidden" name="offduty" value="true" />
+	<input type="submit" value="I'm off duty" />
+      </form>
+      {% else %}
+      <form action="." method="POST" style="display: inline;">
+	{% csrf_token %}
+	Observing only.  Enter an email address here to sign in as a handler:
+	<input id="email" type="text" size="30" name="email" />
+	<input type="submit" value="Go" />
+      </form>
+    {% endif %}
+    </div>
     <table>
       {% for t in teams %}
       <tr><td>{{ t.team.name }}
@@ -41,5 +58,15 @@
       </tr>
       {% endfor %}
     </table>
+    <script type="text/javascript">
+      function r() {
+        {% if not handler %}
+        if (document.activeElement.id == 'email')
+          return;
+        {% endif %}
+        window.location.reload(true);
+      }
+      setInterval(r, 10000);
+    </script>
   </body>
 </html>

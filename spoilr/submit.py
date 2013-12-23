@@ -1,5 +1,6 @@
 from django.http import HttpResponse
 from django.template import RequestContext, loader
+from django.shortcuts import redirect
 import re
 
 from .models import *
@@ -33,9 +34,7 @@ def submit_puzzle_answer(team, puzzle, answer, phone):
             sub.save()
 
 def submit_puzzle(request, puzzle_url):
-    # TODO SETUP: uncomment, make sure user auth works here
     username = request.META['REMOTE_USER']
-    # username = 'bigjimmy'
     try:
         team = Team.objects.get(username=username)
     except:
@@ -78,9 +77,7 @@ def submit_metapuzzle_answer(team, metapuzzle, answer, phone):
             sub.save()
 
 def submit_metapuzzle(request, metapuzzle_url):
-    # TODO SETUP: uncomment, make sure user auth works here
     username = request.META['REMOTE_USER']
-    # username = 'bigjimmy'
     try:
         team = Team.objects.get(username=username)
     except:
@@ -172,6 +169,29 @@ def submit_mit_metapuzzle(request): # 2014-specific
     return HttpResponse(template.render(context))
 
 def queue(request):
+    handler_email = request.session.get('handler_email')
+    handler = None
+    if handler_email:
+        handler = QueueHandler.objects.get(email=handler_email)
+    if request.method == 'POST':
+        if "offduty" in request.POST:
+            del request.session['handler_email']
+        else:
+            handler_email = request.POST["email"]
+            if QueueHandler.objects.filter(email=handler_email).exists():
+                handler = QueueHandler.objects.get(email=handler_email)
+            elif "name" in request.POST:
+                handler_name = request.POST["name"]
+                handler = QueueHandler.objects.create(email=handler_email,name=handler_name)
+            else:
+                template = loader.get_template('queue-signup.html') 
+                context = RequestContext(request, {
+                    'email': handler_email,
+                })
+                return HttpResponse(template.render(context))
+            request.session['handler_email'] = handler_email
+        return redirect(request.path)
+
     teams_dict = dict()
     teams = []
 
@@ -199,6 +219,12 @@ def queue(request):
 
     template = loader.get_template('queue.html') 
     context = RequestContext(request, {
-            'teams': teams,
-            })
+        'handler': handler,
+        'teams': teams,
+    })
+
+    if handler:
+        handler.activity = datetime.now()
+        handler.save()
+
     return HttpResponse(template.render(context))
