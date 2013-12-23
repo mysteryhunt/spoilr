@@ -192,33 +192,50 @@ def queue(request):
             request.session['handler_email'] = handler_email
         return redirect(request.path)
 
+    t_total = Team.objects.count()
+    q_total = PuzzleSubmission.objects.filter(resolved=False).count()
+    q_total += MetapuzzleSubmission.objects.filter(resolved=False).count()
+    q_total += Y2014MitMetapuzzleSubmission.objects.filter(resolved=False).count() # 2014-specific
+    q_teams = set()
+    for x in PuzzleSubmission.objects.filter(resolved=False):
+        q_teams.add(x.team.url)
+    for x in MetapuzzleSubmission.objects.filter(resolved=False):
+        q_teams.add(x.team.url)
+    for x in Y2014MitMetapuzzleSubmission.objects.filter(resolved=False): # 2014-specific
+        q_teams.add(x.team.url)
+
     teams_dict = dict()
     teams = []
 
     def team_obj(team, timestamp):
+        sec = (datetime.now() - timestamp).seconds
         if not team.url in teams_dict:
-            team_obj = {"team": team, "timestamp": timestamp, "submissions": []}
+            team_obj = {"team": team, "youngest": sec, "oldest": sec, "submissions": []}
             teams_dict[team.url] = team_obj
             teams.append(team_obj)
         else:
             team_obj = teams_dict[team.url]
-            if timestamp < team_obj["timestamp"]:
-                team_obj["timestamp"] = timestamp
+            team_obj["youngest"] = min(sec, team_obj["youngest"])
+            team_obj["oldest"] = max(sec, team_obj["oldest"])
         return team_obj
     
     for sub in PuzzleSubmission.objects.filter(resolved=False):
-        team_obj(sub.team, sub.timestamp)["submissions"].append({"type": "puzzle", "thing": str(sub.puzzle.name), "timestamp": sub.timestamp})
+        team_obj(sub.team, sub.timestamp)["submissions"].append({"type": "puzzle", "thing": str(sub.puzzle), "timestamp": sub.timestamp})
     for sub in MetapuzzleSubmission.objects.filter(resolved=False):
-        team_obj(sub.team, sub.timestamp)["submissions"].append({"type": "metapuzzle", "thing": str(sub.metapuzzle.name), "timestamp": sub.timestamp})
+        team_obj(sub.team, sub.timestamp)["submissions"].append({"type": "metapuzzle", "thing": str(sub.metapuzzle), "timestamp": sub.timestamp})
     for sub in Y2014MitMetapuzzleSubmission.objects.filter(resolved=False): # 2014-specific
         team_obj(sub.team, sub.timestamp)["submissions"].append({"type": "mit-metapuzzle", "thing": "", "timestamp": sub.timestamp})
     for team_obj in teams:
         team_obj["submissions"].sort(key=lambda sub: sub["timestamp"])
 
-    teams.sort(key=lambda team: team["timestamp"])
+    teams.sort(key=lambda team: -team["oldest"])
 
     template = loader.get_template('queue.html') 
     context = RequestContext(request, {
+        'tq_max': QUEUE_LIMIT,
+        't_total': t_total,
+        'q_total': q_total,
+        'q_teams': len(q_teams),
         'handler': handler,
         'teams': teams,
     })
