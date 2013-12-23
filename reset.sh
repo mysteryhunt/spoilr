@@ -4,7 +4,7 @@ OWNER="www-data"
 
 cd /home/djangoapps/spoilr
 
-MANAGE=../spoilr-env/bin/python\ manage.py
+MANAGE=python\ manage.py
 
 #Backup database just in case
 #mv /var/sqlitedb/hunt.db /var/sqlitedb/hunt.db.bak
