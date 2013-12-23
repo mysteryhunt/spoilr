@@ -185,6 +185,13 @@ class MetapuzzleSubmissionAdmin(admin.ModelAdmin):
 
 admin.site.register(MetapuzzleSubmission,MetapuzzleSubmissionAdmin)
 
+class QueueHandlerAdmin(admin.ModelAdmin):
+    list_display = ('__str__', 'email')
+    list_filter = ('name', 'team__name')
+    search_fields = ['name', 'email', 'team__name']
+
+admin.site.register(QueueHandler,QueueHandlerAdmin)
+
 # ----------------------- 2014-specific stuff ---------------------
 
 class Y2014TeamDataAdmin(admin.ModelAdmin):
