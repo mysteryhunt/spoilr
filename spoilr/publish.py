@@ -319,7 +319,12 @@ def publish_team_round(team, round, suffix=None):
     # --- 2014-specific ---
     if round.url == 'humpty_dumpty':
         jigsaw = Y2014TeamData.objects.get(team=team).humpty_pieces
-        os.makedirs(os.path.join(round_dir, 'jigsaw'))
+        if not os.path.isdir(os.path.join(round_dir, 'jigsaw')):
+            try:
+                os.makedirs(os.path.join(round_dir, 'jigsaw'))
+            except Exception as e:
+                print(str(e))
+                logger.error('couldn\'t create directory %s' % os.path.join(round_dir, 'jigsaw'))
         for i in range(1,jigsaw+1):
             try:
                 source_file = os.path.join(settings.HUNT_DATA_DIR, 'round', round.url, 'jigsaw', "%02d.png" % i)
@@ -361,6 +366,29 @@ def publish_team_puzzle(team, puzzle, suffix=None):
             puzzle_context['puzzle_js'] = puzzle_js_file.read()
     publish_dir(puzzle_context, os.path.join(settings.HUNT_DATA_DIR, 'round', puzzle.round.url, 'puzzle'), puzzle_dir, '../..')
     # --- 2014-specific ---
+    if team.url == 'spoiler_alert':
+        solution_context = PuzzleContext(team, puzzle)
+        solution_source = os.path.join(settings.HUNT_DATA_DIR, 'solution', puzzle.url)
+        if os.path.isdir(solution_source):
+            solution_dir = os.path.join(team_path, 'puzzle-solution', puzzle.url)
+            if not os.path.isdir(os.path.abspath(solution_dir)):
+                try:
+                    os.makedirs(os.path.abspath(solution_dir))
+                except OSError as e:
+                    logger.error('couldn\'t create directory "%s": %s', solution_dir, str(e))
+                    return
+            publish_dir(solution_context, solution_source, solution_dir, '../..', ['index.html', 'solution.css'])
+            try:
+                with open(os.path.join(solution_source, 'index.html'), 'r') as index_html_file:
+                    solution_context['index_html'] = index_html_file.read()
+            except Exception as e:
+                logger.error('couldn\'t read solution html: %s', solution_dir, str(e))
+                return
+            if os.path.isfile(os.path.join(solution_source, 'solution.css')):
+                with open(os.path.join(solution_source, 'solution.css'), 'r') as solution_css_file:
+                    solution_context['solution_css'] = solution_css_file.read()
+            publish_dir(solution_context, os.path.join(settings.HUNT_DATA_DIR, 'round', puzzle.round.url, 'solution'), solution_dir, '../..')
+        
     if puzzle.round.url == 'mit':
         try:
             card = Y2014MitPuzzleData.objects.get(puzzle=puzzle).card
