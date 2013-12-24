@@ -15,6 +15,16 @@ def cleanup_answer(answer):
 def compare_answers(a, b):
     return re.sub(r'[^A-Z0-9]', '', a.upper()) == re.sub(r'[^A-Z0-9]', '', b.upper())
 
+def check_bait(answer): # 2014-specific
+    for x in ['dormouse', 'caterpillar', 'tweedles']:
+        mp = Metapuzzle.objects.get(url=x)
+        # hack for testing:
+        if compare_answers(answer, x):
+            return mp
+        if compare_answers(answer, mp.answer):
+            return mp
+    return None
+
 def check_phone(team, phone):
     if TeamPhone.objects.filter(team=team, phone=phone).exists():
         return phone
@@ -123,21 +133,9 @@ def submit_mit_metapuzzle_answer(team, answer, phone): # 2014-specific
     system_log('submit-mit-bait', "%s submitted '%s'" % (team.name, answer), team=team)
     Y2014MitMetapuzzleSubmission.objects.create(team=team, phone=phone, answer=answer).save()
     # begin hack for testing:
-    metapuzzle = Metapuzzle.objects.get(url='dormouse')
-    if answer == "DORMOUSE" or compare_answers(answer, metapuzzle.answer):
-        metapuzzle_answer_correct(team, metapuzzle)
-        for sub in Y2014MitMetapuzzleSubmission.objects.filter(team=team):
-            sub.resolved = True
-            sub.save()
-    metapuzzle = Metapuzzle.objects.get(url='caterpillar')
-    if answer == "CATERPILLAR" or compare_answers(answer, metapuzzle.answer):
-        metapuzzle_answer_correct(team, metapuzzle)
-        for sub in Y2014MitMetapuzzleSubmission.objects.filter(team=team):
-            sub.resolved = True
-            sub.save()
-    metapuzzle = Metapuzzle.objects.get(url='tweedles')
-    if answer == "TWEEDLE" or compare_answers(answer, metapuzzle.answer):
-        metapuzzle_answer_correct(team, metapuzzle)
+    bait_meta = check_bait(answer)
+    if bait_meta:
+        metapuzzle_answer_correct(team, bait_meta)
         for sub in Y2014MitMetapuzzleSubmission.objects.filter(team=team):
             sub.resolved = True
             sub.save()
@@ -160,12 +158,9 @@ def submit_mit_metapuzzle(request): # 2014-specific
         submit_mit_metapuzzle_answer(team, answer, phone)
     answers = Y2014MitMetapuzzleSubmission.objects.filter(team=team)
     solved = []
-    for x in MetapuzzleSolve.objects.filter(team=team, metapuzzle__url='dormouse'):
-        solved.append(x.metapuzzle)
-    for x in MetapuzzleSolve.objects.filter(team=team, metapuzzle__url='caterpillar'):
-        solved.append(x.metapuzzle)
-    for x in MetapuzzleSolve.objects.filter(team=team, metapuzzle__url='tweedles'):
-        solved.append(x.metapuzzle)
+    for x in ['dormouse', 'caterpillar', 'tweedles']:
+        for y in MetapuzzleSolve.objects.filter(team=team, metapuzzle__url=x):
+            solved.append(y.metapuzzle)
     context = RequestContext(request, {
             'team': team,
             'answers': answers,
@@ -198,7 +193,31 @@ def queue(request):
             handler.team_timestamp = datetime.now()
             handler.save()
             system_log('queue-claim', "'%s' (%s) claims '%s'" % (h.name, h.email, team.name), team=h.team)
-        else:
+        elif handler and handler.team and "handled" in request.POST:
+            for key in request.POST:
+                if key[:2] == 'p_':
+                    p = PuzzleSubmission.objects.get(team=handler.team, resolved=False, id=key[2:])
+                    p.resolved = True
+                    if compare_answers(p.answer, p.puzzle.answer):
+                        puzzle_answer_correct(handler.team, p.puzzle)
+                    p.save()
+                if key[:2] == 'm_':
+                    p = MetapuzzleSubmission.objects.get(team=handler.team, resolved=False, id=key[2:])
+                    p.resolved = True
+                    if compare_answers(p.answer, p.metapuzzle.answer):
+                        metapuzzle_answer_correct(handler.team, p.metapuzzle)
+                    p.save()
+                if key[:2] == 'b_': # 2014-specific
+                    p = Y2014MitMetapuzzleSubmission.objects.get(team=handler.team, resolved=False, id=key[2:])
+                    p.resolved = True
+                    bait_meta = check_bait(p.answer)
+                    if bait_meta:
+                        metapuzzle_answer_correct(handler.team, bait_meta)
+                    p.save()
+            handler.team = None
+            handler.team_timestamp = None
+            handler.save()
+        elif not handler and "email" in request.POST:
             handler_email = request.POST["email"]
             if QueueHandler.objects.filter(email=handler_email).exists():
                 handler = QueueHandler.objects.get(email=handler_email)
@@ -237,17 +256,8 @@ def queue(request):
             add_phone(p.phone)
         mitmeta = [] # 2014-specific
         for p in Y2014MitMetapuzzleSubmission.objects.filter(team=team, resolved=False): # 2014-specific
-            correct = False
-            mp = Metapuzzle.objects.get(url='dormouse')
-            if compare_answers(p.answer, mp.answer):
-                correct = True
-            mp = Metapuzzle.objects.get(url='caterpillar')
-            if compare_answers(p.answer, mp.answer):
-                correct = True
-            mp = Metapuzzle.objects.get(url='tweedles')
-            if compare_answers(p.answer, mp.answer):
-                correct = True
-            mitmeta.append({'submission': p, 'correct': correct})
+            bait_meta = check_bait(p.answer)
+            mitmeta.append({'submission': p, 'correct': not bait_meta is None})
             add_phone(p.phone)
 
         puzzle.sort(key=lambda p: p['correct'])
