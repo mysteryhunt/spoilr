@@ -18,9 +18,6 @@ def compare_answers(a, b):
 def check_bait(answer): # 2014-specific
     for x in ['dormouse', 'caterpillar', 'tweedles']:
         mp = Metapuzzle.objects.get(url=x)
-        # hack for testing:
-        if compare_answers(answer, x):
-            return mp
         if compare_answers(answer, mp.answer):
             return mp
     return None
@@ -41,11 +38,12 @@ def submit_puzzle_answer(team, puzzle, answer, phone):
     system_log('submit-puzzle', "%s submitted '%s' for %s" % (team.name, answer, str(puzzle)), team=team, object_id=puzzle.url)
     PuzzleSubmission.objects.create(team=team, puzzle=puzzle, phone=phone, answer=answer).save()
     # hack for testing:
-    if compare_answers(answer, "BENOISY") or compare_answers(answer, puzzle.answer):
+    if compare_answers(answer, "BENOISY"):
         puzzle_answer_correct(team, puzzle)
         for sub in PuzzleSubmission.objects.filter(team=team, puzzle=puzzle):
-            sub.resolved = True
-            sub.save()
+            if sub.answer == answer:
+                sub.resolved = True
+                sub.save()
 
 def submit_puzzle(request, puzzle_url):
     username = request.META['REMOTE_USER']
@@ -85,11 +83,12 @@ def submit_metapuzzle_answer(team, metapuzzle, answer, phone):
     system_log('submit-metapuzzle', "%s submitted '%s' for %s" % (team.name, answer, str(metapuzzle)), team=team, object_id=metapuzzle.url)
     MetapuzzleSubmission.objects.create(team=team, metapuzzle=metapuzzle, phone=phone, answer=answer).save()
     # hack for testing:
-    if compare_answers(answer, "BENOISY") or compare_answers(answer, metapuzzle.answer):
+    if compare_answers(answer, "BENOISY"):
         metapuzzle_answer_correct(team, metapuzzle)
         for sub in MetapuzzleSubmission.objects.filter(team=team, metapuzzle=metapuzzle):
-            sub.resolved = True
-            sub.save()
+            if sub.answer == answer:
+                sub.resolved = True
+                sub.save()
 
 def submit_metapuzzle(request, metapuzzle_url):
     username = request.META['REMOTE_USER']
@@ -133,12 +132,13 @@ def submit_mit_metapuzzle_answer(team, answer, phone): # 2014-specific
     system_log('submit-mit-bait', "%s submitted '%s'" % (team.name, answer), team=team)
     Y2014MitMetapuzzleSubmission.objects.create(team=team, phone=phone, answer=answer).save()
     # begin hack for testing:
-    bait_meta = check_bait(answer)
-    if bait_meta:
-        metapuzzle_answer_correct(team, bait_meta)
+    for x in ['dormouse', 'caterpillar', 'tweedles']:
+        if check_answer(answer, x):
+            metapuzzle_answer_correct(team, Metapuzzle.objects.get(url=x))
         for sub in Y2014MitMetapuzzleSubmission.objects.filter(team=team):
-            sub.resolved = True
-            sub.save()
+            if sub.answer == answer:
+                sub.resolved = True
+                sub.save()
     # end hack
 
 def submit_mit_metapuzzle(request): # 2014-specific
