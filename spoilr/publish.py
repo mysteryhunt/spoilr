@@ -368,8 +368,9 @@ def publish_team_puzzle(team, puzzle, suffix=None):
     # --- 2014-specific ---
     if team.url == 'spoiler_alert':
         solution_context = PuzzleContext(team, puzzle)
-        solution_source = os.path.join(settings.HUNT_DATA_DIR, 'solution', puzzle.url)
+        solution_source = os.path.join(settings.HUNT_DATA_DIR, 'puzzle-solution', puzzle.url)
         if os.path.isdir(solution_source):
+            print("  and solution")
             solution_dir = os.path.join(team_path, 'puzzle-solution', puzzle.url)
             if not os.path.isdir(os.path.abspath(solution_dir)):
                 try:
