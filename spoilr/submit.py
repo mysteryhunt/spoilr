@@ -179,10 +179,11 @@ def queue(request):
         if h.team:
             delta = datetime.now() - h.team_timestamp
             if delta.seconds > 60*10:
+                team = h.team
                 h.team = None
                 h.team_timestamp = None
                 h.save()
-                system_log('queue-timeout', "'%s' (%s) had been handling '%s' for %s seconds, but timed out" % (h.name, h.email, h.team.name, delta.seconds), team=h.team)
+                system_log('queue-timeout', "'%s' (%s) had been handling '%s' for %s seconds, but timed out" % (h.name, h.email, team.name, delta.seconds), team=team)
 
     handler_email = request.session.get('handler_email')
     handler = None
@@ -232,15 +233,26 @@ def queue(request):
             add_phone(p.phone)
         metapuzzle = []
         for p in MetapuzzleSubmission.objects.filter(team=team, resolved=False):
-            metapuzzle.append(p)
+            metapuzzle.append({'submission': p, 'correct': compare_answers(p.answer, p.metapuzzle.answer)})
             add_phone(p.phone)
         mitmeta = [] # 2014-specific
         for p in Y2014MitMetapuzzleSubmission.objects.filter(team=team, resolved=False): # 2014-specific
-            mitmeta.append(p)
+            correct = False
+            mp = Metapuzzle.objects.get(url='dormouse')
+            if compare_answers(p.answer, mp.answer):
+                correct = True
+            mp = Metapuzzle.objects.get(url='caterpillar')
+            if compare_answers(p.answer, mp.answer):
+                correct = True
+            mp = Metapuzzle.objects.get(url='tweedles')
+            if compare_answers(p.answer, mp.answer):
+                correct = True
+            mitmeta.append({'submission': p, 'correct': correct})
             add_phone(p.phone)
 
         template = loader.get_template('queue-handling.html') 
         context = RequestContext(request, {
+            'timer': (60*10 - (datetime.now() - handler.team_timestamp).seconds - 3),
             'handler': handler,
             'phones_other': phones_other,
             'phones_now': phones,
