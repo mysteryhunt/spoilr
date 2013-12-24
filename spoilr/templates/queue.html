@@ -35,7 +35,7 @@
 	<input id="email" type="text" size="30" name="email" />
 	<input type="submit" value="Go" />
       </form>
-    {% endif %}
+      {% endif %}
     </div>
     <div>
       {{ t_total }} teams hunting,
@@ -48,7 +48,7 @@
       <div style="padding-left: 30px;">
 	{% if t.oldest > 300 %}
 	<b>Waiting for more than five minutes!</b><br/>
-	{% elif t.oldest > 60 %}
+	{% elif t.oldest > 120 %}
 	<b>Waiting for more than two minutes!</b><br/>
 	{% endif %}
 	{% if t.submissions >= tq_max %}

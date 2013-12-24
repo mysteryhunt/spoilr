@@ -1,0 +1,53 @@
+{% load humanize %}
+<html>
+  <head>
+    <!--<meta http-equiv="refresh" content="8">-->
+    <style type="text/css">
+      body, td, input {
+        font: 10pt Verdana;
+      }
+      td {
+        vertical-align: top;
+      }
+    </style>
+  </head>
+  <body>
+    <div style="text-align: right;">
+      Signed in as {{ handler.name }}
+    </div>
+    <div>
+      Handling <b>{{ team.name }}</b> since {{ handler.team_timestamp|naturaltime }} (this claim will timeout after 10 minutes)<br />
+      <ul>
+	{% for p in phones_now %}
+	<li>{{ p }}</li>
+	{% endfor %}
+      </ul>
+      {% if phones_other %}
+      Other phones:
+      <ul>
+	{% for p in phones_other %}
+	<li>{{ p }}</li>
+	{% endfor %}
+      </ul>
+      {% endif %}
+      Puzzle submissions:
+      <table>
+	{% if puzzle %}
+	<tr><td>Time</td><td>Phone</td><td>Puzzle</td><td>Answer</td><td>Tell them:</td><td></td></tr>
+	{% for p in puzzle %}
+	<tr><td>{{ p.submission.timestamp|naturaltime }}</td><td>{{ p.submission.phone }}</td><td>{{ p.submission.puzzle }}</td><td>{{ p.submission.answer }}</td><td>
+	    {% if p.correct %}
+	    <b>Correct!</b>
+	    {% else %}
+	    Sorry, incorrect.
+	    {% endif %}
+	  </td>
+	</tr>
+	{% endfor %}
+	{% else %}
+	<tr><td>None</td></tr>
+	{% endif %}
+      </table>
+    </div>
+  </body>
+</html>

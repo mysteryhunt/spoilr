@@ -163,18 +163,18 @@ class MetapuzzleSubmission(models.Model):
 
 class QueueHandler(models.Model):
     name = models.CharField(max_length=100)
-    email = models.CharField(max_length=100)
+    email = models.CharField(max_length=100, unique=True)
     activity = models.DateTimeField(default=datetime.now)
-    team = models.ForeignKey(Team, blank=True, null=True)
+    team = models.ForeignKey(Team, unique=True, blank=True, null=True)
     team_timestamp = models.DateTimeField(blank=True, null=True)
     
     def __str__(self):
         if self.team:
             status = 'handling %s since %s' % (str(self.team), str(self.team_timestamp))
         elif (datetime.now - self.activity).seconds > 5 * 60:
-            status = 'afk'
+            status = 'off duty'
         else:
-            status = 'idle'
+            status = 'on duty, idle'
         return '%s: %s' % (self.name, status)
     
 

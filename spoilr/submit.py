@@ -1,10 +1,13 @@
 from django.http import HttpResponse
 from django.template import RequestContext, loader
 from django.shortcuts import redirect
+
 import re
+import datetime
 
 from .models import *
 from .actions import *
+from .log import *
 
 def cleanup_answer(answer):
     return re.sub(r'[^ A-Z0-9]', '', answer.upper()) 
@@ -25,6 +28,7 @@ def submit_puzzle_answer(team, puzzle, answer, phone):
             return
     if PuzzleAccess.objects.filter(team=team, puzzle=puzzle, solved=True).exists():
         return
+    system_log('submit-puzzle', "%s submitted '%s' for %s" % (team.name, answer, str(puzzle)), team=team, object_id=puzzle.url)
     PuzzleSubmission.objects.create(team=team, puzzle=puzzle, phone=phone, answer=answer).save()
     # hack for testing:
     if answer == "BENOISY" or compare_answers(answer, puzzle.answer):
@@ -68,6 +72,7 @@ def submit_metapuzzle_answer(team, metapuzzle, answer, phone):
             return
     if MetapuzzleSolve.objects.filter(team=team, metapuzzle=metapuzzle).exists():
         return
+    system_log('submit-metapuzzle', "%s submitted '%s' for %s" % (team.name, answer, str(metapuzzle)), team=team, object_id=metapuzzle.url)
     MetapuzzleSubmission.objects.create(team=team, metapuzzle=metapuzzle, phone=phone, answer=answer).save()
     # hack for testing:
     if answer == "BENOISY" or compare_answers(answer, metapuzzle.answer):
@@ -115,6 +120,7 @@ def submit_mit_metapuzzle_answer(team, answer, phone): # 2014-specific
     for sub in Y2014MitMetapuzzleSubmission.objects.filter(team=team):
         if compare_answers(sub.answer, answer):
             return
+    system_log('submit-mit-bait', "%s submitted '%s'" % (team.name, answer), team=team)
     Y2014MitMetapuzzleSubmission.objects.create(team=team, phone=phone, answer=answer).save()
     # begin hack for testing:
     metapuzzle = Metapuzzle.objects.get(url='dormouse')
@@ -169,6 +175,15 @@ def submit_mit_metapuzzle(request): # 2014-specific
     return HttpResponse(template.render(context))
 
 def queue(request):
+    for h in QueueHandler.objects.all():
+        if h.team:
+            delta = datetime.now() - h.team_timestamp
+            if delta.seconds > 60*10:
+                h.team = None
+                h.team_timestamp = None
+                h.save()
+                system_log('queue-timeout', "'%s' (%s) had been handling '%s' for %s seconds, but timed out" % (h.name, h.email, h.team.name, delta.seconds), team=h.team)
+
     handler_email = request.session.get('handler_email')
     handler = None
     if handler_email:
@@ -176,6 +191,12 @@ def queue(request):
     if request.method == 'POST':
         if "offduty" in request.POST:
             del request.session['handler_email']
+        elif "claim" in request.POST:
+            team = Team.objects.get(url=request.POST['claim'])
+            handler.team = team
+            handler.team_timestamp = datetime.now()
+            handler.save()
+            system_log('queue-claim', "'%s' (%s) claims '%s'" % (h.name, h.email, team.name), team=h.team)
         else:
             handler_email = request.POST["email"]
             if QueueHandler.objects.filter(email=handler_email).exists():
@@ -191,6 +212,45 @@ def queue(request):
                 return HttpResponse(template.render(context))
             request.session['handler_email'] = handler_email
         return redirect(request.path)
+
+    if handler and handler.team:
+        team = handler.team
+
+        phones_other = [x.phone for x in TeamPhone.objects.filter(team=team)]
+
+        phones = set()
+        def add_phone(p):
+            phones.add(p)
+            try:
+                phones_other.remove(p)
+            except ValueError:
+                pass
+
+        puzzle = []
+        for p in PuzzleSubmission.objects.filter(team=team, resolved=False):
+            puzzle.append({'submission': p, 'correct': compare_answers(p.answer, p.puzzle.answer)})
+            add_phone(p.phone)
+        metapuzzle = []
+        for p in MetapuzzleSubmission.objects.filter(team=team, resolved=False):
+            metapuzzle.append(p)
+            add_phone(p.phone)
+        mitmeta = [] # 2014-specific
+        for p in Y2014MitMetapuzzleSubmission.objects.filter(team=team, resolved=False): # 2014-specific
+            mitmeta.append(p)
+            add_phone(p.phone)
+
+        template = loader.get_template('queue-handling.html') 
+        context = RequestContext(request, {
+            'handler': handler,
+            'phones_other': phones_other,
+            'phones_now': phones,
+            'puzzle': puzzle,
+            'metapuzzle': metapuzzle,
+            'mitmeta': mitmeta,
+            'team': team,
+        })
+
+        return HttpResponse(template.render(context))
 
     t_total = Team.objects.count()
     q_total = PuzzleSubmission.objects.filter(resolved=False).count()
