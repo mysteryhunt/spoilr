@@ -85,9 +85,9 @@ class TopContext(Context):
     def __init__(self, team):
         Context.__init__(self)
         self['team'] = team
-        self['rounds'] = [self.round_obj(x) for x in RoundAccess.objects.filter(team=team).order_by('round__order')]
-        self['solved_metas'] = [x.metapuzzle for x in MetapuzzleSolve.objects.filter(team=team).order_by('metapuzzle__order')]
-        self['log_entries'] = [{"entry": x} for x in TeamLog.objects.filter(team=team).order_by('-timestamp')]
+        self['rounds'] = [self.round_obj(x) for x in RoundAccess.objects.filter(team=team).order_by('id')]
+        self['solved_metas'] = [x.metapuzzle for x in MetapuzzleSolve.objects.filter(team=team).order_by('id')]
+        self['log_entries'] = [{"entry": x} for x in TeamLog.objects.filter(team=team).order_by('-id')]
         for entry in self['log_entries']:
             msg = entry['entry'].message
             if "[[" in msg:
@@ -98,7 +98,7 @@ class TopContext(Context):
         self['team_data'] = Y2014TeamData.objects.get(team=team)
     def round_obj(self, access):
         ret = {"round": access.round}
-        ret["puzzles"] = [self.puzzle_obj(x) for x in PuzzleAccess.objects.filter(puzzle__round=access.round, team=access.team).order_by('puzzle__order')]
+        ret["puzzles"] = [self.puzzle_obj(x) for x in PuzzleAccess.objects.filter(puzzle__round=access.round, team=access.team).order_by('id')]
         return ret
     def puzzle_obj(self, access):
         ret = {"puzzle": access.puzzle, "solved": access.solved}
