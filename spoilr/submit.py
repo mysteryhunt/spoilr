@@ -31,7 +31,7 @@ def submit_puzzle_answer(team, puzzle, answer, phone):
     system_log('submit-puzzle', "%s submitted '%s' for %s" % (team.name, answer, str(puzzle)), team=team, object_id=puzzle.url)
     PuzzleSubmission.objects.create(team=team, puzzle=puzzle, phone=phone, answer=answer).save()
     # hack for testing:
-    if answer == "BENOISY" or compare_answers(answer, puzzle.answer):
+    if compare_answers(answer, "BENOISY") or compare_answers(answer, puzzle.answer):
         puzzle_answer_correct(team, puzzle)
         for sub in PuzzleSubmission.objects.filter(team=team, puzzle=puzzle):
             sub.resolved = True
@@ -75,7 +75,7 @@ def submit_metapuzzle_answer(team, metapuzzle, answer, phone):
     system_log('submit-metapuzzle', "%s submitted '%s' for %s" % (team.name, answer, str(metapuzzle)), team=team, object_id=metapuzzle.url)
     MetapuzzleSubmission.objects.create(team=team, metapuzzle=metapuzzle, phone=phone, answer=answer).save()
     # hack for testing:
-    if answer == "BENOISY" or compare_answers(answer, metapuzzle.answer):
+    if compare_answers(answer, "BENOISY") or compare_answers(answer, metapuzzle.answer):
         metapuzzle_answer_correct(team, metapuzzle)
         for sub in MetapuzzleSubmission.objects.filter(team=team, metapuzzle=metapuzzle):
             sub.resolved = True
