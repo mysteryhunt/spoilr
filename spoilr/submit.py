@@ -250,6 +250,12 @@ def queue(request):
             mitmeta.append({'submission': p, 'correct': correct})
             add_phone(p.phone)
 
+        puzzle.sort(key=lambda p: p['correct'])
+        puzzle.sort(key=lambda p: p['submission'].puzzle.url)
+        metapuzzle.sort(key=lambda p: p['correct'])
+        metapuzzle.sort(key=lambda p: p['submission'].metapuzzle.url)
+        mitmeta.sort(key=lambda p: p['correct']) # 2014-specific
+
         template = loader.get_template('queue-handling.html') 
         context = RequestContext(request, {
             'timer': (60*10 - (datetime.now() - handler.team_timestamp).seconds - 3),
