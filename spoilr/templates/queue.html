@@ -43,7 +43,7 @@
       {{ q_total }} submission(s) among them
     </div>
     {% for t in teams %}
-    <div style="padding: 3px; border-top: 1px solid black; {% if t.oldest > 600 %}background: #faa;{% elif t.oldest > 300 or t.submissions >= tq_max %}background: #ffa;{% endif %}">
+    <div style="padding: 3px; border-top: 1px solid black; {% if t.oldest > 600 %}background: #faa;{% elif t.oldest > 300 or t.submissions|length >= tq_max %}background: #ffa;{% endif %}">
       <b>{{ t.team.name }}</b>
       <div style="padding-left: 30px;">
 	{% if t.oldest > 600 %}
