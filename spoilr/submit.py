@@ -179,28 +179,32 @@ def queue(request):
             handler.team = team
             handler.team_timestamp = datetime.now()
             handler.save()
-            system_log('queue-claim', "'%s' (%s) claims '%s'" % (h.name, h.email, team.name), team=h.team)
+            system_log('queue-claim', "'%s' (%s) claimed '%s'" % (handler.name, handler.email, team.name), team=team)
         elif handler and handler.team and "handled" in request.POST:
             for key in request.POST:
                 if key[:2] == 'p_':
                     p = PuzzleSubmission.objects.get(team=handler.team, resolved=False, id=key[2:])
                     p.resolved = True
+                    system_log('queue-resolution', "'%s' (%s) resolved answer '%s' for puzzle '%s' for team '%s'" % (handler.name, handler.email, p.answer, str(p.puzzle), handler.team.name), team=handler.team)
                     if compare_answers(p.answer, p.puzzle.answer):
                         puzzle_answer_correct(handler.team, p.puzzle)
                     p.save()
                 if key[:2] == 'm_':
                     p = MetapuzzleSubmission.objects.get(team=handler.team, resolved=False, id=key[2:])
                     p.resolved = True
+                    system_log('queue-resolution', "'%s' (%s) resolved answer '%s' for metapuzzle '%s' for team '%s'" % (handler.name, handler.email, p.answer, str(p.metapuzzle), handler.team.name), team=handler.team)
                     if compare_answers(p.answer, p.metapuzzle.answer):
                         metapuzzle_answer_correct(handler.team, p.metapuzzle)
                     p.save()
                 if key[:2] == 'b_': # 2014-specific
                     p = Y2014MitMetapuzzleSubmission.objects.get(team=handler.team, resolved=False, id=key[2:])
                     p.resolved = True
+                    system_log('queue-resolution', "'%s' (%s) resolved bait '%s' for team '%s'" % (handler.name, handler.email, p.answer, handler.team.name), team=handler.team)
                     bait_meta = check_bait(p.answer)
                     if bait_meta:
                         metapuzzle_answer_correct(handler.team, bait_meta)
                     p.save()
+            system_log('queue-claim', "'%s' (%s) released claim on team '%s'" % (handler.name, handler.email, handler.team.name), team=handler.team)
             handler.team = None
             handler.team_timestamp = None
             handler.save()

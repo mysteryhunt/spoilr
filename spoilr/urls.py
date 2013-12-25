@@ -5,6 +5,7 @@ from django.contrib import admin
 admin.autodiscover()
 
 from .dashboard import all_teams
+from .log import system_log_view
 from .submit import *
 
 urlpatterns = patterns('',
@@ -20,4 +21,5 @@ urlpatterns = patterns('',
 
     url(r'^hq/all-teams/$', all_teams),
     url(r'^hq/queue/$', queue),
+    url(r'^hq/log/$', system_log_view),
 )

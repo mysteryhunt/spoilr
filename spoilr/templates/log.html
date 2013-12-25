@@ -1,0 +1,44 @@
+{% load humanize %}
+<html>
+  <head>
+    <meta http-equiv="refresh" content="8">
+    <style type="text/css">
+      body, td, input {
+        font: 10pt Verdana;
+      }
+      table {
+        border-collapse: collapse;
+        padding: 0px;
+        margin: 0px;
+      }
+      td, th {
+        vertical-align: top;
+        padding: 2px 8px;
+        overflow: hidden;
+        white-space: nowrap;
+      }
+      th {
+        font: 10pt Verdana bold;
+        text-align: left;
+      }
+    </style>
+  </head>
+  <body>
+    <table>
+    <tr><th>Time
+      <th>Event Type
+      <th>Message
+      <th>Team
+      <th>Object ID
+    </tr>
+    {% for e in entries %}
+    <tr><td>{{ e.timestamp|date:'Y-m-d H:i:s' }}
+      <td>{{ e.event_type }}
+      <td>{{ e.message }}
+      <td>{{ e.team }}
+      <td>{{ e.object_id }}
+    </tr>
+    {% endfor %}
+    </table>
+  </body>
+</html>

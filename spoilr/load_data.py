@@ -20,7 +20,7 @@ def load_metapuzzles():
             print("  Metapuzzle \"%s\"..." % row["name"])
             metapuzzle = Metapuzzle.objects.create(**row)
             metapuzzle.save() 
-            system_log('load_metapuzzle', 'Loaded metapuzzle "%s"' % metapuzzle.name, object_id=metapuzzle.name)
+            system_log('load-metapuzzle', 'Loaded metapuzzle "%s"' % metapuzzle.name, object_id=metapuzzle.name)
     print("Done loading metapuzzles")
 
 def load_rounds():
@@ -32,7 +32,7 @@ def load_rounds():
             print("  Round \"%s\"..." % row["name"])
             round = Round.objects.create(**row)
             round.save() 
-            system_log('load_round', 'Loaded round "%s"' % round.name, object_id=round.url)
+            system_log('load-round', 'Loaded round "%s"' % round.name, object_id=round.url)
     print("Done loading rounds")
 
 def load_puzzles():
@@ -45,7 +45,7 @@ def load_puzzles():
             row["round"] = Round.objects.get(url=row["round"])
             puzzle = Puzzle.objects.create(**row)
             puzzle.save() 
-            system_log('load_puzzle', 'Loaded puzzle "%s" into round "%s"' % (puzzle.name, puzzle.round.name), object_id=puzzle.url)
+            system_log('load-puzzle', 'Loaded puzzle "%s" into round "%s"' % (puzzle.name, puzzle.round.name), object_id=puzzle.url)
     print("Done loading puzzles")
 
 def load_teams():
@@ -57,7 +57,7 @@ def load_teams():
             print("  Team \"%s\"..." % row["name"])
             team = Team.objects.create(**row)
             team.save() 
-            system_log('load_team', 'Loaded team "%s"' % team.name, object_id=team.url)
+            system_log('load-team', 'Loaded team "%s"' % team.name, object_id=team.url)
             # 2014-specific:
             initial_rounds = [Round.objects.get(url='mit'), Round.objects.get(url='events')]
             for initial_round in initial_rounds:
