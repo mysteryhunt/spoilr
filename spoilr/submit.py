@@ -123,7 +123,7 @@ def submit_mit_metapuzzle_answer(team, answer, phone): # 2014-specific
             return
     system_log('submit-mit-bait', "%s submitted '%s'" % (team.name, answer), team=team)
     for x in ['dormouse', 'caterpillar', 'tweedles']: # hack for testing
-        if check_answer(answer, x):
+        if compare_answers(answer, x):
             metapuzzle_answer_correct(team, Metapuzzle.objects.get(url=x))
             return
     Y2014MitMetapuzzleSubmission.objects.create(team=team, phone=phone, answer=answer).save()
