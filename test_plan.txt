@@ -24,14 +24,19 @@ puzzle_answer_correct(t, Puzzle.objects.get(url='ring_around_the_music'))
 puzzle_answer_correct(t, Puzzle.objects.get(url='down_the_rabbit_hole_2'))
 puzzle_answer_correct(t, Puzzle.objects.get(url='a_meta_puzzle'))
 
-m = Metapuzzle.objects.get(name='The Caterpillar')
+m = Metapuzzle.objects.get(url='caterpillar')
 metapuzzle_answer_incorrect(t, m, 'NOPE')
 metapuzzle_answer_correct(t, m)
 
-m = Metapuzzle.objects.get(name='The Dormouse')
+# meet caterpillar
+
+m = Metapuzzle.objects.get(url='dormouse')
 metapuzzle_answer_correct(t, m)
-m = Metapuzzle.objects.get(name='Tweedledee and Tweedledum')
+m = Metapuzzle.objects.get(url='tweedles')
 metapuzzle_answer_correct(t, m)
+
+# meet dormouse
+# meet tweedles
 
 puzzle_answer_correct(t, Puzzle.objects.get(url='find_your_way_across'))
 puzzle_answer_correct(t, Puzzle.objects.get(url='local_shorts'))
@@ -48,8 +53,7 @@ puzzle_answer_correct(t, Puzzle.objects.get(url='operator_test'))
 puzzle_answer_correct(t, Puzzle.objects.get(url='the_spy_who_read_me'))
 puzzle_answer_correct(t, Puzzle.objects.get(url='can_tab_rig_ian'))
 
-m = Metapuzzle.objects.get(url='white_queen_gift')
-metapuzzle_answer_correct(t, m)
+# white queen gift
 
 m = Metapuzzle.objects.get(url='tea_party')
 metapuzzle_answer_correct(t, m)

@@ -23,6 +23,18 @@ def load_metapuzzles():
             system_log('load-metapuzzle', 'Loaded metapuzzle "%s"' % metapuzzle.name, object_id=metapuzzle.name)
     print("Done loading metapuzzles")
 
+def load_interactions():
+    print("Loading interactions from interactions.txt...")
+    with open(os.path.join(settings.LOAD_DIR, 'interactions.txt'), 'r') as team_file:
+        for row in csv.DictReader(team_file, delimiter='\t'):
+            if Interaction.objects.filter(name=row["name"]).exists():
+                continue
+            print("  Interaction \"%s\"..." % row["name"])
+            interaction = Interaction.objects.create(**row)
+            interaction.save() 
+            system_log('load-interaction', 'Loaded interaction "%s"' % interaction.name, object_id=interaction.name)
+    print("Done loading interactions")
+
 def load_rounds():
     print("Loading rounds from rounds.txt...")
     with open(os.path.join(settings.LOAD_DIR, 'rounds.txt'), 'r') as team_file:
@@ -158,6 +170,7 @@ def load_knights_data(): # 2014-specific
 
 def load_all_inner():
     load_metapuzzles()
+    load_interactions()
     load_rounds()
     load_puzzles()
     load_mit_nodes() # 2014-specific

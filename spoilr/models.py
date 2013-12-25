@@ -27,6 +27,17 @@ class Metapuzzle(models.Model):
     class Meta:
         ordering = ['order']
 
+class Interaction(models.Model):
+    url = models.CharField(max_length=50, unique=True, verbose_name="id")
+    name = models.CharField(max_length=200, unique=True)
+    order = models.IntegerField(unique=True)
+
+    def __str__(self):
+        return '%s' % (self.name)
+
+    class Meta:
+        ordering = ['order']
+
 class Puzzle(models.Model):
     round = models.ForeignKey(Round)
     url = models.CharField(max_length=50, unique=True, verbose_name="id")
@@ -106,6 +117,20 @@ class MetapuzzleSolve(models.Model):
 
     class Meta:
         unique_together = ('team', 'metapuzzle')
+
+class InteractionAccess(models.Model):
+    team = models.ForeignKey(Team)
+    interaction = models.ForeignKey(Interaction)
+    accomplished = models.BooleanField(default=False)
+
+    def __str__(self):
+        s = 'can accomplish'
+        if self.solved:
+            s = 'has accomplished'
+        return '%s %s %s' % (str(self.team), s, str(self.interaction))
+
+    class Meta:
+        unique_together = ('team', 'interaction')
 
 class RoundAccess(models.Model):
     team = models.ForeignKey(Team)

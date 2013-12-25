@@ -3,9 +3,20 @@ from .models import *
 
 class MetapuzzleAdmin(admin.ModelAdmin):
     def teams_solved(metapuzzle):
-        return len(MetapuzzleSolve.objects.filter(metapuzzle=metapuzzle))
+        return MetapuzzleSolve.objects.filter(metapuzzle=metapuzzle).count()
     teams_solved.short_description = 'Teams Solved'
     list_display = ('__str__', teams_solved)
+    search_fields = ['url', 'name']
+    ordering = ['order']
+
+class InteractionAdmin(admin.ModelAdmin):
+    def teams_pending(puzzle):
+        return InteractionAccess.objects.filter(interaction=interaction, accomplished=False).count()
+    teams_pending.short_description = 'Teams Pending'
+    def teams_accomplished(interaction):
+        return InteractionAccess.objects.filter(interaction=interaction, accomplished=True).count()
+    teams_accomplished.short_description = 'Teams Accomplished'
+    list_display = ('__str__', teams_pending, teams_accomplished)
     search_fields = ['url', 'name']
     ordering = ['order']
 
@@ -16,10 +27,10 @@ class RoundPuzzleInline(admin.TabularInline):
 
 class RoundAdmin(admin.ModelAdmin):
     def teams_open(round):
-        return len(RoundAccess.objects.filter(round=round))
+        return RoundAccess.objects.filter(round=round).count()
     teams_open.short_description = 'Teams Open'
     def puzzles(round):
-        return len(Puzzle.objects.filter(round=round))
+        return Puzzle.objects.filter(round=round).count()
     puzzles.short_description = 'Puzzles'
     list_display = ('__str__', puzzles, teams_open)
     search_fields = ['url', 'name']
@@ -28,16 +39,17 @@ class RoundAdmin(admin.ModelAdmin):
 
 class PuzzleAdmin(admin.ModelAdmin):
     def teams_open(puzzle):
-        return len(PuzzleAccess.objects.filter(puzzle=puzzle))
+        return PuzzleAccess.objects.filter(puzzle=puzzle).count()
     teams_open.short_description = 'Teams Open'
     def teams_solved(puzzle):
-        return len(PuzzleAccess.objects.filter(puzzle=puzzle,solved=True))
+        return PuzzleAccess.objects.filter(puzzle=puzzle,solved=True).count()
     teams_solved.short_description = 'Teams Solved'
     list_display = ('__str__', 'name', 'round', teams_open, teams_solved)
     list_filter = ('round__name',)
     search_fields = ['url', 'name']
     ordering = ['order']
 
+admin.site.register(Interaction, InteractionAdmin)
 admin.site.register(Metapuzzle, MetapuzzleAdmin)
 admin.site.register(Round, RoundAdmin)
 admin.site.register(Puzzle, PuzzleAdmin)
@@ -66,19 +78,19 @@ class TeamPhoneInline(admin.TabularInline):
 
 class TeamAdmin(admin.ModelAdmin):
     def rounds_open(team):
-        return len(team.rounds.all())
+        return team.rounds.count()
     rounds_open.short_description = 'Rounds Open'
     def metapuzzles_solved(team):
-        return len(MetapuzzleSolve.objects.filter(team=team))
+        return MetapuzzleSolve.objects.filter(team=team).count()
     metapuzzles_solved.short_description = 'Metapuzzles Solved'
     def puzzles_open(team):
-        return len(team.puzzles.all())
+        return team.puzzles.count()
     puzzles_open.short_description = 'Puzzles Open'
     def puzzles_solved(team):
-        return len(team.puzzles.filter(puzzleaccess__solved=True))
+        return team.puzzles.filter(puzzleaccess__solved=True).count()
     puzzles_solved.short_description = 'Puzzles Solved'
     def puzzles_unsolved(team):
-        return len(team.puzzles.filter(puzzleaccess__solved=False))
+        return team.puzzles.filter(puzzleaccess__solved=False).count()
     puzzles_unsolved.short_description = 'Puzzles Unsolved'
     inlines = [TeamRoundInline, TeamPuzzleInline, TeamPhoneInline]
     list_display = ('__str__', 'username', rounds_open, metapuzzles_solved, puzzles_open, puzzles_solved, puzzles_unsolved)
@@ -165,9 +177,16 @@ class PuzzleAccessAdmin(admin.ModelAdmin):
     search_fields = ['team__name', 'puzzle__name', 'puzzle__round__name']
     ordering = ['team__name', 'puzzle__round__order', 'puzzle__order']
 
+class InteractionAccessAdmin(admin.ModelAdmin):
+    list_display = ('__str__', 'team', 'interaction', 'accomplished')
+    list_filter = ('team__name', 'interaction', 'accomplished')
+    search_fields = ['team__name', 'interaction__name']
+    ordering = ['team__name', 'interaction__order']
+
 admin.site.register(MetapuzzleSolve,MetapuzzleSolveAdmin)
 admin.site.register(RoundAccess,RoundAccessAdmin)
 admin.site.register(PuzzleAccess,PuzzleAccessAdmin)
+admin.site.register(InteractionAccess,InteractionAccessAdmin)
 
 class PuzzleSubmissionAdmin(admin.ModelAdmin):
     list_display = ('__str__', 'timestamp', 'team', 'puzzle', 'phone', 'resolved')

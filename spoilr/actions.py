@@ -31,9 +31,11 @@ def release_round(team, round, reason):
                 except Exception as e:
                     logger.error('error releasing initial puzzle %s: %s' % (apuzzle.url, e))
                 count = count - 1
-    # TODO remove this hack:
-    if round.url == "white_queen": # HACK for testing, auto-gift
-        metapuzzle_answer_correct(team, Metapuzzle.objects.get(url='white_queen_gift'))
+    if round.url == "white_queen":
+        interaction = Interaction.objects.get(url='white_queen_gift')
+        release_interaction(team, interaction, 'Round "%s" released' % round.name)
+        # hack for testing:
+        interaction_accomplished(team, interaction)
     publish_team_round(team, round)
     publish_team_top(team)
 
@@ -45,6 +47,14 @@ def release_puzzle(team, puzzle, reason):
     team_log_puzzle_access(team, puzzle, reason)
     publish_team_puzzle(team, puzzle)
     publish_team_round(team, puzzle.round)
+    publish_team_top(team)
+
+def release_interaction(team, interaction, reason):
+    print("release %s/interaction/%s (%s)" % (team.url, interaction.url, reason))
+    if InteractionAccess.objects.filter(team=team, interaction=interaction).exists():
+        return
+    InteractionAccess.objects.create(team=team, interaction=interaction).save()
+    team_log_interaction_access(team, interaction, reason)
     publish_team_top(team)
 
 def grant_points(team, amount, reason): # 2014-specific
@@ -168,38 +178,10 @@ def metapuzzle_answer_correct(team, metapuzzle):
     team_log_metapuzzle_solved(team, metapuzzle)
     MetapuzzleSolve.objects.create(team=team, metapuzzle=metapuzzle).save()
     if metapuzzle.url in ['dormouse', 'caterpillar', 'tweedles']: # 2014-specific
-        # mit meta: if they have a full vial...
-        td = Y2014TeamData.objects.get(team=team)
-        num_wh = 0
-        for access in RoundAccess.objects.filter(team=team):
-            if access.round.url in ["tea_party", "mock_turtle", "white_queen"]:
-                num_wh = num_wh + 1
-        if num_wh < 3 and td.points >= DRINK_READY[num_wh]:
-            # ...release the corresponding round (which causes the vial to be drunk)
-            next_round = None
-            if metapuzzle.url == 'dormouse':
-                next_round = 'tea_party'
-            elif metapuzzle.url == 'caterpillar':
-                next_round = 'mock_turtle'
-            elif metapuzzle.url == 'tweedles':
-                next_round = 'white_queen'
-            else:
-                logger.error('bug in mit round release: %s' % metapuzzle.name)
-            if not next_round is None:
-                team_log(team, 'story', 'You found a small hole, drank a drink-me vial and jumped in.')
-                release_round(team, Round.objects.get(url=next_round), 'Jumped into a rabbit hole')
-                team_log(team, 'points', 'Consumed %d drink-me point(s) (Jumped into a rabbit hole)' % DRINK_COST[num_wh])
-        else:
-            team_log_hole_discovered_no_vial(team)
-        publish_team_round(team, Round.objects.get(url='mit'))
-    if metapuzzle.url == 'white_queen_gift': # 2014-specific
-        pwa = 'puzzle_with_answer_'
-        for p in [pwa+'williams', pwa+'lynn', pwa+'sullivan', 'another_'+pwa+'sullivan']:
-            try:
-                release_puzzle(team, Puzzle.objects.get(url=p), 'You gave the White Queen a gift')
-            except:
-                pass
-        publish_team_round(team, Round.objects.get(url='white_queen'))
+        interaction = Interaction.objects.get(url=metapuzzle.url)
+        release_interaction(team, interaction, "Found the right bait")
+        # hack for testing:
+        interaction_accomplished(team, interaction)
     if metapuzzle.url in ['tea_party', 'white_queen', 'mock_turtle']: # 2014-specific
         if metapuzzle.url == 'tea_party':
             reason = "Solved the Mad Hatter's problem"
@@ -231,4 +213,54 @@ def metapuzzle_answer_incorrect(team, metapuzzle, answer):
         return
     team_log_metapuzzle_incorrect(team, metapuzzle, answer)
     # publish the log
+    publish_team_top(team)
+
+def mit_bait_incorrect(team, answer): # 2014-specific
+    team_log_mit_bait_incorrect(team, metapuzzle, answer)
+    # publish the log
+    publish_team_top(team)
+
+def interaction_accomplished(team, interaction):
+    print("interaction accomplished %s/interaction/%s" % (team.url, interaction.url))
+    if not InteractionAccess.objects.filter(team=team, interaction=interaction).exists():
+        return
+    ia = InteractionAccess.objects.get(team=team, interaction=interaction)
+    if ia.accomplished:
+        return
+    ia.accomplished = True
+    team_log_interaction_accomplished(team, interaction)
+    ia.save()
+    if interaction.url in ['dormouse', 'caterpillar', 'tweedles']: # 2014-specific
+        # mit meta: if they have a full vial...
+        td = Y2014TeamData.objects.get(team=team)
+        num_wh = 0
+        for access in RoundAccess.objects.filter(team=team):
+            if access.round.url in ["tea_party", "mock_turtle", "white_queen"]:
+                num_wh = num_wh + 1
+        if num_wh < 3 and td.points >= DRINK_READY[num_wh]:
+            # ...release the corresponding round (which causes the vial to be drunk)
+            next_round = None
+            if interaction.url == 'dormouse':
+                next_round = 'tea_party'
+            elif interaction.url == 'caterpillar':
+                next_round = 'mock_turtle'
+            elif interaction.url == 'tweedles':
+                next_round = 'white_queen'
+            else:
+                logger.error('bug in mit round release: %s' % interaction.name)
+            if not next_round is None:
+                team_log(team, 'story', 'You found a small hole, drank a drink-me vial and jumped in.')
+                release_round(team, Round.objects.get(url=next_round), 'Jumped into a rabbit hole')
+                team_log(team, 'points', 'Consumed %d drink-me point(s) (Jumped into a rabbit hole)' % DRINK_COST[num_wh])
+        else:
+            team_log_hole_discovered_no_vial(team)
+        publish_team_round(team, Round.objects.get(url='mit'))
+    if interaction.url == 'white_queen_gift': # 2014-specific
+        pwa = 'puzzle_with_answer_'
+        for p in [pwa+'williams', pwa+'lynn', pwa+'sullivan', 'another_'+pwa+'sullivan']:
+            try:
+                release_puzzle(team, Puzzle.objects.get(url=p), 'You gave the White Queen a gift')
+            except:
+                pass
+        publish_team_round(team, Round.objects.get(url='white_queen'))
     publish_team_top(team)

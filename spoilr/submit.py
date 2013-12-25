@@ -188,6 +188,8 @@ def queue(request):
                     system_log('queue-resolution', "'%s' (%s) resolved answer '%s' for puzzle '%s' for team '%s'" % (handler.name, handler.email, p.answer, str(p.puzzle), handler.team.name), team=handler.team)
                     if compare_answers(p.answer, p.puzzle.answer):
                         puzzle_answer_correct(handler.team, p.puzzle)
+                    else:
+                        puzzle_answer_incorrect(handler.team, p.puzzle, p.answer)
                     p.save()
                 if key[:2] == 'm_':
                     p = MetapuzzleSubmission.objects.get(team=handler.team, resolved=False, id=key[2:])
@@ -195,6 +197,8 @@ def queue(request):
                     system_log('queue-resolution', "'%s' (%s) resolved answer '%s' for metapuzzle '%s' for team '%s'" % (handler.name, handler.email, p.answer, str(p.metapuzzle), handler.team.name), team=handler.team)
                     if compare_answers(p.answer, p.metapuzzle.answer):
                         metapuzzle_answer_correct(handler.team, p.metapuzzle)
+                    else:
+                        metapuzzle_answer_incorrect(handler.team, p.metapuzzle, p.answer)
                     p.save()
                 if key[:2] == 'b_': # 2014-specific
                     p = Y2014MitMetapuzzleSubmission.objects.get(team=handler.team, resolved=False, id=key[2:])
@@ -203,6 +207,8 @@ def queue(request):
                     bait_meta = check_bait(p.answer)
                     if bait_meta:
                         metapuzzle_answer_correct(handler.team, bait_meta)
+                    else:
+                        mit_bait_incorrect(handler.team, p.answer)
                     p.save()
             system_log('queue-claim', "'%s' (%s) released claim on team '%s'" % (handler.name, handler.email, handler.team.name), team=handler.team)
             handler.team = None
