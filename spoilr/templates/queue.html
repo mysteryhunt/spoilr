@@ -51,7 +51,7 @@
 	{% elif t.oldest > 300 %}
 	<b>Waiting for more than five minutes!</b><br/>
 	{% endif %}
-	{% if t.submissions >= tq_max %}
+	{% if t.submissions|length >= tq_max %}
 	<b>Queue is filled!</b><br/>
 	{% endif %}
 	<table>
