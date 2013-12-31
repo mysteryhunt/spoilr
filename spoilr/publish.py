@@ -109,6 +109,10 @@ class TopContext(Context):
                 ret["card"] = d.card
             except:
                 logger.error('puzzle "%s" doesn\'t have a location assigned' % access.puzzle.url)
+        if access.puzzle.round.url == 'tea_party': # 2014-specific
+            data = Y2014PartyAnswerData.objects.get(answer=access.puzzle.answer)
+            if data.type1 == 'cup':
+                ret["cup"] = data.type2
         return ret
 
 class RoundContext(TopContext): # todo don't inherit, it'll just slow things down and we don't need all that context
@@ -193,7 +197,7 @@ class RoundContext(TopContext): # todo don't inherit, it'll just slow things dow
                     pieces.append(puzzles)
             self['pieces'] = pieces
         if round.url == 'white_queen': # 2014-specific
-            self['herring_ok'] = MetapuzzleSolve.objects.filter(team=team, metapuzzle__url='white_queen_gift').exists()
+            self['herring_ok'] = InteractionAccess.objects.filter(team=team, interaction__url='white_queen_gift', accomplished=True).exists()
             pwa = 'puzzle_with_answer_'
             answers = []
             meta_urls = []
@@ -226,6 +230,19 @@ class RoundContext(TopContext): # todo don't inherit, it'll just slow things dow
                         'meta_url': meta_urls[r*3+c]
                         });
             self['cells'] = cells
+        if round.url == 'tea_party': # 2014-specific
+            chairs = [None, None, None, None]
+            for data in Y2014PartyAnswerData.objects.filter(type1='chair'):
+                try:
+                    puzzle = Puzzle.objects.get(answer=data.answer, round=round)
+                    PuzzleAccess.objects.get(puzzle=puzzle, team=team)
+                    chairs['nesw'.index(data.type2)] = {
+                        'direction': data.type2,
+                        'puzzle': puzzle,
+                    }
+                except:
+                    pass
+            self['chairs'] = chairs
         if round.url == "humpty_dumpty": # 2014-specific
             jigsaw = Y2014TeamData.objects.get(team=team).humpty_pieces
             self['jigsaw'] = jigsaw

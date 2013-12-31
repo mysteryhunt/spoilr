@@ -98,16 +98,16 @@ def load_team_phones():
 
 def load_mit_nodes(): # 2014-specific
     print("Loading mit map nodes from mit_nodes.txt...")
+    Y2014MitMapNode.objects.all().delete()
     with open(os.path.join(settings.LOAD_DIR, 'mit_nodes.txt'), 'r') as node_file:
         for row in csv.DictReader(node_file, delimiter='\t'):
-            Y2014MitMapNode.objects.filter(name=row["name"]).delete()
             row['start'] = (row['start'] == 'yes')
-            mitnode = Y2014MitMapNode.objects.create(**row)
-            mitnode.save()
+            Y2014MitMapNode.objects.create(**row).save()
     print("Done loading mit nodes")
 
 def load_mit_edges(): # 2014-specific
     print("Loading mit map edges from mit_edges.txt...")
+    Y2014MitMapEdge.objects.all().delete()
     with open(os.path.join(settings.LOAD_DIR, 'mit_edges.txt'), 'r') as edge_file:
         for row in csv.DictReader(edge_file, delimiter='\t'):
             try:
@@ -120,13 +120,12 @@ def load_mit_edges(): # 2014-specific
             except:
                 print('ERROR: no such node "%s"' % row["node2"])
                 continue
-            Y2014MitMapEdge.objects.filter(node1=node1, node2=node2).delete()
-            mitedge = Y2014MitMapEdge.objects.create(node1=node1, node2=node2)
-            mitedge.save()
+            Y2014MitMapEdge.objects.create(node1=node1, node2=node2).save()
     print("Done loading mit edges")
 
 def load_mit_data(): # 2014-specific
     print("Loading mit data from mit_data.txt...")
+    Y2014MitPuzzleData.objects.all().delete()
     with open(os.path.join(settings.LOAD_DIR, 'mit_data.txt'), 'r') as data_file:
         for row in csv.DictReader(data_file, delimiter='\t'):
             try:
@@ -142,31 +141,33 @@ def load_mit_data(): # 2014-specific
             if puzzle.round.url != "mit":
                 print('ERROR: puzzle "%s" isn\'t in round "mit"' % row["url"])
                 continue
-            Y2014MitPuzzleData.objects.filter(card=row["card"]).delete()
-            Y2014MitPuzzleData.objects.filter(location=location).delete()
-            Y2014MitPuzzleData.objects.filter(puzzle=puzzle).delete()
-            mitdata = Y2014MitPuzzleData.objects.create(puzzle=puzzle, card=row["card"], location=location)
-            mitdata.save()
+            Y2014MitPuzzleData.objects.create(puzzle=puzzle, card=row["card"], location=location).save()
     print("Done loading mit data")
 
 
 def load_caucus_data(): # 2014-specific
     print("Loading caucus data from caucus_data.txt...")
+    Y2014CaucusAnswerData.objects.all().delete()
     with open(os.path.join(settings.LOAD_DIR, 'caucus_data.txt'), 'r') as data_file:
         for row in csv.DictReader(data_file, delimiter='\t'):
-            if Y2014CaucusAnswerData.objects.filter(bird=row["bird"]).exists():
-                continue
             Y2014CaucusAnswerData.objects.create(**row).save()
     print("Done loading caucus data")
 
 def load_knights_data(): # 2014-specific
     print("Loading knights data from knights_data.txt...")
+    Y2014KnightsAnswerData.objects.all().delete()
     with open(os.path.join(settings.LOAD_DIR, 'knights_data.txt'), 'r') as data_file:
         for row in csv.DictReader(data_file, delimiter='\t'):
-            if Y2014KnightsAnswerData.objects.filter(piece=row["piece"], order=row["order"]).exists():
-                continue
             Y2014KnightsAnswerData.objects.create(**row).save()
     print("Done loading knights data")
+
+def load_party_data(): # 2014-specific
+    print("Loading party data from party_data.txt...")
+    Y2014PartyAnswerData.objects.all().delete()
+    with open(os.path.join(settings.LOAD_DIR, 'party_data.txt'), 'r') as data_file:
+        for row in csv.DictReader(data_file, delimiter='\t'):
+            Y2014PartyAnswerData.objects.create(**row).save()
+    print("Done loading party data")
 
 def load_all_inner():
     load_metapuzzles()
@@ -178,6 +179,7 @@ def load_all_inner():
     load_mit_data() # 2014-specific / must load after mit_nodes and puzzles, and must load before teams
     load_caucus_data() # 2014-specific
     load_knights_data() # 2014-specific
+    load_party_data() # 2014-specific
     load_teams()
     load_team_phones()
 
@@ -186,7 +188,7 @@ def load_all():
         from django.db import transaction # Django 1.6 required here
         with transaction.atomic():
             load_all_inner();
-    except:
+    except ImportError:
         load_all_inner();
 
 

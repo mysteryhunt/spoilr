@@ -264,3 +264,9 @@ class Y2014KnightsAnswerDataAdmin(admin.ModelAdmin):
     list_filter = ('piece', 'color')
 
 admin.site.register(Y2014KnightsAnswerData, Y2014KnightsAnswerDataAdmin)
+
+class Y2014PartyAnswerDataAdmin(admin.ModelAdmin):
+    list_display = ('type1', 'type2', 'level')
+    list_filter = ('type1', 'type2', 'level')
+
+admin.site.register(Y2014PartyAnswerData, Y2014PartyAnswerDataAdmin)

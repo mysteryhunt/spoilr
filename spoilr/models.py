@@ -321,3 +321,20 @@ class Y2014KnightsAnswerData(models.Model):
         verbose_name = '2014 Knights answer data'
         verbose_name_plural = '2014 Knights answer data'
 
+class Y2014PartyAnswerData(models.Model):
+    answer = models.CharField(max_length=50)
+    TYPE1_CHOICES = [('chair', 'chair'), ('cup', 'cup')]
+    type1 = models.CharField(max_length=10, choices=TYPE1_CHOICES)
+    TYPE2_CHOICES = [('n', 'n'), ('e', 'e'), ('s', 's'), ('w', 'w'), ('yule', 'yule'), ('moon', 'moon'), ('oolong', 'oolong')]
+    type2 = models.CharField(max_length=10, choices=TYPE2_CHOICES)
+    level = models.IntegerField()
+
+    def __str__(self):
+        return '%s %s %d %s' % (self.type2, self.type1, self.level, self.answer)
+
+    class Meta:
+        unique_together = ('type2', 'level')
+        ordering = ['level', 'type1', 'type2']
+        verbose_name = '2014 Tea Party answer data'
+        verbose_name_plural = '2014 Tea Party answer data'
+
