@@ -188,7 +188,7 @@ def load_all():
         from django.db import transaction # Django 1.6 required here
         with transaction.atomic():
             load_all_inner();
-    except ImportError:
+    except:
         load_all_inner();
 
 
