@@ -66,7 +66,8 @@ def grant_points(team, amount, reason): # 2014-specific
     if pre < DRINK_READY[-1]:
         team_log(team, 'points', 'Gained %d drink-me point(s) (%s)' % (min(DRINK_READY[-1], td.points) - pre, reason))
     if td.points >= DRINK_READY[-1]:
-        team_log(team, 'points', 'Gained %d train ticket point(s) (%s)' % (td.points - max(DRINK_READY[-1], pre), reason))
+        if pre < TRAIN_READY[-1]:
+            team_log(team, 'points', 'Gained %d train ticket point(s) (%s)' % (min(TRAIN_READY[-1], td.points) - max(DRINK_READY[-1], pre), reason))
     # If they've got a full vial now...
     num_wh = 0
     for access in RoundAccess.objects.filter(team=team):
@@ -182,13 +183,19 @@ def metapuzzle_answer_correct(team, metapuzzle):
         release_interaction(team, interaction, "Found the right bait")
         # hack for testing:
         interaction_accomplished(team, interaction)
-    if metapuzzle.url in ['tea_party', 'white_queen', 'mock_turtle']: # 2014-specific
+    if metapuzzle.url in ['tea_party', 'white_queen', 'mock_turtle', 'caucus_race', 'knights', 'white_queen']: # 2014-specific
         if metapuzzle.url == 'tea_party':
             reason = "Solved the Mad Hatter's problem"
         elif metapuzzle.url == 'white_queen':
             reason = "Solved the White Queen's problem"
         elif metapuzzle.url == 'mock_turtle':
             reason = "Solved the Mock Turtle's problem"
+        elif metapuzzle.url == 'caucus_race':
+            reason = "Found a Weakness of the Beast"
+        elif metapuzzle.url == 'knights':
+            reason = "Found a Weakness of the Beast"
+        elif metapuzzle.url == 'white_queen':
+            reason = "Found a Weakness of the Beast"
         grant_points(team, POINT_INCR_WLMETA, reason)
     if metapuzzle.url[:13] == 'white_queen_a': # 2014-specific
         pwa = 'puzzle_with_answer_'

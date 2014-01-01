@@ -96,6 +96,20 @@ class TopContext(Context):
         # ----- 2014-specific -----
         self['has_wl_access'] = (len(self['rounds']) > 2)
         self['team_data'] = Y2014TeamData.objects.get(team=team)
+        points = self['team_data'].points
+        self['tickett'] = TRAIN_COST
+        if points >= TRAIN_READY[2]:
+            self['ticket'] = 0
+            self['tickett'] = None
+        elif points < DRINK_READY[-1]:
+            self['ticket'] = 0
+        elif points >= TRAIN_READY[1]:
+            self['ticket'] = min(TRAIN_COST, max(0, points - TRAIN_READY[1]))
+        elif points >= TRAIN_READY[0]:
+            self['ticket'] = min(TRAIN_COST, max(0, points - TRAIN_READY[0]))
+        else:
+            self['ticket'] = min(TRAIN_COST, max(0, points - DRINK_READY[-1]))
+        self['ticketx'] = self['ticket']*10/TRAIN_COST
     def round_obj(self, access):
         ret = {"round": access.round}
         ret["puzzles"] = [self.puzzle_obj(x) for x in PuzzleAccess.objects.filter(puzzle__round=access.round, team=access.team).order_by('id')]

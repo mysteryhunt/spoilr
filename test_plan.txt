@@ -55,7 +55,14 @@ puzzle_answer_correct(t, Puzzle.objects.get(url='can_tab_rig_ian'))
 
 # white queen gift
 
-m = Metapuzzle.objects.get(url='tea_party')
-metapuzzle_answer_correct(t, m)
+metapuzzle_answer_correct(t, Metapuzzle.objects.get(url='tea_party'))
 
-#grant_points(t, 14, 'because reasons')
+grant_points(t, 14, 'because reasons')
+
+puzzle_answer_correct(t, Puzzle.objects.get(url='common_bonds'))
+puzzle_answer_correct(t, Puzzle.objects.get(url='round_tripper'))
+puzzle_answer_correct(t, Puzzle.objects.get(url='initial_impressions'))
+puzzle_answer_correct(t, Puzzle.objects.get(url='introduction_to_collegiate_notetaking'))
+
+metapuzzle_answer_correct(t, Metapuzzle.objects.get(url='caucus_race'))
+metapuzzle_answer_correct(t, Metapuzzle.objects.get(url='mock_turtle'))
