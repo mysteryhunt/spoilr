@@ -223,7 +223,7 @@ def metapuzzle_answer_incorrect(team, metapuzzle, answer):
     publish_team_top(team)
 
 def mit_bait_incorrect(team, answer): # 2014-specific
-    team_log_mit_bait_incorrect(team, metapuzzle, answer)
+    team_log_mit_bait_incorrect(team, answer)
     # publish the log
     publish_team_top(team)
 
