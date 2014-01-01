@@ -24,18 +24,40 @@
       </script>
       {% endif %}
       {% if answers %}
+      {% if unresolved %}
+      <hr/>
+      In the Queue:
       <table>
-	<tr><th>Answer Attempt
-	  <th>Time
-	  <th>In Queue
+	<tr><th>Time
+	  <th>Attempt
 	</tr>
         {% for a in answers %}
-	<tr><td>{{ a.answer }}
-	  <td>{{ a.timestamp|naturaltime }}
-	  <td>{% if not a.resolved %}Yes{% else %}No{% endif %}
+	{% if not a.resolved %}
+	<tr>
+	  <td>{{ a.timestamp|naturaltime }}:
+	  <td>{{ a.answer }}
 	</tr>
+	{% endif %}
 	{% endfor %}
       </table>
+      {% endif %}
+      {% if resolved %}
+      <hr/>
+      Previous Attempts:
+      <table>
+	<tr><th>Time
+	  <th>Attempt
+	</tr>
+        {% for a in answers %}
+	{% if a.resolved %}
+	<tr>
+	  <td>{{ a.timestamp|naturaltime }}:
+	  <td>{{ a.answer }}
+	</tr>
+	{% endif %}
+	{% endfor %}
+      </table>
+      {% endif %}
       {% endif %}
     </div>
   </body>

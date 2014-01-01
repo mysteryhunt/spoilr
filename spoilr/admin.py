@@ -211,6 +211,13 @@ class QueueHandlerAdmin(admin.ModelAdmin):
 
 admin.site.register(QueueHandler,QueueHandlerAdmin)
 
+class PuzzleSurveyAdmin(admin.ModelAdmin):
+    list_display = ('__str__', 'fun', 'difficulty', 'timestamp')
+    list_filter = ('team__name', PuzzleAccessRoundFilter, 'fun', 'difficulty')
+    search_fields = ['team__name', 'puzzle__name', 'puzzle__round__name', 'comment']
+
+admin.site.register(PuzzleSurvey,PuzzleSurveyAdmin)
+
 # ----------------------- 2014-specific stuff ---------------------
 
 class Y2014TeamDataAdmin(admin.ModelAdmin):

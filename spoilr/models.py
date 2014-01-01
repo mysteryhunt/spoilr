@@ -201,6 +201,20 @@ class QueueHandler(models.Model):
         else:
             status = 'on duty, idle'
         return '%s: %s' % (self.name, status)
+
+class PuzzleSurvey(models.Model):
+    puzzle = models.ForeignKey(Puzzle)
+    team = models.ForeignKey(Team)
+    fun = models.IntegerField()
+    difficulty = models.IntegerField()
+    comment = models.CharField(max_length=2000)
+    timestamp = models.DateTimeField(default=datetime.now)
+
+    def __str__(self):
+        return '%s submitted the survey for %s' % (self.team.name, str(self.puzzle))
+
+    class Meta:
+        ordering = ['timestamp']
     
 
 # ----------------------- 2014-specific stuff ---------------------

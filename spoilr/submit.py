@@ -52,19 +52,38 @@ def submit_puzzle(request, puzzle_url):
     except:
         return HttpResponseBadRequest('cannot find puzzle for url '+puzzle_url)
     template = loader.get_template('submit-puzzle.html') 
-    if request.method == "POST":
-        maxlen = Puzzle._meta.get_field('answer').max_length
-        answer = cleanup_answer(request.POST["answer"])[:maxlen]
-        phone = request.POST["phone"]
-        phone = check_phone(team, phone)
-        submit_puzzle_answer(team, puzzle, answer, phone)
-    answers = PuzzleSubmission.objects.filter(team=team, puzzle=puzzle)
     solved = PuzzleAccess.objects.get(team=team, puzzle=puzzle).solved
+    if request.method == "POST":
+        if "survey" in request.POST:
+            if not solved:
+                return HttpResponseBadRequest('cannot submit survey until the puzzle is solved')
+            maxlen = PuzzleSurvey._meta.get_field('comment').max_length
+            comment = request.POST["comment"][:maxlen]
+            fun = request.POST["fun"]
+            if fun not in ['1','2','3','4','5']:
+                fun = ' '
+            difficulty = request.POST["difficulty"]
+            if difficulty not in ['1','2','3','4','5']:
+                difficulty = ' '
+            PuzzleSurvey.objects.create(team=team, puzzle=puzzle, fun=fun, difficulty=difficulty, comment=comment).save()
+        else:
+            maxlen = Puzzle._meta.get_field('answer').max_length
+            answer = cleanup_answer(request.POST["answer"])[:maxlen]
+            phone = request.POST["phone"]
+            phone = check_phone(team, phone)
+            submit_puzzle_answer(team, puzzle, answer, phone)
+    answers = PuzzleSubmission.objects.filter(team=team, puzzle=puzzle)
+    unresolved = answers.filter(resolved=False).exists()
+    resolved = answers.filter(resolved=True).exists()
+    commentlen = PuzzleSurvey._meta.get_field('comment').max_length
     context = RequestContext(request, {
             'team': team,
             'puzzle': puzzle,
             'solved': solved,
             'answers': answers,
+            'unresolved': unresolved,
+            'resolved': resolved,
+            'commentlen': commentlen,
             })
     return HttpResponse(template.render(context))
 
@@ -105,6 +124,8 @@ def submit_metapuzzle(request, metapuzzle_url):
     if metapuzzle.url.startswith("white_queen_a"):
         describe = "Puzzle: ???"
     answers = MetapuzzleSubmission.objects.filter(team=team, metapuzzle=metapuzzle)
+    unresolved = answers.filter(resolved=False).exists()
+    resolved = answers.filter(resolved=True).exists()
     solved = MetapuzzleSolve.objects.filter(team=team, metapuzzle=metapuzzle).exists()
     context = RequestContext(request, {
             'team': team,
@@ -112,6 +133,8 @@ def submit_metapuzzle(request, metapuzzle_url):
             'metapuzzle': metapuzzle,
             'solved': solved,
             'answers': answers,
+            'unresolved': unresolved,
+            'resolved': resolved,
             })
     return HttpResponse(template.render(context))
 
@@ -129,9 +152,7 @@ def submit_mit_metapuzzle_answer(team, answer, phone): # 2014-specific
     Y2014MitMetapuzzleSubmission.objects.create(team=team, phone=phone, answer=answer).save()
 
 def submit_mit_metapuzzle(request): # 2014-specific
-    # TODO SETUP: uncomment, make sure user auth works here
     username = request.META['REMOTE_USER']
-    # username = 'bigjimmy'
     try:
         team = Team.objects.get(username=username)
     except:
@@ -144,6 +165,8 @@ def submit_mit_metapuzzle(request): # 2014-specific
         phone = check_phone(team, phone)
         submit_mit_metapuzzle_answer(team, answer, phone)
     answers = Y2014MitMetapuzzleSubmission.objects.filter(team=team)
+    unresolved = answers.filter(resolved=False).exists()
+    resolved = answers.filter(resolved=True).exists()
     solved = []
     for x in ['dormouse', 'caterpillar', 'tweedles']:
         for y in MetapuzzleSolve.objects.filter(team=team, metapuzzle__url=x):
@@ -151,6 +174,8 @@ def submit_mit_metapuzzle(request): # 2014-specific
     context = RequestContext(request, {
             'team': team,
             'answers': answers,
+            'resolved': resolved,
+            'unresolved': unresolved,
             'solved': solved,
             'notdone': len(solved) != 3,
             })
