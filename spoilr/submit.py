@@ -27,6 +27,12 @@ def check_phone(team, phone):
         return phone
     return TeamPhone.objects.filter(team=team)[:1].get()
 
+def count_queue(team):
+    q = PuzzleSubmission.objects.filter(team=team, resolved=False).count()
+    q += MetapuzzleSubmission.objects.filter(team=team, resolved=False).count()
+    q += Y2014MitMetapuzzleSubmission.objects.filter(team=team, resolved=False).count() # 2014-specific
+    return q 
+
 def submit_puzzle_answer(team, puzzle, answer, phone):
     if len(answer) == 0:
         return
@@ -42,7 +48,7 @@ def submit_puzzle_answer(team, puzzle, answer, phone):
     PuzzleSubmission.objects.create(team=team, puzzle=puzzle, phone=phone, answer=answer).save()
 
 def submit_puzzle(request, puzzle_url):
-    username = request.META['REMOTE_USER']
+    username = 'bigjimmy'#request.META['REMOTE_USER']
     try:
         team = Team.objects.get(username=username)
     except:
@@ -51,6 +57,8 @@ def submit_puzzle(request, puzzle_url):
         puzzle = Puzzle.objects.get(url=puzzle_url)
     except:
         return HttpResponseBadRequest('cannot find puzzle for url '+puzzle_url)
+    q_full1 = count_queue(team) >= QUEUE_LIMIT
+    q_full2 = PuzzleSubmission.objects.filter(team=team, puzzle=puzzle, resolved=False).count() >= PUZZLE_QUEUE_LIMIT
     template = loader.get_template('submit-puzzle.html') 
     if request.method == "POST":
         if "survey" in request.POST:
@@ -66,12 +74,14 @@ def submit_puzzle(request, puzzle_url):
             if difficulty not in ['1','2','3','4','5']:
                 difficulty = None
             PuzzleSurvey.objects.create(team=team, puzzle=puzzle, fun=fun, difficulty=difficulty, comment=comment).save()
-        else:
+        elif not q_full1 and not q_full2:
             maxlen = Puzzle._meta.get_field('answer').max_length
             answer = cleanup_answer(request.POST["answer"])[:maxlen]
             phone = request.POST["phone"]
             phone = check_phone(team, phone)
             submit_puzzle_answer(team, puzzle, answer, phone)
+            q_full1 = count_queue(team) >= QUEUE_LIMIT
+            q_full2 = PuzzleSubmission.objects.filter(team=team, puzzle=puzzle, resolved=False).count() >= PUZZLE_QUEUE_LIMIT
     solved = PuzzleAccess.objects.get(team=team, puzzle=puzzle).solved
     answers = PuzzleSubmission.objects.filter(team=team, puzzle=puzzle)
     unresolved = answers.filter(resolved=False).exists()
@@ -85,6 +95,10 @@ def submit_puzzle(request, puzzle_url):
             'unresolved': unresolved,
             'resolved': resolved,
             'commentlen': commentlen,
+            'q_full1': q_full1,
+            'q_full2': q_full2,
+            'q_lim1': QUEUE_LIMIT,
+            'q_lim2': PUZZLE_QUEUE_LIMIT,
             })
     return HttpResponse(template.render(context))
 
@@ -114,13 +128,17 @@ def submit_metapuzzle(request, metapuzzle_url):
         metapuzzle = Metapuzzle.objects.get(url=metapuzzle_url)
     except:
         return HttpResponseBadRequest('cannot find metapuzzle for url '+metapuzzle_url)
+    q_full1 = count_queue(team) >= QUEUE_LIMIT
+    q_full2 = MetapuzzleSubmission.objects.filter(team=team, metapuzzle=metapuzzle, resolved=False).count() >= PUZZLE_QUEUE_LIMIT
     template = loader.get_template('submit-metapuzzle.html') 
-    if request.method == "POST":
+    if not q_full1 and not q_full2 and request.method == "POST":
         maxlen = Metapuzzle._meta.get_field('answer').max_length
         answer = cleanup_answer(request.POST["answer"])[:maxlen]
         phone = request.POST["phone"]
         phone = check_phone(team, phone)
         submit_metapuzzle_answer(team, metapuzzle, answer, phone)
+        q_full1 = count_queue(team) >= QUEUE_LIMIT
+        q_full2 = PuzzleSubmission.objects.filter(team=team, puzzle=puzzle, resolved=False).count() >= PUZZLE_QUEUE_LIMIT
     describe = "Round: %s" % metapuzzle.name
     if metapuzzle.url.startswith("white_queen_a"):
         describe = "Puzzle: ???"
@@ -136,6 +154,10 @@ def submit_metapuzzle(request, metapuzzle_url):
             'answers': answers,
             'unresolved': unresolved,
             'resolved': resolved,
+            'q_full1': q_full1,
+            'q_full2': q_full2,
+            'q_lim1': QUEUE_LIMIT,
+            'q_lim2': PUZZLE_QUEUE_LIMIT,
             })
     return HttpResponse(template.render(context))
 
@@ -158,13 +180,17 @@ def submit_mit_metapuzzle(request): # 2014-specific
         team = Team.objects.get(username=username)
     except:
         return HttpResponseBadRequest('cannot find team for user '+username)
+    q_full1 = count_queue(team) >= QUEUE_LIMIT
+    q_full2 = Y2014MitMetapuzzleSubmission.objects.filter(team=team, resolved=False).count() >= PUZZLE_QUEUE_LIMIT
     template = loader.get_template('submit-mit-metapuzzle.html') 
-    if request.method == "POST":
+    if not q_full1 and not q_full2 and request.method == "POST":
         maxlen = Metapuzzle._meta.get_field('answer').max_length
         answer = cleanup_answer(request.POST["answer"])[:maxlen]
         phone = request.POST["phone"]
         phone = check_phone(team, phone)
         submit_mit_metapuzzle_answer(team, answer, phone)
+        q_full1 = count_queue(team) >= QUEUE_LIMIT
+        q_full2 = PuzzleSubmission.objects.filter(team=team, puzzle=puzzle, resolved=False).count() >= PUZZLE_QUEUE_LIMIT
     answers = Y2014MitMetapuzzleSubmission.objects.filter(team=team)
     unresolved = answers.filter(resolved=False).exists()
     resolved = answers.filter(resolved=True).exists()
@@ -179,6 +205,10 @@ def submit_mit_metapuzzle(request): # 2014-specific
             'unresolved': unresolved,
             'solved': solved,
             'notdone': len(solved) != 3,
+            'q_full1': q_full1,
+            'q_full2': q_full2,
+            'q_lim1': QUEUE_LIMIT,
+            'q_lim2': PUZZLE_QUEUE_LIMIT,
             })
     return HttpResponse(template.render(context))
 

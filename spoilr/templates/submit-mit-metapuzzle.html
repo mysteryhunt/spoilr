@@ -7,6 +7,13 @@
       {{ m.name }} took the bait: <b>{{ m.answer }}</b><br>
       {% endfor %}
       {% if notdone %}
+      {% if q_full2 %}
+      Your team has reached the per-item queue limit ({{ q_lim2 }}).<br/>
+      Try again after those have been resolved.
+      {% elif q_full1 %}
+      Your team has reached the overall queue limit ({{ q_lim1 }}).<br/>
+      Try again after those have been resolved.
+      {% else %}
       <form action="." method="POST">
 	{% csrf_token %}
 	Bait: <input id="answer" type="text" name="answer" size="38" autofocus><br />
@@ -22,6 +29,7 @@
           document.getElementById("answer").focus()
 	};
       </script>
+      {% endif %}
       {% endif %}
       {% if answers %}
       {% if unresolved %}

@@ -1,5 +1,5 @@
 PUZZLE_QUEUE_LIMIT = 2
-QUEUE_LIMIT = 8
+QUEUE_LIMIT = 10
 
 # ----- 2014-specific -----
 
