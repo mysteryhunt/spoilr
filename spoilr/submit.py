@@ -61,10 +61,10 @@ def submit_puzzle(request, puzzle_url):
             comment = request.POST["comment"][:maxlen]
             fun = request.POST["fun"]
             if fun not in ['1','2','3','4','5']:
-                fun = ' '
+                fun = None
             difficulty = request.POST["difficulty"]
             if difficulty not in ['1','2','3','4','5']:
-                difficulty = ' '
+                difficulty = None
             PuzzleSurvey.objects.create(team=team, puzzle=puzzle, fun=fun, difficulty=difficulty, comment=comment).save()
         else:
             maxlen = Puzzle._meta.get_field('answer').max_length

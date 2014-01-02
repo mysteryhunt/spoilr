@@ -205,9 +205,9 @@ class QueueHandler(models.Model):
 class PuzzleSurvey(models.Model):
     puzzle = models.ForeignKey(Puzzle)
     team = models.ForeignKey(Team)
-    fun = models.IntegerField()
-    difficulty = models.IntegerField()
-    comment = models.CharField(max_length=2000)
+    fun = models.IntegerField(blank=True, null=True)
+    difficulty = models.IntegerField(blank=True, null=True)
+    comment = models.CharField(max_length=2000, blank=True)
     timestamp = models.DateTimeField(default=datetime.now)
 
     def __str__(self):
