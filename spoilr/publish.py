@@ -213,17 +213,23 @@ class RoundContext(TopContext): # todo don't inherit, it'll just slow things dow
         if round.url == 'white_queen': # 2014-specific
             self['herring_ok'] = InteractionAccess.objects.filter(team=team, interaction__url='white_queen_gift', accomplished=True).exists()
             pwa = 'puzzle_with_answer_'
-            answers = []
-            meta_urls = []
-            urls = []
+            answers_tmp = ['WILLIAMS', None, 'LYNN', None, None, None, None, None, 'SULLIVAN', None, None, None, None, None, 'SULLIVAN', None, 'RICE', None]
+            meta_urls = [None for i in range(18)]
             for meta in Metapuzzle.objects.all():
                 if meta.url.startswith('white_queen_a'):
-                    if meta.answer in answers:
-                        urls.append('another_'+pwa+meta.answer.lower().replace(' ','_'))
-                    else:
-                        urls.append(pwa+meta.answer.lower().replace(' ','_'))
-                    answers.append(meta.answer)
-                    meta_urls.append(meta.url)
+                    for i in range(18):
+                        if answers_tmp[i] is None:
+                            answers_tmp[i] = meta.answer
+                            meta_urls[i] = meta.url
+                            break
+            answers = []
+            urls = []
+            for answer in answers_tmp:
+                if answer in answers:
+                    urls.append('another_'+pwa+answer.lower().replace(' ','_'))
+                else:
+                    urls.append(pwa+answer.lower().replace(' ','_'))
+                answers.append(answer)
             letters = 'ITSJUSTAREDHERRING'
             self['rows'] = [r for r in range(6)]
             self['columns'] = [c for c in range(3)]
