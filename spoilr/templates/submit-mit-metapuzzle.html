@@ -1,7 +1,7 @@
 {% load humanize %}
 <html>
   <body>
-    <div style="white-space: nowrap; overflow-x: hidden;">
+    <div style="white-space: nowrap;">
       Team: {{ team.name }}<br>
       {% for m in solved %}
       {{ m.name }} baited! Bait: <b>{{ m.answer }}</b><br>
