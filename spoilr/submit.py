@@ -48,7 +48,7 @@ def submit_puzzle_answer(team, puzzle, answer, phone):
     PuzzleSubmission.objects.create(team=team, puzzle=puzzle, phone=phone, answer=answer).save()
 
 def submit_puzzle(request, puzzle_url):
-    username = 'bigjimmy'#request.META['REMOTE_USER']
+    username = request.META['REMOTE_USER']
     try:
         team = Team.objects.get(username=username)
     except:
