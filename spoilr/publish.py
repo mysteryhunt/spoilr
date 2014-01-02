@@ -266,7 +266,7 @@ class PuzzleContext(RoundContext): # todo don't inherit, it'll just slow things 
         try:
             round = team.rounds.get(url=puzzle.round.url)
         except:
-            logger.error('[bug] team "%s" doesn\'t have access to round "%s"', team.url, round.url)
+            logger.error('[bug] team "%s" doesn\'t have access to round "%s"', team.url, puzzle.round.url)
             TopContext.__init__(self, team)
             return
         RoundContext.__init__(self, team, round)
