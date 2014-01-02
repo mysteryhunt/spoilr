@@ -41,19 +41,43 @@ metapuzzle_answer_correct(t, m)
 puzzle_answer_correct(t, Puzzle.objects.get(url='find_your_way_across'))
 puzzle_answer_correct(t, Puzzle.objects.get(url='local_shorts'))
 puzzle_answer_correct(t, Puzzle.objects.get(url='sneaky_fox'))
+
+# tea party released
+
 puzzle_answer_correct(t, Puzzle.objects.get(url='feed_your_head'))
 puzzle_answer_correct(t, Puzzle.objects.get(url='across_the_hall'))
 puzzle_answer_correct(t, Puzzle.objects.get(url='dressing_down'))
 
-puzzle_answer_correct(t, Puzzle.objects.get(url='now_lets_create_melodies'))
 puzzle_answer_correct(t, Puzzle.objects.get(url='disemvoweled'))
-puzzle_answer_correct(t, Puzzle.objects.get(url='uncommon_nonsense'))
-puzzle_answer_correct(t, Puzzle.objects.get(url='hedgehogs_and_flamingos'))
 puzzle_answer_correct(t, Puzzle.objects.get(url='operator_test'))
-puzzle_answer_correct(t, Puzzle.objects.get(url='the_spy_who_read_me'))
-puzzle_answer_correct(t, Puzzle.objects.get(url='can_tab_rig_ian'))
+
+# level 1 tea cups released
+
+puzzle_answer_correct(t, Puzzle.objects.get(url='now_lets_create_melodies'))
+
+# monster potatoes released
+
+puzzle_answer_correct(t, Puzzle.objects.get(url='hedgehogs_and_flamingos'))
+
+# oyster card released
+
+puzzle_answer_correct(t, Puzzle.objects.get(url='best_of_five'))
+
+# white queen released
 
 # white queen gift
+
+puzzle_answer_correct(t, Puzzle.objects.get(url='the_puzzle_your_puzzle_could_smell_like'))
+
+# level 2 tea cups released
+
+puzzle_answer_correct(t, Puzzle.objects.get(url='monster_potatoes'))
+
+# ???
+
+puzzle_answer_correct(t, Puzzle.objects.get(url='can_tab_rig_ian'))
+
+# level 3 tea cups released
 
 metapuzzle_answer_correct(t, Metapuzzle.objects.get(url='tea_party'))
 metapuzzle_answer_correct(t, Metapuzzle.objects.get(url='white_queen_a14'))

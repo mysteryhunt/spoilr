@@ -8,41 +8,51 @@ import logging
 logger = logging.getLogger(__name__)
 
 def release_round(team, round, reason):
-    print("release %s/round/%s (%s)" % (team.url, round.url, reason))
     if RoundAccess.objects.filter(team=team, round=round).exists():
         return
+    print("release %s/round/%s (%s)" % (team.url, round.url, reason))
     RoundAccess.objects.create(team=team, round=round).save()
     team_log_round_access(team, round, reason)
-    if round.url != 'mit' and round.url != 'white_queen': # 2014-specific
-        # it's a wonderland round, let's release some puzzles in it...
-        count = WL_RELEASE_INIT
-        def release_initial(apuzzle):
-            # we could call release_puzzle, but since we're going to 
-            # release top and round later anyway we can skip that here
+    def release_initial(apuzzle):
+        # we could call release_puzzle, but since we're going to 
+        # release top and round later anyway we can skip that here
+        try:
             if PuzzleAccess.objects.filter(team=team, puzzle=apuzzle).exists():
                 return
             PuzzleAccess.objects.create(team=team, puzzle=apuzzle).save()
             team_log_puzzle_access(team, apuzzle, 'Round "%s" released' % round.name)
             publish_team_puzzle(team, apuzzle)
-        for apuzzle in Puzzle.objects.filter(round=round):
-            if count > 0:
-                try:
-                    release_initial(apuzzle)
-                except Exception as e:
-                    logger.error('error releasing initial puzzle %s: %s' % (apuzzle.url, e))
-                count = count - 1
-    if round.url == "white_queen":
+        except Exception as e:
+            logger.error('error releasing initial puzzle %s: %s' % (apuzzle.url, e))
+    if round.url == "mit": # 2014-specific
+        pass
+    elif round.url == "tea_party": # 2014-specific
+        # tea party starts with all the chair puzzles
+        for data in Y2014PartyAnswerData.objects.all():
+            if data.type1 == 'chair':
+                apuzzle = Puzzle.objects.get(round=round, answer=data.answer)
+                release_initial(apuzzle)
+    elif round.url == "white_queen": # 2014-specific
+        # white queen doesn't release puzzles at first
+        # teams must complete 'white_queen_gift' before seeing puzzles
         interaction = Interaction.objects.get(url='white_queen_gift')
         release_interaction(team, interaction, 'Round "%s" released' % round.name)
         # hack for testing:
         interaction_accomplished(team, interaction)
+    else: # 2014-specific
+        # it's a wonderland round, let's release some puzzles in it...
+        count = WL_RELEASE_INIT
+        for apuzzle in Puzzle.objects.filter(round=round):
+            if count > 0:
+                release_initial(apuzzle)
+                count = count - 1
     publish_team_round(team, round)
     publish_team_top(team)
 
 def release_puzzle(team, puzzle, reason):
-    print("release %s/puzzle/%s (%s)" % (team.url, puzzle.url, reason))
     if PuzzleAccess.objects.filter(team=team, puzzle=puzzle).exists():
         return
+    print("release %s/puzzle/%s (%s)" % (team.url, puzzle.url, reason))
     PuzzleAccess.objects.create(team=team, puzzle=puzzle).save()
     team_log_puzzle_access(team, puzzle, reason)
     publish_team_puzzle(team, puzzle)
@@ -50,9 +60,9 @@ def release_puzzle(team, puzzle, reason):
     publish_team_top(team)
 
 def release_interaction(team, interaction, reason):
-    print("release %s/interaction/%s (%s)" % (team.url, interaction.url, reason))
     if InteractionAccess.objects.filter(team=team, interaction=interaction).exists():
         return
+    print("release %s/interaction/%s (%s)" % (team.url, interaction.url, reason))
     InteractionAccess.objects.create(team=team, interaction=interaction).save()
     team_log_interaction_access(team, interaction, reason)
     publish_team_top(team)
@@ -107,18 +117,21 @@ def grant_points(team, amount, reason): # 2014-specific
     publish_team_top(team)            
 
 def puzzle_answer_correct(team, puzzle):
-    print("puzzle answer correct %s/puzzle/%s" % (team.url, puzzle.url))
     if not PuzzleAccess.objects.filter(team=team, puzzle=puzzle).exists():
         return
     pa = PuzzleAccess.objects.get(team=team, puzzle=puzzle)
     if pa.solved:
         return
+    print("puzzle answer correct %s/puzzle/%s" % (team.url, puzzle.url))
     pa.solved = True
     team_log_puzzle_solved(team, puzzle)
     pa.save()
     publish_team_puzzle(team, puzzle)
     if puzzle.round.url == 'mit': # 2014-specific
         grant_points(team, POINT_INCR_MIT, 'solved an MIT puzzle')
+    elif puzzle.round.url != 'events': # 2014-specific
+        grant_points(team, POINT_INCR_WL, 'solved a Wonderland puzzle')
+    if puzzle.round.url == 'mit': # 2014-specific
         # mit map: release all puzzles connected to the solved one
         node = Y2014MitPuzzleData.objects.get(puzzle=puzzle).location
         def release_connected(other_puzzle):
@@ -139,14 +152,69 @@ def puzzle_answer_correct(team, puzzle):
                 release_connected(Y2014MitPuzzleData.objects.get(location=edge.node1).puzzle)
             except Exception as e:
                 logger.error('error releasing connecting puzzle at %s: %s' % (edge.node1, e))
-    if puzzle.round.url != 'mit' and puzzle.round.url != 'events': # 2014-specific
-        grant_points(team, POINT_INCR_WL, 'solved a Wonderland puzzle')
-    if puzzle.round.url == 'humpty_dumpty': # 2014-specific
+    elif puzzle.round.url == 'tea_party': # 2014-specific
+        # crazy tea party rules:
+        chairs = 0
+        max_yule = -1
+        max_moon = -1
+        max_oolong = -1
+        level_1 = 0
+        level_2 = 0
+        def relpuzzle(data, reason):
+            try:
+                apuzzle = Puzzle.objects.get(round=puzzle.round, answer=data.answer)
+                release_puzzle(team, apuzzle, reason)
+            except:
+                logger.error('missing puzzle in tea party round at ' + str(data))
+        for data in Y2014PartyAnswerData.objects.all():
+            try:
+                apuzzle = Puzzle.objects.get(round=puzzle.round, answer=data.answer)
+                if PuzzleAccess.objects.filter(team=team, puzzle=apuzzle, solved=True).exists():
+                    if data.type1 == 'chair':
+                        chairs += 1
+                    else:
+                        if data.type2 == 'yule':
+                            max_yule = data.level
+                        elif data.type2 == 'moon':
+                            max_moon = data.level
+                        elif data.type2 == 'oolong':
+                            max_oolong = data.level
+                        if data.level == 1:
+                            level_1 += 1
+                        elif data.level == 2:
+                            level_2 += 1
+            except:
+                logger.error('missing puzzle in tea party round at ' + str(data))
+        if chairs == 4:
+            for data in Y2014PartyAnswerData.objects.all():
+                if data.type1 == 'cup' and data.level == 2:
+                    relpuzzle(data, 'solved all four chair puzzles')
+        elif chairs == 2:
+            for data in Y2014PartyAnswerData.objects.all():
+                if data.type1 == 'cup' and data.level == 1:
+                    relpuzzle(data, 'solved two chair puzzles')
+        if level_2 == 3:
+            for data in Y2014PartyAnswerData.objects.all():
+                if data.type1 == 'cup' and data.level == 4:
+                    relpuzzle(data, 'solved all three second-tier teacup puzzles')
+        elif level_1 == 3:
+            for data in Y2014PartyAnswerData.objects.all():
+                if data.type1 == 'cup' and data.level == 3:
+                    relpuzzle(data, 'solved all three initial teacup puzzles')
+        for data in Y2014PartyAnswerData.objects.all():
+            if data.type1 == 'cup':
+                if data.type2 == 'yule' and data.level == max_yule + 1:
+                    relpuzzle(data, 'solved %s' % puzzle.name)
+                elif data.type2 == 'moon' and data.level == max_moon + 1:
+                    relpuzzle(data, 'solved %s' % puzzle.name)
+                elif data.type2 == 'oolong' and data.level == max_oolong + 1:
+                    relpuzzle(data, 'solved %s' % puzzle.name)
+    elif puzzle.round.url == 'humpty_dumpty': # 2014-specific
         td = Y2014TeamData.objects.get(team=team)
         if td.humpty_pieces < 12:
             td.humpty_pieces = td.humpty_pieces + 1
             td.save()
-    if puzzle.round.url != 'mit' and puzzle.round.url != 'white_queen':
+    else:
         # release more puzzles
         count = WL_RELEASE_INCR
         def release_another(apuzzle):
@@ -173,9 +241,9 @@ def puzzle_answer_incorrect(team, puzzle, answer):
     publish_team_top(team)
 
 def metapuzzle_answer_correct(team, metapuzzle):
-    print("metapuzzle answer correct %s/metapuzzle/%s" % (team.url, metapuzzle.url))
     if MetapuzzleSolve.objects.filter(team=team, metapuzzle=metapuzzle).exists():
         return
+    print("metapuzzle answer correct %s/metapuzzle/%s" % (team.url, metapuzzle.url))
     team_log_metapuzzle_solved(team, metapuzzle)
     MetapuzzleSolve.objects.create(team=team, metapuzzle=metapuzzle).save()
     if metapuzzle.url in ['dormouse', 'caterpillar', 'tweedles']: # 2014-specific
@@ -228,12 +296,12 @@ def mit_bait_incorrect(team, answer): # 2014-specific
     publish_team_top(team)
 
 def interaction_accomplished(team, interaction):
-    print("interaction accomplished %s/interaction/%s" % (team.url, interaction.url))
     if not InteractionAccess.objects.filter(team=team, interaction=interaction).exists():
         return
     ia = InteractionAccess.objects.get(team=team, interaction=interaction)
     if ia.accomplished:
         return
+    print("interaction accomplished %s/interaction/%s" % (team.url, interaction.url))
     ia.accomplished = True
     team_log_interaction_accomplished(team, interaction)
     ia.save()
