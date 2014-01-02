@@ -196,7 +196,7 @@ class QueueHandler(models.Model):
     def __str__(self):
         if self.team:
             status = 'handling %s since %s' % (str(self.team), str(self.team_timestamp))
-        elif (datetime.now - self.activity).seconds > 5 * 60:
+        elif (datetime.now() - self.activity).seconds > 5 * 60:
             status = 'off duty'
         else:
             status = 'on duty, idle'
