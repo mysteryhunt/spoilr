@@ -209,7 +209,7 @@ def metapuzzle_answer_correct(team, metapuzzle):
                     else:
                         url = pwa+meta.answer.lower().replace(' ','_')
                 answers.append(meta.answer)
-        release_puzzle(team, Puzzle.objects.get(url=url), 'You backsolved this puzzle\'s answer, now find it\'s title')
+        release_puzzle(team, Puzzle.objects.get(url=url), 'You backsolved this puzzle\'s answer, now find its title')
         publish_team_round(team, Round.objects.get(url='white_queen'))
     if Round.objects.filter(url=metapuzzle.url).exists(): # 2014-specific
         publish_team_round(team, Round.objects.get(url=metapuzzle.url))

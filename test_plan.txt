@@ -56,6 +56,7 @@ puzzle_answer_correct(t, Puzzle.objects.get(url='can_tab_rig_ian'))
 # white queen gift
 
 metapuzzle_answer_correct(t, Metapuzzle.objects.get(url='tea_party'))
+metapuzzle_answer_correct(t, Metapuzzle.objects.get(url='white_queen_a14'))
 
 grant_points(t, 14, 'because reasons')
 
