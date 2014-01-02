@@ -238,14 +238,17 @@ class RoundContext(TopContext): # todo don't inherit, it'll just slow things dow
                 for c in range(3):
                     answer = None
                     url = None
+                    solved = False
                     if PuzzleAccess.objects.filter(team=team, puzzle__url=urls[r*3+c]).exists():
                         answer = answers[r*3+c]
                         url = urls[r*3+c]
+                        solved = PuzzleAccess.objects.get(team=team, puzzle__url=urls[r*3+c]).solved
                     cells.append({
                         'row': r+1,
                         'column': c+1,
                         'letter': letters[r*3+c],
                         'answer': answer,
+                        'solved': solved,
                         'url': url,
                         'meta_url': meta_urls[r*3+c]
                         });
