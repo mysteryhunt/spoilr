@@ -52,9 +52,9 @@ def submit_puzzle(request, puzzle_url):
     except:
         return HttpResponseBadRequest('cannot find puzzle for url '+puzzle_url)
     template = loader.get_template('submit-puzzle.html') 
-    solved = PuzzleAccess.objects.get(team=team, puzzle=puzzle).solved
     if request.method == "POST":
         if "survey" in request.POST:
+            solved = PuzzleAccess.objects.get(team=team, puzzle=puzzle).solved
             if not solved:
                 return HttpResponseBadRequest('cannot submit survey until the puzzle is solved')
             maxlen = PuzzleSurvey._meta.get_field('comment').max_length
@@ -72,6 +72,7 @@ def submit_puzzle(request, puzzle_url):
             phone = request.POST["phone"]
             phone = check_phone(team, phone)
             submit_puzzle_answer(team, puzzle, answer, phone)
+    solved = PuzzleAccess.objects.get(team=team, puzzle=puzzle).solved
     answers = PuzzleSubmission.objects.filter(team=team, puzzle=puzzle)
     unresolved = answers.filter(resolved=False).exists()
     resolved = answers.filter(resolved=True).exists()
