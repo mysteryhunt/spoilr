@@ -55,6 +55,17 @@ def release_puzzle(team, puzzle, reason):
     print("release %s/puzzle/%s (%s)" % (team.url, puzzle.url, reason))
     PuzzleAccess.objects.create(team=team, puzzle=puzzle).save()
     team_log_puzzle_access(team, puzzle, reason)
+    if puzzle.round.url == 'white_queen': # 2014-specific
+        # upon releasing six white queen puzzles,
+        # reveal "answers" for three more
+        count = PuzzleAccess.objects.filter(team=team, puzzle__round=puzzle.round).count()
+        if count == 6:
+            pwa = 'puzzle_with_answer_'
+            for p in [pwa+'eight_days_a_week', pwa+'norwegian_wood', pwa+'love_me_do']:
+                try:
+                    release_puzzle(team, Puzzle.objects.get(url=p), 'confirmed six answers to White Queen puzzles')
+                except:
+                    pass
     publish_team_puzzle(team, puzzle)
     publish_team_round(team, puzzle.round)
     publish_team_top(team)
@@ -332,7 +343,7 @@ def interaction_accomplished(team, interaction):
         publish_team_round(team, Round.objects.get(url='mit'))
     if interaction.url == 'white_queen_gift': # 2014-specific
         pwa = 'puzzle_with_answer_'
-        for p in [pwa+'williams', pwa+'lynn', pwa+'sullivan', 'another_'+pwa+'sullivan']:
+        for p in [pwa+'williams', pwa+'lynn', pwa+'sullivan', 'another_'+pwa+'sullivan', pwa+'rice']:
             try:
                 release_puzzle(team, Puzzle.objects.get(url=p), 'You gave the White Queen a gift')
             except:

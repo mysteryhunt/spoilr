@@ -50,37 +50,42 @@ puzzle_answer_correct(t, Puzzle.objects.get(url='dressing_down'))
 
 puzzle_answer_correct(t, Puzzle.objects.get(url='disemvoweled'))
 puzzle_answer_correct(t, Puzzle.objects.get(url='operator_test'))
-
 # level 1 tea cups released
 
 puzzle_answer_correct(t, Puzzle.objects.get(url='now_lets_create_melodies'))
-
 # monster potatoes released
 
 puzzle_answer_correct(t, Puzzle.objects.get(url='hedgehogs_and_flamingos'))
-
 # oyster card released
 
 puzzle_answer_correct(t, Puzzle.objects.get(url='best_of_five'))
-
 # white queen released
-
 # white queen gift
 
 puzzle_answer_correct(t, Puzzle.objects.get(url='the_puzzle_your_puzzle_could_smell_like'))
-
 # level 2 tea cups released
 
 puzzle_answer_correct(t, Puzzle.objects.get(url='monster_potatoes'))
-
 # ???
 
 puzzle_answer_correct(t, Puzzle.objects.get(url='can_tab_rig_ian'))
-
 # level 3 tea cups released
 
 metapuzzle_answer_correct(t, Metapuzzle.objects.get(url='tea_party'))
-metapuzzle_answer_correct(t, Metapuzzle.objects.get(url='white_queen_a14'))
+# caucus race released
+
+metapuzzle_answer_correct(t, Metapuzzle.objects.get(url='white_queen_a05'))
+# clemens released
+
+metapuzzle_answer_correct(t, Metapuzzle.objects.get(url='white_queen_a07'))
+# youkilis released
+
+metapuzzle_answer_correct(t, Metapuzzle.objects.get(url='white_queen_a14')) # should be 11, but we don't have enough dark-red puzzles in post-prod yet
+# drive-my-car released
+# three light-red puzzles released
+
+metapuzzle_answer_correct(t, Metapuzzle.objects.get(url='white_queen_a10'))
+# i want to hold your hand relased
 
 grant_points(t, 14, 'because reasons')
 
