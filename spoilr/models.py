@@ -177,7 +177,7 @@ class MetapuzzleSubmission(models.Model):
     phone = models.CharField(max_length=100)
     metapuzzle = models.ForeignKey(Metapuzzle)
     timestamp = models.DateTimeField(default=datetime.now)
-    answer = models.CharField(max_length=50)
+    answer = models.CharField(max_length=100)
     resolved = models.BooleanField(default=False)
 
     def __str__(self):
@@ -294,7 +294,7 @@ class Y2014MitMetapuzzleSubmission(models.Model):
     team = models.ForeignKey(Team)
     phone = models.CharField(max_length=100)
     timestamp = models.DateTimeField(default=datetime.now)
-    answer = models.CharField(max_length=50)
+    answer = models.CharField(max_length=100)
     resolved = models.BooleanField(default=False)
 
     def __str__(self):
