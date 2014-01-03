@@ -182,19 +182,26 @@ class RoundContext(TopContext): # todo don't inherit, it'll just slow things dow
         if round.url == 'caucus_race': # 2014-specific
             birds = []
             for bird in Y2014CaucusAnswerData.objects.all():
+                yes_solved = False
+                no_solved = False
                 try:
                     yes_puzzle = Puzzle.objects.get(round=round, answer=bird.yes_answer)
-                    PuzzleAccess.objects.get(puzzle=yes_puzzle, team=team)
+                    yes_solved = PuzzleAccess.objects.get(puzzle=yes_puzzle, team=team).solved
                 except:
                     yes_puzzle = None
                     pass
                 try:
                     no_puzzle = Puzzle.objects.get(round=round, answer=bird.no_answer)
-                    PuzzleAccess.objects.get(puzzle=no_puzzle, team=team)
+                    no_solved = PuzzleAccess.objects.get(puzzle=no_puzzle, team=team).solved
                 except:
                     no_puzzle = None
                     pass
-                birds.append({"yes": yes_puzzle, "no": no_puzzle})
+                birds.append({
+                    "yes": yes_puzzle, 
+                    "yes_solved": yes_solved,
+                    "no": no_puzzle,
+                    "no_solved": no_solved,
+                })
             self['birds'] = birds
         if round.url == 'knights': # 2014-specific
             pieces = []
