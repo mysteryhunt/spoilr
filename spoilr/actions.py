@@ -14,14 +14,8 @@ def release_round(team, round, reason):
     RoundAccess.objects.create(team=team, round=round).save()
     team_log_round_access(team, round, reason)
     def release_initial(apuzzle):
-        # we could call release_puzzle, but since we're going to 
-        # release top and round later anyway we can skip that here
         try:
-            if PuzzleAccess.objects.filter(team=team, puzzle=apuzzle).exists():
-                return
-            PuzzleAccess.objects.create(team=team, puzzle=apuzzle).save()
-            team_log_puzzle_access(team, apuzzle, 'Round "%s" released' % round.name)
-            publish_team_puzzle(team, apuzzle)
+            release_puzzle(team, apuzzle, 'Round "%s" released' % round.name)
         except Exception as e:
             logger.error('error releasing initial puzzle %s: %s' % (apuzzle.url, e))
     if round.url == "mit": # 2014-specific
@@ -244,12 +238,12 @@ def puzzle_answer_correct(team, puzzle):
                 if no_puzzle:
                     release_puzzle(team, no_puzzle, 'solved "%s"' % puzzle.name)
                 break
-    elif puzzle.round.url == 'humpty_dumpty': # 2014-specific
-        td = Y2014TeamData.objects.get(team=team)
-        if td.humpty_pieces < 12:
-            td.humpty_pieces = td.humpty_pieces + 1
-            td.save()
     else:
+        if puzzle.round.url == 'humpty_dumpty': # 2014-specific
+            td = Y2014TeamData.objects.get(team=team)
+            if td.humpty_pieces < 12:
+                td.humpty_pieces = td.humpty_pieces + 1
+                td.save()
         # release more puzzles
         count = WL_RELEASE_INCR
         for apuzzle in Puzzle.objects.filter(round=puzzle.round):

@@ -29,6 +29,7 @@ metapuzzle_answer_incorrect(t, m, 'NOPE')
 metapuzzle_answer_correct(t, m)
 
 # meet caterpillar
+# mock turtle released
 
 m = Metapuzzle.objects.get(url='dormouse')
 metapuzzle_answer_correct(t, m)
@@ -109,4 +110,12 @@ puzzle_answer_correct(t, Puzzle.objects.get(url='initial_impressions'))
 puzzle_answer_correct(t, Puzzle.objects.get(url='introduction_to_collegiate_notetaking'))
 
 metapuzzle_answer_correct(t, Metapuzzle.objects.get(url='caucus_race'))
+# knights released
+
+puzzle_answer_correct(t, Puzzle.objects.get(url='kroskuro'))
+puzzle_answer_correct(t, Puzzle.objects.get(url='walk_across_some_dungeons'))
+
 metapuzzle_answer_correct(t, Metapuzzle.objects.get(url='mock_turtle'))
+
+puzzle_answer_correct(t, Puzzle.objects.get(url='compose_yourself'))
+puzzle_answer_correct(t, Puzzle.objects.get(url='crow_facts'))
