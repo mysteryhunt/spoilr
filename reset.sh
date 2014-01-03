@@ -6,6 +6,9 @@ cd /home/djangoapps/spoilr
 
 MANAGE=python\ manage.py
 
+mkdir -p /var/cache/spoilr
+chown -R $OWNER /var/cache/spoilr
+
 #Backup database just in case
 #mv /var/sqlitedb/hunt.db /var/sqlitedb/hunt.db.bak
 /usr/bin/mysqldump --events --all-databases > /home/hunt/spoilr.sql
