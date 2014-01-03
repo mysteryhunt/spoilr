@@ -4,7 +4,7 @@ from django.conf.urls import patterns, include, url
 from django.contrib import admin
 admin.autodiscover()
 
-from .dashboard import all_teams
+from .dashboard import all_teams_view
 from .log import system_log_view
 from .submit import *
 
@@ -19,7 +19,7 @@ urlpatterns = patterns('',
     url(r'^submit/meta/(\w+)/$', submit_metapuzzle),
     url(r'^submit/bait/$', submit_mit_metapuzzle),
 
-    url(r'^hq/all-teams/$', all_teams),
+    url(r'^hq/all-teams/$', all_teams_view),
     url(r'^hq/queue/$', queue),
     url(r'^hq/log/$', system_log_view),
 )

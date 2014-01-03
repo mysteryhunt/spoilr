@@ -1,5 +1,7 @@
 from django.http import HttpResponse
-from django.template import RequestContext, loader
+from django.template import Context, loader
+from django.core.cache import cache
+
 from .models import *
 
 PUZZLE_ACCESS = 'puzzle-access'
@@ -52,11 +54,14 @@ def team_log_hole_discovered_no_vial(team):
 def team_log_vial_filled_no_hole(team):
     team_log(team, 'story', 'You filled a vial of drink-me potion, but you haven\'t found any small holes to jump into.')
 
-def system_log_view(request):
+def system_log_update():
+    global slog_cache
     entries = SystemLog.objects.all().order_by('-id')
     template = loader.get_template('log.html') 
-    context = RequestContext(request, {
+    context = Context({
         'entries': entries,
     })
+    cache.set('system_log', template.render(context), None)
 
-    return HttpResponse(template.render(context))
+def system_log_view(request):
+    return HttpResponse(cache.get('system_log'))

@@ -1,5 +1,6 @@
 from django.http import HttpResponse
-from django.template import RequestContext, loader
+from django.template import Context, loader
+from django.core.cache import cache
 
 from .models import *
 from .constants import *
@@ -82,7 +83,7 @@ def TeamDict(team, puzzle_objects, puzzle_access, round_objects, round_access):
         'q_submissions': q_submissions,
         }
 
-def all_teams(request):
+def all_teams_update():
     template = loader.get_template('all-teams.html') 
     teams = []
     for team in Team.objects.all():
@@ -102,7 +103,7 @@ def all_teams(request):
     p_total = Puzzle.objects.count()
     r_total = Round.objects.count()
     r_total = r_total - 1 + 3 # 2014-specific
-    context = RequestContext(request, {
+    context = Context({
         'teams': teams,
         'q_total': q_total,
         'q_teams': len(q_teams),
@@ -110,4 +111,7 @@ def all_teams(request):
         'r_total': r_total,
         'p_total': p_total,
     })
-    return HttpResponse(template.render(context))
+    cache.set('all_teams', template.render(context), None)
+
+def all_teams_view(request):
+    return HttpResponse(cache.get('all_teams'))
