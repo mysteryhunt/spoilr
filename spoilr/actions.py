@@ -39,6 +39,19 @@ def release_round(team, round, reason):
         release_interaction(team, interaction, 'Round "%s" released' % round.name)
         # hack for testing:
         interaction_accomplished(team, interaction)
+    elif round.url == 'caucus_race': # 2014-specific
+        count = 2
+        for abird in Y2014CaucusAnswerData.objects.all():
+            if count > 0:
+                try:
+                    release_initial(Puzzle.objects.get(round=round, answer=abird.yes_answer))
+                except Exception as e:
+                    logger.error('missing caucus puzzle, yes for %s' % str(abird))
+                try:
+                    release_initial(Puzzle.objects.get(round=round, answer=abird.no_answer))
+                except Exception as e:
+                    logger.error('missing caucus puzzle, no for %s' % str(abird))
+                count = count - 1
     else: # 2014-specific
         # it's a wonderland round, let's release some puzzles in it...
         count = WL_RELEASE_INIT
@@ -134,24 +147,16 @@ def puzzle_answer_correct(team, puzzle):
     if puzzle.round.url == 'mit': # 2014-specific
         # mit map: release all puzzles connected to the solved one
         node = Y2014MitPuzzleData.objects.get(puzzle=puzzle).location
-        def release_connected(other_puzzle):
-            # we could call release_puzzle, but since we're going to 
-            # release top and round later anyway we can skip that here
-            if PuzzleAccess.objects.filter(team=team, puzzle=other_puzzle).exists():
-                return
-            PuzzleAccess.objects.create(team=team, puzzle=other_puzzle).save()
-            team_log_puzzle_access(team, other_puzzle, 'connected to "%s"' % puzzle.name)
-            publish_team_puzzle(team, other_puzzle)
         for edge in Y2014MitMapEdge.objects.filter(node1=node):
             try:
-                release_connected(Y2014MitPuzzleData.objects.get(location=edge.node2).puzzle)
+                release_puzzle(team, Y2014MitPuzzleData.objects.get(location=edge.node2).puzzle, 'connected to "%s"' % puzzle.name)
             except Exception as e:
-                logger.error('error releasing connecting puzzle at %s: %s' % (edge.node2, e))
+                logger.error('missing mit puzzle at %s' % (edge.node2))
         for edge in Y2014MitMapEdge.objects.filter(node2=node):
             try:
-                release_connected(Y2014MitPuzzleData.objects.get(location=edge.node1).puzzle)
+                release_puzzle(team, Y2014MitPuzzleData.objects.get(location=edge.node1).puzzle, 'connected to "%s"' % puzzle.name)
             except Exception as e:
-                logger.error('error releasing connecting puzzle at %s: %s' % (edge.node1, e))
+                logger.error('missing mit puzzle at %s' % (edge.node1))
     elif puzzle.round.url == 'tea_party': # 2014-specific
         # crazy tea party rules:
         chairs = 0
@@ -220,6 +225,25 @@ def puzzle_answer_correct(team, puzzle):
                     release_puzzle(team, Puzzle.objects.get(url=p), 'Having found six titles to White Queen puzzles, you remember some more answers')
                 except:
                     pass
+    elif puzzle.round.url == 'caucus_race': # 2014-specific
+        # caucus race releases puzzles in pairs by bird
+        for abird in Y2014CaucusAnswerData.objects.all():
+            yes_puzzle = None
+            no_puzzle = None
+            try:
+                yes_puzzle = Puzzle.objects.get(round=puzzle.round, answer=abird.yes_answer)
+            except Exception as e:
+                logger.error('missing caucus puzzle, yes for %s' % str(abird))
+            try:
+                no_puzzle = Puzzle.objects.get(round=puzzle.round, answer=abird.no_answer)
+            except Exception as e:
+                logger.error('missing caucus puzzle, no for %s' % str(abird))
+            if (yes_puzzle and not PuzzleAccess.objects.filter(team=team, puzzle=yes_puzzle).exists()) or (no_puzzle and not PuzzleAccess.objects.filter(team=team, puzzle=no_puzzle).exists()):
+                if yes_puzzle:
+                    release_puzzle(team, yes_puzzle, 'solved "%s"' % puzzle.name)
+                if no_puzzle:
+                    release_puzzle(team, no_puzzle, 'solved "%s"' % puzzle.name)
+                break
     elif puzzle.round.url == 'humpty_dumpty': # 2014-specific
         td = Y2014TeamData.objects.get(team=team)
         if td.humpty_pieces < 12:
@@ -228,16 +252,10 @@ def puzzle_answer_correct(team, puzzle):
     else:
         # release more puzzles
         count = WL_RELEASE_INCR
-        def release_another(apuzzle):
-            # we could call release_puzzle, but since we're going to 
-            # publish top and round later anyway we can skip that here
-            PuzzleAccess.objects.create(team=team, puzzle=apuzzle).save()
-            team_log_puzzle_access(team, apuzzle, 'solved "%s"' % puzzle.name)
-            publish_team_puzzle(team, apuzzle)
         for apuzzle in Puzzle.objects.filter(round=puzzle.round):
             if count > 0 and not PuzzleAccess.objects.filter(team=team, puzzle=apuzzle).exists():
                 try:
-                    release_another(apuzzle)
+                    release_puzzle(team, apuzzle, 'solved "%s"' % puzzle.name)
                 except Exception as e:
                     logger.error('error releasing additional puzzle %s: %s' % (apuzzle.url, e))
                 count = count - 1        
