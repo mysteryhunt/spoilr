@@ -78,7 +78,7 @@ def load_teams():
             teamdata = Y2014TeamData.objects.create(team=team)
             teamdata.save()
             for mitdata in Y2014MitPuzzleData.objects.all():
-                if mitdata.location.start:
+                if mitdata.card.start:
                     PuzzleAccess.objects.create(team=team, puzzle=mitdata.puzzle).save()
                     team_log_puzzle_access(team, mitdata.puzzle, "The hunt begins")
     print("Done loading teams")
@@ -96,14 +96,14 @@ def load_team_phones():
             TeamPhone.objects.create(team=team, phone=row["phone"]).save()
     print("Done loading team phones")
 
-def load_mit_nodes(): # 2014-specific
-    print("Loading mit map nodes from mit_nodes.txt...")
-    Y2014MitMapNode.objects.all().delete()
-    with open(os.path.join(settings.LOAD_DIR, 'mit_nodes.txt'), 'r') as node_file:
+def load_mit_cards(): # 2014-specific
+    print("Loading mit cards from mit_cards.txt...")
+    Y2014MitCard.objects.all().delete()
+    with open(os.path.join(settings.LOAD_DIR, 'mit_cards.txt'), 'r') as node_file:
         for row in csv.DictReader(node_file, delimiter='\t'):
             row['start'] = (row['start'] == 'yes')
-            Y2014MitMapNode.objects.create(**row).save()
-    print("Done loading mit nodes")
+            Y2014MitCard.objects.create(**row).save()
+    print("Done loading mit cards")
 
 def load_mit_edges(): # 2014-specific
     print("Loading mit map edges from mit_edges.txt...")
@@ -111,16 +111,16 @@ def load_mit_edges(): # 2014-specific
     with open(os.path.join(settings.LOAD_DIR, 'mit_edges.txt'), 'r') as edge_file:
         for row in csv.DictReader(edge_file, delimiter='\t'):
             try:
-                node1 = Y2014MitMapNode.objects.get(name=row["node1"])
+                card1 = Y2014MitCard.objects.get(name=row["card1"])
             except:
-                print('ERROR: no such node "%s"' % row["node1"])
+                print('ERROR: no such card "%s"' % row["card1"])
                 continue
             try:
-                node2 = Y2014MitMapNode.objects.get(name=row["node2"])
+                card2 = Y2014MitCard.objects.get(name=row["card2"])
             except:
-                print('ERROR: no such node "%s"' % row["node2"])
+                print('ERROR: no such card "%s"' % row["card2"])
                 continue
-            Y2014MitMapEdge.objects.create(node1=node1, node2=node2).save()
+            Y2014MitMapEdge.objects.create(card1=card1, card2=card2).save()
     print("Done loading mit edges")
 
 def load_mit_data(): # 2014-specific
@@ -129,9 +129,9 @@ def load_mit_data(): # 2014-specific
     with open(os.path.join(settings.LOAD_DIR, 'mit_data.txt'), 'r') as data_file:
         for row in csv.DictReader(data_file, delimiter='\t'):
             try:
-                location = Y2014MitMapNode.objects.get(name=row["location"])
+                card = Y2014MitCard.objects.get(name=row["card"])
             except:
-                print('ERROR: no such puzzle "%s"' % row["url"])
+                print('ERROR: no such card "%s"' % row["card"])
                 continue
             try:
                 puzzle = Puzzle.objects.get(url=row["url"])
@@ -141,7 +141,7 @@ def load_mit_data(): # 2014-specific
             if puzzle.round.url != "mit":
                 print('ERROR: puzzle "%s" isn\'t in round "mit"' % row["url"])
                 continue
-            Y2014MitPuzzleData.objects.create(puzzle=puzzle, card=row["card"], location=location).save()
+            Y2014MitPuzzleData.objects.create(puzzle=puzzle, card=card).save()
     print("Done loading mit data")
 
 
@@ -174,7 +174,7 @@ def load_all_inner():
     load_interactions()
     load_rounds()
     load_puzzles()
-    load_mit_nodes() # 2014-specific
+    load_mit_cards() # 2014-specific
     load_mit_edges() # 2014-specific / must load after mit_nodes
     load_mit_data() # 2014-specific / must load after mit_nodes and puzzles, and must load before teams
     load_caucus_data() # 2014-specific

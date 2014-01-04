@@ -244,7 +244,7 @@ class Y2014TeamData(models.Model):
         verbose_name = '2014 team data'
         verbose_name_plural = '2014 team data'
 
-class Y2014MitMapNode(models.Model):
+class Y2014MitCard(models.Model):
     name = models.CharField(max_length=50, unique=True)
     order = models.IntegerField()
     start = models.BooleanField(default=False, verbose_name="Access Granted at Start of Hunt")
@@ -255,50 +255,45 @@ class Y2014MitMapNode(models.Model):
         else:
             return '%s' % (self.name)
 
+    def mit_meta(self):
+        if 'spades' in self.name:
+            return 'dormouse'
+        if 'clubs' in self.name:
+            return 'caterpillar'
+        if 'diamonds' in self.name:
+            return 'tweedles'
+
     class Meta:
         ordering = ['order']
-        verbose_name = '2014 MIT map node'
-        verbose_name_plural = '2014 MIT map nodes'
+        verbose_name = '2014 MIT card'
+        verbose_name_plural = '2014 MIT cards'
 
 class Y2014MitMapEdge(models.Model):
-    node1 = models.ForeignKey(Y2014MitMapNode, related_name='+')
-    node2 = models.ForeignKey(Y2014MitMapNode, related_name='+')
+    card1 = models.ForeignKey(Y2014MitCard, related_name='+')
+    card2 = models.ForeignKey(Y2014MitCard, related_name='+')
 
     def __str__(self):
-        return '%s <-> %s' % (self.node1.name, self.node2.name)
+        return '%s <-> %s' % (self.card1.name, self.card2.name)
 
     class Meta:
-        unique_together = ('node1', 'node2')
-        ordering = ['node1__order', 'node2__order']
+        unique_together = ('card1', 'card2')
+        ordering = ['card1__order', 'card2__order']
         verbose_name = '2014 MIT map edge'
         verbose_name_plural = '2014 MIT map edges'
 
 class Y2014MitPuzzleData(models.Model):
     puzzle = models.ForeignKey(Puzzle, unique=True, limit_choices_to = {'round__url': 'mit'})
 
-    CARD_CHOICES = []
-    for n in [2,3,4,5,6,7,8,9]: # dormouse
-        CARD_CHOICES.append((str(n)+'_spades', str(n)+' of spades (dormouse)'))
-    for n in [2,4,5,7,9,'J','Q','K']: # caterpillar
-        CARD_CHOICES.append((str(n)+'_clubs', str(n)+' of clubs (caterpillar)'))
-    for n in ['A',2,3,4,8,9,10,'J']: # tweedles
-        CARD_CHOICES.append((str(n)+'_diamonds', str(n)+' of diamonds (tweedles)'))
-    card = models.CharField(max_length=12, choices=CARD_CHOICES, unique=True)
-    location = models.ForeignKey(Y2014MitMapNode, unique=True)
+    card = models.ForeignKey(Y2014MitCard, unique=True)
 
     def __str__(self):
-        return '%s (%s, %s)' % (self.puzzle.name, self.card, self.location.name)
+        return '%s (%s, %s)' % (self.puzzle.name, self.card.name)
 
     def mit_meta(self):
-        if 'spades' in self.card:
-            return 'dormouse'
-        if 'clubs' in self.card:
-            return 'caterpillar'
-        if 'diamonds' in self.card:
-            return 'tweedles'
+        return self.card.mit_meta()
 
     class Meta:
-        ordering = ['puzzle__order', 'card']
+        ordering = ['puzzle__order', 'card__order']
         order_with_respect_to = 'puzzle'
         verbose_name = '2014 MIT puzzle data'
         verbose_name_plural = '2014 MIT puzzle data'

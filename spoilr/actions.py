@@ -140,17 +140,17 @@ def puzzle_answer_correct(team, puzzle):
         grant_points(team, POINT_INCR_WL, 'solved a Wonderland puzzle')
     if puzzle.round.url == 'mit': # 2014-specific
         # mit map: release all puzzles connected to the solved one
-        node = Y2014MitPuzzleData.objects.get(puzzle=puzzle).location
-        for edge in Y2014MitMapEdge.objects.filter(node1=node):
+        card = Y2014MitPuzzleData.objects.get(puzzle=puzzle).card
+        for edge in Y2014MitMapEdge.objects.filter(card1=card):
             try:
-                release_puzzle(team, Y2014MitPuzzleData.objects.get(location=edge.node2).puzzle, 'connected to "%s"' % puzzle.name)
+                release_puzzle(team, Y2014MitPuzzleData.objects.get(card=edge.card2).puzzle, 'connected to "%s"' % puzzle.name)
             except Exception as e:
-                logger.error('missing mit puzzle at %s' % (edge.node2))
-        for edge in Y2014MitMapEdge.objects.filter(node2=node):
+                logger.error('missing mit puzzle at %s' % (edge.card2))
+        for edge in Y2014MitMapEdge.objects.filter(card2=card):
             try:
-                release_puzzle(team, Y2014MitPuzzleData.objects.get(location=edge.node1).puzzle, 'connected to "%s"' % puzzle.name)
+                release_puzzle(team, Y2014MitPuzzleData.objects.get(card=edge.card1).puzzle, 'connected to "%s"' % puzzle.name)
             except Exception as e:
-                logger.error('missing mit puzzle at %s' % (edge.node1))
+                logger.error('missing mit puzzle at %s' % (edge.card1))
     elif puzzle.round.url == 'tea_party': # 2014-specific
         # crazy tea party rules:
         chairs = 0

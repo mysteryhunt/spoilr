@@ -119,10 +119,9 @@ class TopContext(Context):
         if access.puzzle.round.url == 'mit': # 2014-specific
             try:
                 d = Y2014MitPuzzleData.objects.get(puzzle=access.puzzle)
-                ret["location"] = d.location
                 ret["card"] = d.card
             except:
-                logger.error('puzzle "%s" doesn\'t have a location assigned' % access.puzzle.url)
+                logger.error('puzzle "%s" doesn\'t have a card assigned' % access.puzzle.url)
         if access.puzzle.round.url == 'tea_party': # 2014-specific
             data = Y2014PartyAnswerData.objects.get(answer=access.puzzle.answer)
             if data.type1 == 'cup':
@@ -440,11 +439,12 @@ def publish_team_puzzle(team, puzzle, suffix=None):
     if puzzle.round.url == 'mit':
         try:
             card = Y2014MitPuzzleData.objects.get(puzzle=puzzle).card
-            source_file = os.path.join(settings.HUNT_DATA_DIR, 'round', 'mit', 'cards', card+'.png')
+            source_file = os.path.join(settings.HUNT_DATA_DIR, 'round', 'mit', 'cards', card.name+'.png')
             dest_file = os.path.join(puzzle_dir, 'card.png')
             shutil.copyfile(source_file, dest_file)
-        except:
-            logger.error('puzzle "%s" doesn\'t have a playing card assigned' % puzzle.url)
+        except Exception as e:
+            print(str(e))
+            logger.error('puzzle "%s" doesn\'t have a card assigned' % puzzle.url)
     if puzzle.round.url == 'knights':
         try:
             data = Y2014KnightsAnswerData.objects.get(answer=puzzle.answer)
