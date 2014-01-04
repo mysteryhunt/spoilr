@@ -212,6 +212,37 @@ def submit_mit_metapuzzle(request): # 2014-specific
             })
     return HttpResponse(template.render(context))
 
+
+def submit_contact_actual(team, phone, comment):
+    system_log('submit-contact', "%s wants to talk to HQ: '%s'" % (team.name, comment), team=team)
+    ContactRequest.objects.create(team=team, phone=phone, comment=comment).save()
+
+def submit_contact(request):
+    username = 'bigjimmy'#request.META['REMOTE_USER']
+    try:
+        team = Team.objects.get(username=username)
+    except:
+        return HttpResponseBadRequest('cannot find team for user '+username)
+    # these don't count toward the QUEUE_LIMIT
+    q_full2 = ContactRequest.objects.filter(team=team, resolved=False).count() >= CONTACT_LIMIT
+    template = loader.get_template('submit-contact.html') 
+    if not q_full2 and request.method == "POST":
+        maxlen = ContactRequest._meta.get_field('comment').max_length
+        comment = request.POST["comment"][:maxlen]
+        phone = request.POST["phone"]
+        phone = check_phone(team, phone)
+        submit_contact_actual(team, phone, comment)
+        # these don't count toward the QUEUE_LIMIT
+        q_full2 = ContactRequest.objects.filter(team=team, resolved=False).count() >= CONTACT_LIMIT
+    requests = ContactRequest.objects.filter(team=team, resolved=False)
+    context = RequestContext(request, {
+            'team': team,
+            'requests': requests,
+            'q_full2': q_full2,
+            'q_lim2': CONTACT_LIMIT,
+            })
+    return HttpResponse(template.render(context))
+
 def queue(request):
     for h in QueueHandler.objects.all():
         if h.team:
@@ -266,6 +297,11 @@ def queue(request):
                     else:
                         mit_bait_incorrect(handler.team, p.answer)
                     p.save()
+                if key[:2] == 'c_':
+                    p = ContactRequest.objects.get(team=handler.team, resolved=False, id=key[2:])
+                    p.resolved = True
+                    system_log('queue-resolution', "'%s' (%s) resolved hq-contact '%s' for team '%s'" % (handler.name, handler.email, p.comment, handler.team.name), team=handler.team)
+                    p.save()
             system_log('queue-claim', "'%s' (%s) released claim on team '%s'" % (handler.name, handler.email, handler.team.name), team=handler.team)
             handler.team = None
             handler.team_timestamp = None
@@ -312,6 +348,10 @@ def queue(request):
             bait_meta = check_bait(p.answer)
             mitmeta.append({'submission': p, 'correct': not bait_meta is None})
             add_phone(p.phone)
+        contact = []
+        for p in ContactRequest.objects.filter(team=team, resolved=False):
+            contact.append({'submission': p})
+            add_phone(p.phone)
 
         puzzle.sort(key=lambda p: p['correct'])
         puzzle.sort(key=lambda p: p['submission'].puzzle.url)
@@ -328,6 +368,7 @@ def queue(request):
             'puzzle': puzzle,
             'metapuzzle': metapuzzle,
             'mitmeta': mitmeta,
+            'contact': contact,
             'team': team,
         })
 
@@ -337,12 +378,15 @@ def queue(request):
     q_total = PuzzleSubmission.objects.filter(resolved=False).count()
     q_total += MetapuzzleSubmission.objects.filter(resolved=False).count()
     q_total += Y2014MitMetapuzzleSubmission.objects.filter(resolved=False).count() # 2014-specific
+    q_total += ContactRequest.objects.filter(resolved=False).count()
     q_teams = set()
     for x in PuzzleSubmission.objects.filter(resolved=False):
         q_teams.add(x.team.url)
     for x in MetapuzzleSubmission.objects.filter(resolved=False):
         q_teams.add(x.team.url)
     for x in Y2014MitMetapuzzleSubmission.objects.filter(resolved=False): # 2014-specific
+        q_teams.add(x.team.url)
+    for x in ContactRequest.objects.filter(resolved=False):
         q_teams.add(x.team.url)
 
     teams_dict = dict()
@@ -366,6 +410,8 @@ def queue(request):
         team_obj(sub.team, sub.timestamp)["submissions"].append({"type": "metapuzzle", "thing": str(sub.metapuzzle), "timestamp": sub.timestamp})
     for sub in Y2014MitMetapuzzleSubmission.objects.filter(resolved=False): # 2014-specific
         team_obj(sub.team, sub.timestamp)["submissions"].append({"type": "mit-metapuzzle", "thing": "", "timestamp": sub.timestamp})
+    for sub in ContactRequest.objects.filter(resolved=False):
+        team_obj(sub.team, sub.timestamp)["submissions"].append({"type": "contact", "thing": sub.comment, "timestamp": sub.timestamp})
     for team_obj in teams:
         team_obj["submissions"].sort(key=lambda sub: sub["timestamp"])
 

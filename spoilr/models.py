@@ -186,6 +186,19 @@ class MetapuzzleSubmission(models.Model):
     class Meta:
         ordering = ['-timestamp']
 
+class ContactRequest(models.Model):
+    team = models.ForeignKey(Team)
+    phone = models.CharField(max_length=100)
+    timestamp = models.DateTimeField(default=datetime.now)
+    comment = models.CharField(max_length=100)
+    resolved = models.BooleanField(default=False)
+
+    def __str__(self):
+        return '%s: %s wants to talk to HQ' % (str(self.timestamp), str(self.team))
+
+    class Meta:
+        ordering = ['-timestamp']
+
 class QueueHandler(models.Model):
     name = models.CharField(max_length=100)
     email = models.CharField(max_length=100, unique=True)

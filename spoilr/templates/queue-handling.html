@@ -78,6 +78,22 @@
 	{% endif %}
       </div>
       <br />
+      {% if contact %}
+      <div>
+	Contact HQ submissions:
+	<table>
+	  <tr><th>Time</th><th>Phone</th><th>Reason</th><th></th></tr>
+	  {% for p in contact %}
+	  <tr id="row_m_{{ p.submission.id }}" class="correct">
+	    <td>{{ p.submission.timestamp|naturaltime }}</td><td>{{ p.submission.phone }}</td><td class="ital">{{ p.submission.comment }}</td>
+	    <td>
+	      <label for="c_{{ p.submission.id }}"><input id="c_{{ p.submission.id }}" class="check" type="checkbox" name="c_{{ p.submission.id }}" />Done</label>
+	    </td>
+	  </tr>
+	  {% endfor %}
+	</table>
+      </div>
+      {% endif %}
       {% if metapuzzle %}
       <div>
 	Metapuzzle submissions:

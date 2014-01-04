@@ -204,6 +204,14 @@ class MetapuzzleSubmissionAdmin(admin.ModelAdmin):
 
 admin.site.register(MetapuzzleSubmission,MetapuzzleSubmissionAdmin)
 
+class ContactRequestAdmin(admin.ModelAdmin):
+    list_display = ('__str__', 'timestamp', 'team', 'phone', 'comment', 'resolved')
+    list_filter = ('team__name', 'resolved')
+    search_fields = ['team__name', 'comment']
+    ordering = ['timestamp']
+
+admin.site.register(ContactRequest,ContactRequestAdmin)
+
 class QueueHandlerAdmin(admin.ModelAdmin):
     list_display = ('__str__', 'email')
     list_filter = ('name', 'team__name')

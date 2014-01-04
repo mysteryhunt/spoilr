@@ -1,5 +1,6 @@
 PUZZLE_QUEUE_LIMIT = 2
 QUEUE_LIMIT = 10
+CONTACT_LIMIT = 5
 
 # ----- 2014-specific -----
 
