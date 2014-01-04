@@ -23,7 +23,7 @@ def TeamDict(team, puzzle_objects, puzzle_access, round_objects, round_access):
             if solved:
                 r_solved += 1
             rounds[x] = {'puzzles': [], 'released': True, 'solved': solved}
-        for mitdata in Y2014MitPuzzleData.objects.all():
+        for mitdata in Y2014MitPuzzleData.objects.all().order_by('id'):
             released = False
             solved = False
             access = [a for a in puzzle_access if a.team == team and a.puzzle == mitdata.puzzle]
@@ -84,6 +84,7 @@ def TeamDict(team, puzzle_objects, puzzle_access, round_objects, round_access):
         }
 
 def all_teams_update():
+    print("updating all teams dashboard...")
     template = loader.get_template('all-teams.html') 
     teams = []
     for team in Team.objects.all():
@@ -112,6 +113,7 @@ def all_teams_update():
         'p_total': p_total,
     })
     cache.set('all_teams', template.render(context), None)
+    print("...done")
 
 def all_teams_view(request):
     return HttpResponse(cache.get('all_teams'))
