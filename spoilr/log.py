@@ -55,13 +55,14 @@ def team_log_vial_filled_no_hole(team):
     team_log(team, 'story', 'You filled a vial of drink-me potion, but you haven\'t found any small holes to jump into.')
 
 def system_log_update():
-    global slog_cache
+    print("updating system log view...")
     entries = SystemLog.objects.all().order_by('-id')
     template = loader.get_template('log.html') 
     context = Context({
         'entries': entries,
     })
     cache.set('system_log', template.render(context), None)
+    print("...done")
 
 def system_log_view(request):
     return HttpResponse(cache.get('system_log'))
