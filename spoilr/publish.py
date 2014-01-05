@@ -442,6 +442,9 @@ def publish_team_puzzle(team, puzzle, suffix=None):
             source_file = os.path.join(settings.HUNT_DATA_DIR, 'round', 'mit', 'cards', card.name+'.png')
             dest_file = os.path.join(puzzle_dir, 'card.png')
             shutil.copyfile(source_file, dest_file)
+            source_file = os.path.join(settings.HUNT_DATA_DIR, 'round', 'mit', 'edges', card.name+'.png')
+            dest_file = os.path.join(puzzle_dir, 'paths.png')
+            shutil.copyfile(source_file, dest_file)
         except Exception as e:
             print(str(e))
             logger.error('puzzle "%s" doesn\'t have a card assigned' % puzzle.url)
