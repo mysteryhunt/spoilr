@@ -1,0 +1,35 @@
+{% load humanize %}
+<html>
+  <head>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+  </head>
+  <body>
+    <h3>Admin actions (be very very careful)</h3>
+    <p>
+      <form action="interaction/" method="POST" style="display: inline;">
+	{% csrf_token %}
+	<b>Interaction:</b> Register that one or more teams have accomplished
+	<select name="interaction">
+	  {% for i in interactions %}
+	  <option value="{{i.url}}">{{i.name}}</option>
+	  {% endfor %}
+	</select>
+	<input type="submit" value="Go" />
+      </form>
+    <p>
+      <form action="points/" method="POST" style="display: inline;">
+	{% csrf_token %}
+	<b>Points:</b> Grant
+	<input type="text" size="5" name="points" value="5" style="text-align: right;" />
+	drink-me/train-ticket points to <b>all teams</b>
+	<input type="submit" value="Go" />
+      </form>
+      <br>
+      {% if last_points %}
+      <em>&nbsp;&nbsp;&nbsp;Last time was {{ last_points.timestamp|naturaltime }} (refresh to be sure):</em><br>
+      <em>&nbsp;&nbsp;&nbsp;{{ last_points.timestamp|date:'Y-m-d H:i:s' }}: {{ last_points.message }}</em>
+      {% else %}
+      <em>&nbsp;&nbsp;&nbsp;This hasn't happened yet</em>
+      {% endif %}
+  </body>
+</html>

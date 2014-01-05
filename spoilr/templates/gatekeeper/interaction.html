@@ -1,0 +1,58 @@
+<html>
+  <head>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+  </head>
+  <body>
+    {% if done %}
+    Okay, the following teams were registered as having accomplished '{{ interaction.name }}':
+    <ul>
+      {% for ia in ias %}
+      <li>"{{ia.team.name }}" ({{ia.team.url}})</li>
+      {% endfor %}
+    </ul>
+    <br><br>
+    <a href="..">Back to the admin page</a>
+    {% else %}
+    <h3>{{ interaction.name }}</h3>
+    <p>
+      <form id="form" action="." method="POST">
+	{% csrf_token %}
+	<input type="hidden" name="go" value="true" />
+	<input type="hidden" name="interaction" value="{{interaction.url}}" />
+	<div>Teams that have access to this interaction:</div>
+	<ul>
+	{% if teams_ready %}
+	{% for t in teams_ready %}
+	<li>
+	  <label for="t_{{t.url}}"><input id="t_{{t.url}}" type="checkbox" name="t_{{t.url}}" />"{{t.name}}" ({{t.url}})</label>
+	</li>
+	{% endfor %}
+	<input type="submit" value="Register the checked teams as having accomplished '{{ interaction.name }}'" />
+	Or go <a href="..">back to the admin page</a>
+	{% else %}
+	<li>None!  Nothing to do here.  Go <a href="..">back to the admin page</a>
+	</li>
+	{% endif %}
+	</ul>
+      </form>
+      <script type="text/javascript">
+	$('#form').bind('submit', function(e) {
+          $(this).find('input:submit').attr('disabled', 'disabled');
+        });
+      </script>
+      <hr>
+      <div>Teams that <b>have already</b> accomplished this interaction:</div>
+      <ul>
+	{% for t in teams_accomplished %}
+	<li>{{t.name}}</li>
+	{% endfor %}
+      </ul>
+      <div>Teams that <b>don't have access</b> to this interaction:</div>
+      <ul>
+	{% for t in teams_not_ready %}
+	<li>{{t.name}}</li>
+	{% endfor %}
+      </ul>
+      {% endif %}
+  </body>
+</html>

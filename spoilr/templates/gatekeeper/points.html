@@ -1,0 +1,42 @@
+<html>
+  <head>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+  </head>
+  <body>
+    {% if done %}
+    Okay, granted {{ points }} drink-me/train-ticket points to all teams.
+    <br><br>
+    <a href="..">Back to the admin page</a>
+    {% else %}
+    <h3>Grant {{ points }} drink-me/train-ticket points to all teams</h3>
+    <p>
+      <form id="form" action="." method="POST">
+	{% csrf_token %}
+	<input type="hidden" name="go" value="true" />
+	<input type="hidden" name="points" value="{{ points }}" />
+	Reason (teams can see this): <input name="reason" value="time-release" size="60" /><br>
+	<input type="submit" value="Yes, grant {{ points }} drink-me/train-ticket points to all teams." />
+	Or go <a href="..">back to the admin page</a>
+      </form>
+      <script type="text/javascript">
+	$('#form').bind('submit', function(e) {
+          $(this).find('input:submit').attr('disabled', 'disabled');
+        });
+      </script>
+      {% if log %}
+      <hr>
+      Recent handouts:<br>
+      <table>
+	<tr><th>Time
+	  <th>Message
+	</tr>
+	{% for e in log %}
+	<tr><td>{{ e.timestamp|date:'Y-m-d H:i:s' }}
+	  <td>{{ e.message }}
+	</tr>
+	{% endfor %}
+      </table>
+      {% endif %}
+      {% endif %}
+  </body>
+</html>
