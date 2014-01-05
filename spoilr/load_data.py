@@ -195,10 +195,13 @@ def load_all():
 
 def everybody_can_see_everything_inner():
     print("Granting full access to every team...")
+    InteractionAccess.objects.all().delete()
     for team in Team.objects.all():
         td = Y2014TeamData.objects.get(team=team)
         td.humpty_pieces = 12
         td.save()
+        for interaction in Interaction.objects.all():
+            InteractionAccess.objects.create(team=team, puzzle=puzzle, accomplished=True).save()
         for round in Round.objects.all():
             if not RoundAccess.objects.filter(team=team, round=round).exists():
                 RoundAccess.objects.create(team=team, round=round).save()

@@ -291,6 +291,9 @@ class PuzzleContext(RoundContext): # todo don't inherit, it'll just slow things 
             logger.error('[bug] team "%s" doesn\'t have access to puzzle "%s"', team.url, puzzle.url)
             return
         self['puzzle'] = self.puzzle_obj(PuzzleAccess.objects.get(team=team, puzzle=puzzle))
+        if puzzle.url == 'puzzle_with_answer_garciaparra': # 2014-specific
+            self['stage3'] = InteractionAccess.objects.filter(team=team, interaction__url='pwa_garciaparra_food', accomplished=True).exists()
+            self['stage2'] = InteractionAccess.objects.filter(team=team, interaction__url='pwa_garciaparra_url', accomplished=True).exists()
 
 def publish_dir(context, source_path, dest_path, root_path, except_for=[]):
     for dirpath, dirnames, filenames in os.walk(source_path):
@@ -397,10 +400,22 @@ def publish_team_puzzle(team, puzzle, suffix=None):
             return
     puzzle_context = PuzzleContext(team, puzzle)
     puzzle_source = os.path.join(settings.HUNT_DATA_DIR, 'puzzle', puzzle.url)
-    publish_dir(puzzle_context, puzzle_source, puzzle_dir, '../..', ['index.html', 'puzzle.css', 'puzzle.js'])
+    except_for = ['index.html', 'puzzle.css', 'puzzle.js']
+    if puzzle.url == 'puzzle_with_answer_garciaparra': # 2014-specific
+        if not puzzle_context['stage2']:
+            except_for.append('stage2')
+        if not puzzle_context['stage3']:
+            except_for.append('stage3')
+        print(str(except_for))
+    publish_dir(puzzle_context, puzzle_source, puzzle_dir, '../..', except_for)
     try:
-        with open(os.path.join(puzzle_source, 'index.html'), 'r') as index_html_file:
-            puzzle_context['index_html'] = index_html_file.read()
+        html_path = os.path.join(puzzle_source, 'index.html')
+        if os.path.isfile(html_path):
+            with open(html_path, 'r') as index_html_file:
+                puzzle_context['index_html'] = index_html_file.read()
+        elif os.path.isfile(html_path+'.tmpl'):
+            with open(html_path+'.tmpl', 'r') as index_html_file:
+                puzzle_context['index_html'] = Template(index_html_file.read()).render(puzzle_context)
     except Exception as e:
         logger.error('couldn\'t read puzzle html: %s', puzzle_dir, str(e))
         return

@@ -62,6 +62,8 @@ def release_puzzle(team, puzzle, reason):
     print("release %s/puzzle/%s (%s)" % (team.url, puzzle.url, reason))
     PuzzleAccess.objects.create(team=team, puzzle=puzzle).save()
     team_log_puzzle_access(team, puzzle, reason)
+    if puzzle.url == 'puzzle_with_answer_garciaparra': # 2014-specific
+        release_interaction(team, Interaction.objects.get(url='pwa_garciaparra_url'), '"%s" released' % puzzle.name)
     publish_team_puzzle(team, puzzle)
     publish_team_round(team, puzzle.round)
     publish_team_top(team)
@@ -353,7 +355,7 @@ def interaction_accomplished(team, interaction):
         else:
             team_log_hole_discovered_no_vial(team)
         publish_team_round(team, Round.objects.get(url='mit'))
-    if interaction.url == 'white_queen_gift': # 2014-specific
+    elif interaction.url == 'white_queen_gift': # 2014-specific
         pwa = 'puzzle_with_answer_'
         for p in [pwa+'williams', pwa+'lynn', pwa+'sullivan', 'another_'+pwa+'sullivan', pwa+'rice']:
             try:
@@ -361,4 +363,9 @@ def interaction_accomplished(team, interaction):
             except:
                 pass
         publish_team_round(team, Round.objects.get(url='white_queen'))
+    elif interaction.url == 'pwa_garciaparra_url': # 2014-specific 
+        release_interaction(team, Interaction.objects.get(url='pwa_garciaparra_food'), 'You beat the White Queen\'s GeoGuessr challenge')
+        publish_team_puzzle(team, Puzzle.objects.get(url='puzzle_with_answer_garciaparra'))
+    elif interaction.url == 'pwa_garciaparra_food': # 2014-specific 
+        publish_team_puzzle(team, Puzzle.objects.get(url='puzzle_with_answer_garciaparra'))
     publish_team_top(team)

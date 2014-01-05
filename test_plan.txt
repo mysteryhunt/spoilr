@@ -81,8 +81,14 @@ metapuzzle_answer_correct(t, Metapuzzle.objects.get(url='white_queen_a05'))
 metapuzzle_answer_correct(t, Metapuzzle.objects.get(url='white_queen_a07'))
 # youkilis released
 
-metapuzzle_answer_correct(t, Metapuzzle.objects.get(url='white_queen_a14')) # should be 11, but we don't have enough light-red puzzles in post-prod yet
-# drive-my-car released
+metapuzzle_answer_correct(t, Metapuzzle.objects.get(url='white_queen_a13'))
+# garciaparra released
+
+interaction_accomplished(t, Interaction.objects.get(url='pwa_garciaparra_url'))
+# garciaparra stage 2
+
+interaction_accomplished(t, Interaction.objects.get(url='pwa_garciaparra_food'))
+# garciaparra stage 3
 
 pwa='puzzle_with_answer_'
 puzzle_answer_correct(t, Puzzle.objects.get(url=pwa+'williams'))
@@ -90,7 +96,7 @@ puzzle_answer_correct(t, Puzzle.objects.get(url=pwa+'lynn'))
 puzzle_answer_correct(t, Puzzle.objects.get(url=pwa+'clemens'))
 puzzle_answer_correct(t, Puzzle.objects.get(url=pwa+'youkilis'))
 puzzle_answer_correct(t, Puzzle.objects.get(url='another_'+pwa+'sullivan'))
-puzzle_answer_correct(t, Puzzle.objects.get(url=pwa+'drive_my_car')) # should be cronin, but not enough light-red puzzles yet
+puzzle_answer_correct(t, Puzzle.objects.get(url=pwa+'garciaparra'))
 
 metapuzzle_answer_correct(t, Metapuzzle.objects.get(url='white_queen_a10'))
 # i want to hold your hand relased
