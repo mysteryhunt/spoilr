@@ -125,7 +125,7 @@ class InteractionAccess(models.Model):
 
     def __str__(self):
         s = 'can accomplish'
-        if self.solved:
+        if self.accomplished:
             s = 'has accomplished'
         return '%s %s %s' % (str(self.team), s, str(self.interaction))
 
