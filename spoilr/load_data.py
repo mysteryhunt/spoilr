@@ -20,7 +20,7 @@ def load_metapuzzles():
             print("  Metapuzzle \"%s\"..." % row["name"])
             metapuzzle = Metapuzzle.objects.create(**row)
             metapuzzle.save() 
-            system_log('load-metapuzzle', 'Loaded metapuzzle "%s"' % metapuzzle.name, object_id=metapuzzle.name)
+            system_log('load-metapuzzle', 'Loaded metapuzzle "%s"' % metapuzzle.name, object_id=metapuzzle.url)
     print("Done loading metapuzzles")
 
 def load_interactions():
@@ -32,7 +32,7 @@ def load_interactions():
             print("  Interaction \"%s\"..." % row["name"])
             interaction = Interaction.objects.create(**row)
             interaction.save() 
-            system_log('load-interaction', 'Loaded interaction "%s"' % interaction.name, object_id=interaction.name)
+            system_log('load-interaction', 'Loaded interaction "%s"' % interaction.name, object_id=interaction.url)
     print("Done loading interactions")
 
 def load_rounds():
