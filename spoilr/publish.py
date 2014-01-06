@@ -375,6 +375,31 @@ def publish_team_round(team, round, suffix=None):
     round_context = RoundContext(team, round)
     publish_dir(round_context, os.path.join(settings.HUNT_DATA_DIR, 'round', round.url, 'round'), round_dir, '../..')
     # --- 2014-specific ---
+    if team.url == 'spoiler_alert':
+        solution_context = RoundContext(team, round)
+        solution_context['name'] = round.name
+        solution_context['url'] = 'round/' + round.url
+        solution_source = os.path.join(settings.HUNT_DATA_DIR, 'round-solution', round.url)
+        if os.path.isdir(solution_source):
+            print("  and solution")
+            solution_dir = os.path.join(team_path, 'round-solution', round.url)
+            if not os.path.isdir(os.path.abspath(solution_dir)):
+                try:
+                    os.makedirs(os.path.abspath(solution_dir))
+                except OSError as e:
+                    logger.error('couldn\'t create directory "%s": %s', solution_dir, str(e))
+                    return
+            publish_dir(solution_context, solution_source, solution_dir, '../..', ['index.html', 'solution.css'])
+            try:
+                with open(os.path.join(solution_source, 'index.html'), 'r') as index_html_file:
+                    solution_context['index_html'] = index_html_file.read()
+            except Exception as e:
+                logger.error('couldn\'t read solution html: %s', solution_dir, str(e))
+                return
+            if os.path.isfile(os.path.join(solution_source, 'solution.css')):
+                with open(os.path.join(solution_source, 'solution.css'), 'r') as solution_css_file:
+                    solution_context['solution_css'] = solution_css_file.read()
+            publish_dir(solution_context, os.path.join(settings.HUNT_DATA_DIR, 'round', round.url, 'solution'), solution_dir, '../..')
     if round.url == 'humpty_dumpty':
         jigsaw = Y2014TeamData.objects.get(team=team).humpty_pieces
         if not os.path.isdir(os.path.join(round_dir, 'jigsaw')):
@@ -409,7 +434,7 @@ def publish_team_puzzle(team, puzzle, suffix=None):
             return
     puzzle_context = PuzzleContext(team, puzzle)
     puzzle_source = os.path.join(settings.HUNT_DATA_DIR, 'puzzle', puzzle.url)
-    except_for = ['index.html', 'puzzle.css', 'puzzle.js']
+    except_for = ['index.html', 'index.html.tmpl', 'puzzle.css', 'puzzle.js']
     if puzzle.url == 'puzzle_with_answer_garciaparra': # 2014-specific
         if not puzzle_context['stage2']:
             except_for.append('stage2')
@@ -437,6 +462,8 @@ def publish_team_puzzle(team, puzzle, suffix=None):
     # --- 2014-specific ---
     if team.url == 'spoiler_alert':
         solution_context = PuzzleContext(team, puzzle)
+        solution_context['name'] = puzzle.name + ' (' + puzzle.round.name + ')'
+        solution_context['url'] = 'puzzle/' + puzzle.url
         solution_source = os.path.join(settings.HUNT_DATA_DIR, 'puzzle-solution', puzzle.url)
         if os.path.isdir(solution_source):
             print("  and solution")
@@ -458,7 +485,6 @@ def publish_team_puzzle(team, puzzle, suffix=None):
                 with open(os.path.join(solution_source, 'solution.css'), 'r') as solution_css_file:
                     solution_context['solution_css'] = solution_css_file.read()
             publish_dir(solution_context, os.path.join(settings.HUNT_DATA_DIR, 'round', puzzle.round.url, 'solution'), solution_dir, '../..')
-        
     if puzzle.round.url == 'mit':
         try:
             card = Y2014MitPuzzleData.objects.get(puzzle=puzzle).card
