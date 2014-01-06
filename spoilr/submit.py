@@ -231,6 +231,9 @@ def submit_pwa_garciaparra_url(request): # 2014-specific
         team = Team.objects.get(username=username)
     except:
         return HttpResponseBadRequest('cannot find team for user '+username)
+    ia = InteractionAccess.objects.get(team=team, url='pwa_garciaparra_url')
+    if ia.accomplished:
+        return
     q_full1 = count_queue(team) >= QUEUE_LIMIT
     q_full2 = Y2014PwaGarciaparraUrlSubmission.objects.filter(team=team, resolved=False).count() >= 1
     template = loader.get_template('submit-pwa-garciaparra-url.html') 
