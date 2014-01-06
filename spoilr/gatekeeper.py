@@ -32,8 +32,7 @@ def gatekeeper_interaction_view(request):
                 ias.append(InteractionAccess.objects.get(interaction=interaction, team__url=key[2:]))
         system_log('admin-interaction', 'Registering %d teams as having completed "%s"' % (len(ias), interaction.name))
         for ia in ias:
-            ia.accomplished = True
-            ia.save()
+            interaction_accomplished(ia.team, ia.interaction)
         context = RequestContext(request, {
             'interaction': interaction,
             'done': True,

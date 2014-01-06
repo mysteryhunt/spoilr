@@ -1,0 +1,41 @@
+{% load humanize %}
+<html>
+  <body>
+    <div style="white-space: nowrap;">
+      Team: {{ team.name }}<br>
+      {% if urls %}
+      In the Queue:
+      <table>
+	<tr><th>Time
+	  <th>Attempt
+	</tr>
+        {% for a in urls %}
+	<tr>
+	  <td>{{ a.timestamp|naturaltime }}:
+	  <td><a href="{{ a.url }}" target="_blank">{{ a.url }}</a>
+	</tr>
+	{% endfor %}
+      </table>
+      {% elif q_full1 %}
+      Your team has reached the overall queue limit ({{ q_lim1 }}).<br/>
+      Try again after those have been resolved.
+      {% else %}
+      <form action="." method="POST">
+	{% csrf_token %}
+	URL: <input id="url" type="text" name="url" size="38" autofocus><br />
+	Phone: <select name="phone">
+	  {% for p in team.teamphone_set.all %}
+	  <option value="{{ p.phone }}">{{ p.phone }}</option>
+	  {% endfor %}
+	</select>
+	<input type="submit" value="Submit">
+      </form>
+      <script type="text/javascript">
+	window.onload = function() {
+          document.getElementById("url").focus()
+	};
+      </script>
+      {% endif %}
+    </div>
+  </body>
+</html>

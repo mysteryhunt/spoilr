@@ -31,6 +31,7 @@ def count_queue(team):
     q = PuzzleSubmission.objects.filter(team=team, resolved=False).count()
     q += MetapuzzleSubmission.objects.filter(team=team, resolved=False).count()
     q += Y2014MitMetapuzzleSubmission.objects.filter(team=team, resolved=False).count() # 2014-specific
+    q += Y2014PwaGarciaparraUrlSubmission.objects.filter(team=team, resolved=False).count()
     return q 
 
 def submit_puzzle_answer(team, puzzle, answer, phone):
@@ -212,6 +213,47 @@ def submit_mit_metapuzzle(request): # 2014-specific
             })
     return HttpResponse(template.render(context))
 
+def submit_pwa_garciaparra_url_actual(team, url, phone): # 2014-specific
+    if len(url) == 0:
+        return
+    for sub in Y2014PwaGarciaparraUrlSubmission.objects.filter(team=team):
+        if sub.url == url:
+            return
+    system_log('submit-pwa-garciaparra-url', "%s submitted '%s'" % (team.name, url), team=team)
+    if compare_answers(url, 'BENOISY'): # hack for testing
+        interaction_accomplished(team, Interaction.objects.get(url='pwa_garciaparra_url'))
+        return
+    Y2014PwaGarciaparraUrlSubmission.objects.create(team=team, phone=phone, url=url).save()
+
+def submit_pwa_garciaparra_url(request): # 2014-specific
+    username = 'bigjimmy'#request.META['REMOTE_USER']
+    try:
+        team = Team.objects.get(username=username)
+    except:
+        return HttpResponseBadRequest('cannot find team for user '+username)
+    q_full1 = count_queue(team) >= QUEUE_LIMIT
+    q_full2 = Y2014PwaGarciaparraUrlSubmission.objects.filter(team=team, resolved=False).count() >= 1
+    template = loader.get_template('submit-pwa-garciaparra-url.html') 
+    if not q_full1 and not q_full2 and request.method == "POST":
+        maxlen = Y2014PwaGarciaparraUrlSubmission._meta.get_field('url').max_length
+        url = request.POST["url"][:maxlen]
+        phone = request.POST["phone"]
+        phone = check_phone(team, phone)
+        submit_pwa_garciaparra_url_actual(team, url, phone)
+        q_full1 = count_queue(team) >= QUEUE_LIMIT
+        q_full2 = Y2014PwaGarciaparraUrlSubmission.objects.filter(team=team, resolved=False).count() >= 1
+    urls = Y2014PwaGarciaparraUrlSubmission.objects.filter(team=team, resolved=False)
+    print(str(urls))
+    context = RequestContext(request, {
+            'team': team,
+            'urls': urls,
+            'q_full1': q_full1,
+            'q_full2': q_full2,
+            'q_lim1': QUEUE_LIMIT,
+            'q_lim2': PUZZLE_QUEUE_LIMIT,
+            })
+    return HttpResponse(template.render(context))
+
 
 def submit_contact_actual(team, phone, comment):
     system_log('submit-contact', "%s wants to talk to HQ: '%s'" % (team.name, comment), team=team)
@@ -302,6 +344,13 @@ def queue(request):
                     p.resolved = True
                     system_log('queue-resolution', "'%s' (%s) resolved hq-contact '%s' for team '%s'" % (handler.name, handler.email, p.comment, handler.team.name), team=handler.team)
                     p.save()
+                if key == 'pwa_garciaparra_url':
+                    p = Y2014PwaGarciaparraUrlSubmission.objects.get(team=handler.team, resolved=False)
+                    p.resolved = True
+                    system_log('queue-resolution', "'%s' (%s) resolved pwa-garciaparra-url '%s' for team '%s'" % (handler.name, handler.email, p.url, handler.team.name), team=handler.team)
+                    if 'pwa_garciaparra_url_result' in request.POST and request.POST['pwa_garciaparra_url_result'] == 'good':
+                        interaction_accomplished(handler.team, Interaction.objects.get(url='pwa_garciaparra_url'))
+                    p.save()
             system_log('queue-claim', "'%s' (%s) released claim on team '%s'" % (handler.name, handler.email, handler.team.name), team=handler.team)
             handler.team = None
             handler.team_timestamp = None
@@ -352,6 +401,10 @@ def queue(request):
         for p in ContactRequest.objects.filter(team=team, resolved=False):
             contact.append({'submission': p})
             add_phone(p.phone)
+        pwagarciaparraurl = [] # 2014-specific
+        for p in Y2014PwaGarciaparraUrlSubmission.objects.filter(team=team, resolved=False):
+            pwagarciaparraurl.append({'submission': p})
+            add_phone(p.phone)
 
         puzzle.sort(key=lambda p: p['correct'])
         puzzle.sort(key=lambda p: p['submission'].puzzle.url)
@@ -369,6 +422,7 @@ def queue(request):
             'metapuzzle': metapuzzle,
             'mitmeta': mitmeta,
             'contact': contact,
+            'pwagarciaparraurl': pwagarciaparraurl,
             'team': team,
         })
 
@@ -379,6 +433,7 @@ def queue(request):
     q_total += MetapuzzleSubmission.objects.filter(resolved=False).count()
     q_total += Y2014MitMetapuzzleSubmission.objects.filter(resolved=False).count() # 2014-specific
     q_total += ContactRequest.objects.filter(resolved=False).count()
+    q_total += Y2014PwaGarciaparraUrlSubmission.objects.filter(resolved=False).count() # 2014-specific
     q_teams = set()
     for x in PuzzleSubmission.objects.filter(resolved=False):
         q_teams.add(x.team.url)
@@ -387,6 +442,8 @@ def queue(request):
     for x in Y2014MitMetapuzzleSubmission.objects.filter(resolved=False): # 2014-specific
         q_teams.add(x.team.url)
     for x in ContactRequest.objects.filter(resolved=False):
+        q_teams.add(x.team.url)
+    for x in Y2014PwaGarciaparraUrlSubmission.objects.filter(resolved=False): # 2014-specific
         q_teams.add(x.team.url)
 
     teams_dict = dict()
@@ -412,6 +469,8 @@ def queue(request):
         team_obj(sub.team, sub.timestamp)["submissions"].append({"type": "mit-metapuzzle", "thing": "", "timestamp": sub.timestamp})
     for sub in ContactRequest.objects.filter(resolved=False):
         team_obj(sub.team, sub.timestamp)["submissions"].append({"type": "contact", "thing": sub.comment, "timestamp": sub.timestamp})
+    for sub in Y2014PwaGarciaparraUrlSubmission.objects.filter(resolved=False):
+        team_obj(sub.team, sub.timestamp)["submissions"].append({"type": "pwa-garciaparra-url", "thing": sub.url, "timestamp": sub.timestamp})
     for team_obj in teams:
         team_obj["submissions"].sort(key=lambda sub: sub["timestamp"])
 

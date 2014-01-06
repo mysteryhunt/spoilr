@@ -294,6 +294,11 @@ class PuzzleContext(RoundContext): # todo don't inherit, it'll just slow things 
         if puzzle.url == 'puzzle_with_answer_garciaparra': # 2014-specific
             self['stage3'] = InteractionAccess.objects.filter(team=team, interaction__url='pwa_garciaparra_food', accomplished=True).exists()
             self['stage2'] = InteractionAccess.objects.filter(team=team, interaction__url='pwa_garciaparra_url', accomplished=True).exists()
+            if self['stage2']:
+                try:
+                    self['stage2url'] = Y2014PwaGarciaparraUrlSubmission.objects.filter(team=team).order_by('-id')[0].url
+                except:
+                    self['stage2url'] = '???'                
 
 def publish_dir(context, source_path, dest_path, root_path, except_for=[]):
     for dirpath, dirnames, filenames in os.walk(source_path):

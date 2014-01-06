@@ -11,7 +11,9 @@
 	<b>Interaction:</b> Register that one or more teams have accomplished
 	<select name="interaction">
 	  {% for i in interactions %}
+	  {% if i.url != 'pwa_garciaparra_url' %}
 	  <option value="{{i.url}}">{{i.name}}</option>
+	  {% endif %}
 	  {% endfor %}
 	</select>
 	<input type="submit" value="Go" />

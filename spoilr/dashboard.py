@@ -13,6 +13,8 @@ def TeamDict(team, puzzle_objects, puzzle_access, round_objects, round_access):
     q_submissions = sum(1 for a in PuzzleSubmission.objects.filter(team=team, resolved=False))
     q_submissions += sum(1 for a in MetapuzzleSubmission.objects.filter(team=team, resolved=False))
     q_submissions += sum(1 for a in Y2014MitMetapuzzleSubmission.objects.filter(team=team, resolved=False)) # 2014-specific
+    q_submissions += sum(1 for a in ContactRequest.objects.filter(team=team, resolved=False))
+    q_submissions += sum(1 for a in Y2014PwaGarciaparraUrlSubmission.objects.filter(team=team, resolved=False)) # 2014-specific
     rounds = dict()
     if True: # 2014-specific
         s_current = Y2014TeamData.objects.get(team=team).points

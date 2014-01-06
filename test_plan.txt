@@ -84,6 +84,7 @@ metapuzzle_answer_correct(t, Metapuzzle.objects.get(url='white_queen_a07'))
 metapuzzle_answer_correct(t, Metapuzzle.objects.get(url='white_queen_a13'))
 # garciaparra released
 
+# http://url.geoguessr.com/5NUD , e.g.
 interaction_accomplished(t, Interaction.objects.get(url='pwa_garciaparra_url'))
 # garciaparra stage 2
 

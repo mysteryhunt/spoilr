@@ -160,6 +160,28 @@
 	</table>
       </div>
       {% endif %}
+      {% if pwagarciaparraurl %}
+      <div>
+	PWA GARCIAPARRA URL submissions:
+	<table>
+	  <tr><th>Time</th><th>Phone</th><th>URL</th><th>Result</th><th></th></tr>
+	  {% for p in pwagarciaparraurl %}
+	  <tr id="row_p_{{ p.submission.id }}">
+	    <td>{{ p.submission.timestamp|naturaltime }}</td><td>{{ p.submission.phone }}</td><td class="mono"><a href="{{ p.submission.url }}" target="_blank">{{ p.submission.url }}</a></td>
+	    <td>
+	      <select name="pwa_garciaparra_url_result">
+		<option value="bad">Try again.</option>
+		<option value="good">Good job! (Score &gt; 20,000)</option>
+	      </select>
+	    </td>
+	    <td>
+	      <label for="pwa_garciaparra_url"><input id="pwa_garciaparra_url" class="check" type="checkbox" name="pwa_garciaparra_url" />Done</label>
+	    </td>
+	  </tr>
+	  {% endfor %}
+	</table>
+      </div>
+      {% endif %}
       <input id="done" type="submit" value="All done here." />
     </form>
     <script type="text/javascript">

@@ -313,6 +313,21 @@ class Y2014MitMetapuzzleSubmission(models.Model):
         verbose_name = '2014 MIT metapuzzle submission'
         verbose_name_plural = '2014 MIT metapuzzle submissions'
 
+class Y2014PwaGarciaparraUrlSubmission(models.Model):
+    team = models.ForeignKey(Team)
+    phone = models.CharField(max_length=100)
+    timestamp = models.DateTimeField(default=datetime.now)
+    url = models.CharField(max_length=100)
+    resolved = models.BooleanField(default=False)
+
+    def __str__(self):
+        return '%s: %s submitted a GeoGuessr URL' % (str(self.timestamp), str(self.team))
+
+    class Meta:
+        ordering = ['-timestamp']
+        verbose_name = '2014 PWA GARCIAPARRA URL submission'
+        verbose_name_plural = '2014 PWA GARCIAPARRA URL submissions'
+
 class Y2014CaucusAnswerData(models.Model):
     bird = models.IntegerField(unique=True)
     yes_answer = models.CharField(max_length=50)
