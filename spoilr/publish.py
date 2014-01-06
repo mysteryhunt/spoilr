@@ -415,7 +415,6 @@ def publish_team_puzzle(team, puzzle, suffix=None):
             except_for.append('stage2')
         if not puzzle_context['stage3']:
             except_for.append('stage3')
-        print(str(except_for))
     publish_dir(puzzle_context, puzzle_source, puzzle_dir, '../..', except_for)
     try:
         html_path = os.path.join(puzzle_source, 'index.html')
