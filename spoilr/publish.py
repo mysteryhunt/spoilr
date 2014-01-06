@@ -95,6 +95,10 @@ class TopContext(Context):
                 entry['unprotected_message'] = log_entry_protect.sub(r'\1', msg)
         # ----- 2014-specific -----
         self['has_wl_access'] = (len(self['rounds']) > 2)
+        try:
+            self['gone_with_the_wind_released'] = PuzzleAccess.objects.filter(team=team, puzzle=Puzzle.objects.get(url='gone_with_the_wind')).exists()
+        except:
+            pass
         self['team_data'] = Y2014TeamData.objects.get(team=team)
         points = self['team_data'].points
         self['tickett'] = TRAIN_COST
