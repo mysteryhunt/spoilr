@@ -81,6 +81,9 @@ def load_teams():
                 if mitdata.card.start:
                     PuzzleAccess.objects.create(team=team, puzzle=mitdata.puzzle).save()
                     team_log_puzzle_access(team, mitdata.puzzle, "The hunt begins")
+            for puzzle in Puzzle.objects.filter(round__url='events'):
+                PuzzleAccess.objects.create(team=team, puzzle=puzzle).save()
+                team_log_puzzle_access(team, mitdata.puzzle, "The hunt begins")
     print("Done loading teams")
 
 def load_team_phones():
@@ -201,7 +204,7 @@ def everybody_can_see_everything_inner():
         td.humpty_pieces = 12
         td.save()
         for interaction in Interaction.objects.all():
-            InteractionAccess.objects.create(team=team, puzzle=puzzle, accomplished=True).save()
+            InteractionAccess.objects.create(team=team, interaction=interaction, accomplished=True).save()
         for round in Round.objects.all():
             if not RoundAccess.objects.filter(team=team, round=round).exists():
                 RoundAccess.objects.create(team=team, round=round).save()
