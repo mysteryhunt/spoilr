@@ -5,6 +5,18 @@
     <title>All Puzzles Dashboard</title>
     <meta http-equiv="refresh" content="30">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+    <style type="text/css">
+      th { text-align: left; }
+      .n { text-align: right; }
+      .d { text-align: right; }
+      .p { text-align: right; padding: 0px 5px; }
+      .p0 { background: #eee; color: #666; }
+      .p1 { background: #fff; }
+      .p2 { background: #efe; }
+      .p3 { background: #ffe; }
+      .g { width: 100px; padding: 0px 15px 0px 0px; }
+      .gb{ background: #000; height: 5px; }
+    </style>
   </head>
   <body>
     <em>(This may be several minutes behind)</em>
@@ -14,23 +26,57 @@
 	{{ metas|length }} metas,
 	{{ p_total }} puzzles
       </div>
-      {% for meta in metas %}
-      <div id="meta_{{ meta.meta.url }}" class="meta" style="border-top: 1px solid black; border-radius 5px; padding: 3px;">
-	<div><b>{{ meta.meta.name }}</b> ({{ meta.solved }} / {{ meta.released }} / {{ t_total }})</div>
-	<table style="border-collapse: collapse;">
-	  {% for puzzle in meta.puzzles %}
-	  <tr><td>{{ puzzle.puzzle.name }}</td><td>({{ puzzle.solved }} / {{ puzzle.released }} / {{ t_total }})</td></tr>
-	  {% endfor %}
-	</table>
-      </div>
-      <script type="text/javascript">
-	$('#meta_{{ meta.meta.url }}').hover(function () {
-          $('#meta_{{ meta.meta.url }}').css("background-color", "#ffa");
-	}, function () {
-          $('#meta_{{ meta.meta.url }}').css("background-color", "");
-	});
-      </script>
-      {% endfor %}
+      <table style="border-collapse: collapse;">
+	<tr>
+	  <th>Name</th>
+	  <th>Info</th>
+	  <th colspan="5">Releases</th>
+	  <th colspan="5">Solves</th>
+	</tr>
+	{% for meta in metas %}
+	<tr style="border-top: 1px solid black;">
+	  <td colspan="2">
+	    <b>{{ meta.meta.name }}</b>
+	  </td>
+
+	  <td class="n">{{ meta.released }}</td>
+	  <td>/</td>
+	  <td class="d">{{ t_total }}</td>
+	  <td class="p">{% if meta.releasedp != '-' %}{{ meta.releasedp }}%{% else %}-{% endif %}</td>
+          <td class="g">{% if meta.releasedp != '-' %}<div class="gb" style="width: {{ meta.releasedp }}px;"></div>{% else %}-{% endif %}</td>
+
+	  <td class="n">{{ meta.solved }}</td>
+	  <td>/</td>
+	  <td class="d">{{ meta.released }}</td>
+	  <td class="p">{% if meta.solvedp != '-' %}{{ meta.solvedp }}%{% else %}-{% endif %}</td>
+          <td class="g">{% if meta.solvedp != '-' %}<div class="gb" style="width: {{ meta.solvedp }}px"></div>{% else %}-{% endif %}</td>
+
+	</tr>
+	{% for puzzle in meta.puzzles %}
+	<tr class={% if puzzle.released %}{% if puzzle.solvedp != '-' %}{% if puzzle.solvedp > 50 %}p3{% else %}p2{% endif %}{% else %}p1{% endif %}{% else %}p0{% endif %}>
+	  <td>
+	    {{ puzzle.puzzle.name|truncatechars:40 }}
+	  </td>
+	  <td>
+	    {{ puzzle.info }}
+	  </td>
+
+	  <td class="n">{{ puzzle.released }}</td>
+	  <td>/</td>
+	  <td class="d">{{ t_total }}</td>
+	  <td class="p">{% if puzzle.releasedp != '-' %}{{ puzzle.releasedp }}%{% else %}-{% endif %}</td>
+          <td class="g">{% if puzzle.releasedp != '-' %}<div class="gb" style="width: {{ puzzle.releasedp }}px"></div>{% else %}-{% endif %}</td>
+
+	  <td class="n">{{ puzzle.solved }}</td>
+	  <td>/</td>
+	  <td class="d">{{ puzzle.released }}</td>
+	  <td class="p">{% if puzzle.solvedp != '-' %}{{ puzzle.solvedp }}%{% else %}-{% endif %}</td>
+          <td class="g">{% if puzzle.solvedp != '-' %}<div class="gb" style="width: {{ puzzle.solvedp }}px"></div>{% else %}-{% endif %}</td>
+
+	</tr>
+	{% endfor %}
+	{% endfor %}
+      </table>
     </div>
     <script type="text/javascript">
       $(document).tooltip();

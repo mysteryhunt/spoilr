@@ -124,21 +124,38 @@ def all_puzzles_update():
     print("updating all puzzles dashboard...")
     template = loader.get_template('all-puzzles.html') 
     t_total = Team.objects.count()
+
+    def percent(n, d):
+        if d == 0 or d < 3:
+            return '-'
+        return int(n*100/d)
+
     metas = []
-    for mm in ['dormouse', 'caterpillar', 'tweedles']:
+    for mm in ['dormouse', 'caterpillar', 'tweedles']: # 2014-specific
         meta = Metapuzzle.objects.get(url=mm)
-        released = 3
+        released = t_total
         solved = MetapuzzleSolve.objects.filter(metapuzzle=meta).count()
         puzzles = []
-        
-        metas.append({'meta': meta, 'puzzles': puzzles, 'released': t_total, 'solved': solved})
-    for mitdata in Y2014MitPuzzleData.objects.all().order_by('id'):
+
+        m = {
+            'meta': meta,
+            'puzzles': puzzles,
+            'released': released,
+            'releasedp': percent(released, t_total),
+            'solved': solved,
+            'solvedp': percent(solved, released),
+        }
+        metas.append(m)
+    for mitdata in Y2014MitPuzzleData.objects.all().order_by('id'): # 2014-specific
         released = PuzzleAccess.objects.filter(puzzle=mitdata.puzzle).count()
         solved = PuzzleAccess.objects.filter(puzzle=mitdata.puzzle, solved=True).count()
         p = {
             'puzzle': mitdata.puzzle,
+            'info': mitdata.card.name,
             'released': released,
+            'releasedp': percent(released, t_total),
             'solved': solved,
+            'solvedp': percent(solved, released),
         }
         if mitdata.mit_meta() == 'dormouse':
             metas[0]['puzzles'].append(p)
@@ -154,10 +171,44 @@ def all_puzzles_update():
         for puzzle in Puzzle.objects.filter(round=round).order_by('id'):
             released = PuzzleAccess.objects.filter(puzzle=puzzle).count()
             solved = PuzzleAccess.objects.filter(puzzle=puzzle, solved=True).count()
-            puzzles.append({'puzzle': puzzle, 'released': released, 'solved': solved})
+            info = ''
+            if round.url == 'tea_party':
+                rounddata = Y2014PartyAnswerData.objects.get(answer=puzzle.answer)
+                if rounddata.type1 == 'chair':
+                    info = rounddata.type1+' ('+rounddata.type2+')'
+                else:
+                    info = rounddata.type1+' ('+rounddata.type2+', '+str(rounddata.level)+')'
+            if round.url == 'caucus_race':
+                rounddata = Y2014CaucusAnswerData.objects.filter(yes_answer=puzzle.answer)
+                if rounddata.exists():
+                    info = '%d YES' % rounddata[0].bird
+                else:
+                    rounddata = Y2014CaucusAnswerData.objects.filter(no_answer=puzzle.answer)
+                    if rounddata.exists():
+                        info = '%d NO' % rounddata[0].bird
+            if round.url == 'knights':
+                rounddata = Y2014KnightsAnswerData.objects.get(answer=puzzle.answer)
+                info = '%s %s' % (rounddata.color, rounddata.piece)
+            p = {
+                'puzzle': puzzle,
+                'info': info,
+                'released': released,
+                'releasedp': percent(released, t_total),
+                'solved': solved,
+                'solvedp': percent(solved, released),
+            }
+            puzzles.append(p)
         released = RoundAccess.objects.filter(round=round).count()
         solved = MetapuzzleSolve.objects.filter(metapuzzle=meta).count()
-        metas.append({'meta': meta, 'puzzles': puzzles, 'released': released, 'solved': solved})
+        m = {
+            'meta': meta,
+            'puzzles': puzzles,
+            'released': released,
+            'releasedp': percent(released, t_total),
+            'solved': solved,
+            'solvedp': percent(solved, released),
+        }
+        metas.append(m)
     p_total = Puzzle.objects.count()
     context = Context({
         'metas': metas,
