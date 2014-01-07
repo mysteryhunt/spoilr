@@ -119,3 +119,53 @@ def all_teams_update():
 
 def all_teams_view(request):
     return HttpResponse(cache.get('all_teams'))
+
+def all_puzzles_update():
+    print("updating all puzzles dashboard...")
+    template = loader.get_template('all-puzzles.html') 
+    t_total = Team.objects.count()
+    metas = []
+    for mm in ['dormouse', 'caterpillar', 'tweedles']:
+        meta = Metapuzzle.objects.get(url=mm)
+        released = 3
+        solved = MetapuzzleSolve.objects.filter(metapuzzle=meta).count()
+        puzzles = []
+        
+        metas.append({'meta': meta, 'puzzles': puzzles, 'released': t_total, 'solved': solved})
+    for mitdata in Y2014MitPuzzleData.objects.all().order_by('id'):
+        released = PuzzleAccess.objects.filter(puzzle=mitdata.puzzle).count()
+        solved = PuzzleAccess.objects.filter(puzzle=mitdata.puzzle, solved=True).count()
+        p = {
+            'puzzle': mitdata.puzzle,
+            'released': released,
+            'solved': solved,
+        }
+        if mitdata.mit_meta() == 'dormouse':
+            metas[0]['puzzles'].append(p)
+        elif mitdata.mit_meta() == 'caterpillar':
+            metas[1]['puzzles'].append(p)
+        elif mitdata.mit_meta() == 'tweedles':
+            metas[2]['puzzles'].append(p)
+    for round in Round.objects.all().order_by('id'):
+        if round.url == 'mit': # 2014-specific
+            continue
+        meta = Metapuzzle.objects.get(url=round.url)
+        puzzles = []
+        for puzzle in Puzzle.objects.filter(round=round).order_by('id'):
+            released = PuzzleAccess.objects.filter(puzzle=puzzle).count()
+            solved = PuzzleAccess.objects.filter(puzzle=puzzle, solved=True).count()
+            puzzles.append({'puzzle': puzzle, 'released': released, 'solved': solved})
+        released = RoundAccess.objects.filter(round=round).count()
+        solved = MetapuzzleSolve.objects.filter(metapuzzle=meta).count()
+        metas.append({'meta': meta, 'puzzles': puzzles, 'released': released, 'solved': solved})
+    p_total = Puzzle.objects.count()
+    context = Context({
+        'metas': metas,
+        't_total': t_total,
+        'p_total': p_total,
+    })
+    cache.set('all_puzzles', template.render(context), None)
+    print("...done")
+
+def all_puzzles_view(request):
+    return HttpResponse(cache.get('all_puzzles'))

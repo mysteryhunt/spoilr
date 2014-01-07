@@ -1,2 +1,3 @@
 * * * * * root /home/djangoapps/spoilr/manage update_hq_log
 */10 * * * * root /home/djangoapps/spoilr/manage update_hq_all_teams
+*/10 * * * * root /home/djangoapps/spoilr/manage update_hq_all_puzzles

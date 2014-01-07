@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+{% load staticfiles %}
+<html>
+  <head>
+    <title>All Puzzles Dashboard</title>
+    <meta http-equiv="refresh" content="30">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+  </head>
+  <body>
+    <em>(This may be several minutes behind)</em>
+    <div style="font: 10pt monospace">
+      <div>
+	{{ t_total }} teams,
+	{{ metas|length }} metas,
+	{{ p_total }} puzzles
+      </div>
+      {% for meta in metas %}
+      <div id="meta_{{ meta.meta.url }}" class="meta" style="border-top: 1px solid black; border-radius 5px; padding: 3px;">
+	<div><b>{{ meta.meta.name }}</b> ({{ meta.solved }} / {{ meta.released }} / {{ t_total }})</div>
+	<table style="border-collapse: collapse;">
+	  {% for puzzle in meta.puzzles %}
+	  <tr><td>{{ puzzle.puzzle.name }}</td><td>({{ puzzle.solved }} / {{ puzzle.released }} / {{ t_total }})</td></tr>
+	  {% endfor %}
+	</table>
+      </div>
+      <script type="text/javascript">
+	$('#meta_{{ meta.meta.url }}').hover(function () {
+          $('#meta_{{ meta.meta.url }}').css("background-color", "#ffa");
+	}, function () {
+          $('#meta_{{ meta.meta.url }}').css("background-color", "");
+	});
+      </script>
+      {% endfor %}
+    </div>
+    <script type="text/javascript">
+      $(document).tooltip();
+    </script>
+  </body>
+</html>

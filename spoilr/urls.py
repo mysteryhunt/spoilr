@@ -4,7 +4,7 @@ from django.conf.urls import patterns, include, url
 from django.contrib import admin
 admin.autodiscover()
 
-from .dashboard import all_teams_view
+from .dashboard import all_teams_view, all_puzzles_view
 from .gatekeeper import *
 from .log import system_log_view
 from .submit import *
@@ -23,6 +23,7 @@ urlpatterns = patterns('',
     url(r'^submit/pwa-garciaparra-url/$', submit_pwa_garciaparra_url),
 
     url(r'^hq/all-teams/$', all_teams_view),
+    url(r'^hq/all-puzzles/$', all_puzzles_view),
     url(r'^hq/queue/$', queue),
     url(r'^hq/log/$', system_log_view),
 
