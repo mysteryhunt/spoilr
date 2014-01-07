@@ -130,6 +130,8 @@ class TopContext(Context):
             data = Y2014PartyAnswerData.objects.get(answer=access.puzzle.answer)
             if data.type1 == 'cup':
                 ret["cup"] = data.type2
+            else:
+                ret["chair"] = data.type2
         return ret
 
 class RoundContext(TopContext): # todo don't inherit, it'll just slow things down and we don't need all that context
@@ -206,20 +208,6 @@ class RoundContext(TopContext): # todo don't inherit, it'll just slow things dow
                     "no_solved": no_solved,
                 })
             self['birds'] = birds
-        if round.url == 'knights': # 2014-specific
-            pieces = []
-            for piece in [x[0] for x in Y2014KnightsAnswerData.PIECE_CHOICES]:
-                puzzles = []
-                for data in Y2014KnightsAnswerData.objects.filter(piece=piece):
-                    try:
-                        puzzle = Puzzle.objects.get(round=round, answer=data.answer)
-                        PuzzleAccess.objects.get(puzzle=puzzle, team=team)
-                        puzzles.append({"puzzle": puzzle, "color": data.color, "piece": piece})
-                    except:
-                        pass
-                if len(puzzles) > 0:
-                    pieces.append(puzzles)
-            self['pieces'] = pieces
         if round.url == 'white_queen': # 2014-specific
             self['herring_ok'] = InteractionAccess.objects.filter(team=team, interaction__url='white_queen_gift', accomplished=True).exists()
             pwa = 'puzzle_with_answer_'
@@ -419,6 +407,13 @@ def publish_team_round(team, round, suffix=None):
             except Exception as e:
                 print(str(e))
                 logger.error('couldn\'t copy jigsaw piece %d' % i)
+    if round.url == 'white_queen' and round_context['round']['solved']:
+        try:
+            source_file = os.path.join(settings.HUNT_DATA_DIR, 'round', round.url, 'clean_grid', "answers_background.jpg")
+            dest_file = os.path.join(round_dir, 'answers_background.jpg')
+            shutil.copyfile(source_file, dest_file)
+        except Exception as e:
+            print(str(e))
 
 def publish_team_puzzle(team, puzzle, suffix=None):
     print("publish %s/puzzle/%s" % (team.url, puzzle.url))
