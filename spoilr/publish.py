@@ -149,20 +149,12 @@ class RoundContext(TopContext): # todo don't inherit, it'll just slow things dow
         if round.url == 'mit': # 2014-specific
             count = 0
             for x in self['solved_metas']:
-                if x.name == "The Dormouse":
-                    count = count + 1
-                if x.name == "The Caterpillar":
-                    count = count + 1
-                if x.name == "Tweedledee and Tweedledum":
+                if x.url in ['spades', 'clubs', 'diamonds']:
                     count = count + 1
             self['bait_ready'] = count < 3
             count = 0
             for x in self['rounds']:
-                if x['round'].url == "tea_party":
-                    count = count + 1
-                if x['round'].url == "mock_turtle":
-                    count = count + 1
-                if x['round'].url == "white_queen":
+                if x['round'].url in ["tea_party", "mock_turtle", "white_queen"]:
                     count = count + 1
             points = self['team_data'].points
             self['vial1'] = self['vial2'] = self['vial3'] = -1

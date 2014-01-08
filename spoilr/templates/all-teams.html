@@ -35,10 +35,10 @@
 	    </td>
 	  </tr>
 	  <tr>
-	    <td>dormouse:</td>
+	    <td>spades:</td>
 	    <td>
-	      <img title="The Dormouse" src="{% if team.rounds.dormouse.solved %}{% static "r_solved.png" %}{% elif team.rounds.dormouse.released %}{% static "r_released.png" %}{% else %}{% static "r_unreleased.png" %}{% endif %}" />
-	      {% for puzzle in team.rounds.dormouse.puzzles %}
+	      <img title="Spades" src="{% if team.rounds.spades.solved %}{% static "r_solved.png" %}{% elif team.rounds.spades.released %}{% static "r_released.png" %}{% else %}{% static "r_unreleased.png" %}{% endif %}" />
+	      {% for puzzle in team.rounds.spades.puzzles %}
 	      <img title="{{ puzzle.puzzle.name }}" src="{% if puzzle.solved %}{% static "p_solved.png" %}{% elif puzzle.released %}{% static "p_released.png" %}{% else %}{% static "p_unreleased.png" %}{% endif %}" />
 	      {% endfor %}
 	    </td>
@@ -58,10 +58,10 @@
 	    </td>
 	  </tr>
 	  <tr>
-	    <td>caterpillar:</td>
+	    <td>clubs:</td>
 	    <td>
-	      <img title="The Caterpillar" src="{% if team.rounds.caterpillar.solved %}{% static "r_solved.png" %}{% elif team.rounds.caterpillar.released %}{% static "r_released.png" %}{% else %}{% static "r_unreleased.png" %}{% endif %}" />
-	      {% for puzzle in team.rounds.caterpillar.puzzles %}
+	      <img title="Clubs" src="{% if team.rounds.clubs.solved %}{% static "r_solved.png" %}{% elif team.rounds.clubs.released %}{% static "r_released.png" %}{% else %}{% static "r_unreleased.png" %}{% endif %}" />
+	      {% for puzzle in team.rounds.clubs.puzzles %}
 	      <img title="{{ puzzle.puzzle.name }}" src="{% if puzzle.solved %}{% static "p_solved.png" %}{% elif puzzle.released %}{% static "p_released.png" %}{% else %}{% static "p_unreleased.png" %}{% endif %}" />
 	      {% endfor %}
 	    </td>
@@ -81,10 +81,10 @@
 	    </td>
 	  </tr>
 	  <tr>
-	    <td>tweedles:</td>
+	    <td>diamonds:</td>
 	    <td>
-	      <img title="Tweedledee and Tweedledum" src="{% if team.rounds.tweedles.solved %}{% static "r_solved.png" %}{% elif team.rounds.tweedles.released %}{% static "r_released.png" %}{% else %}{% static "r_unreleased.png" %}{% endif %}" />
-	      {% for puzzle in team.rounds.tweedles.puzzles %}
+	      <img title="Diamonds" src="{% if team.rounds.diamonds.solved %}{% static "r_solved.png" %}{% elif team.rounds.diamonds.released %}{% static "r_released.png" %}{% else %}{% static "r_unreleased.png" %}{% endif %}" />
+	      {% for puzzle in team.rounds.diamonds.puzzles %}
 	      <img title="{{ puzzle.puzzle.name }}" src="{% if puzzle.solved %}{% static "p_solved.png" %}{% elif puzzle.released %}{% static "p_released.png" %}{% else %}{% static "p_unreleased.png" %}{% endif %}" />
 	      {% endfor %}
 	    </td>

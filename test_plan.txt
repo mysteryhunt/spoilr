@@ -24,16 +24,16 @@ puzzle_answer_correct(t, Puzzle.objects.get(url='ring_around_the_music'))
 puzzle_answer_correct(t, Puzzle.objects.get(url='down_the_rabbit_hole_2'))
 puzzle_answer_correct(t, Puzzle.objects.get(url='a_meta_puzzle'))
 
-m = Metapuzzle.objects.get(url='caterpillar')
+m = Metapuzzle.objects.get(url='clubs')
 metapuzzle_answer_incorrect(t, m, 'NOPE')
 metapuzzle_answer_correct(t, m)
 
 # meet caterpillar
 # mock turtle released
 
-m = Metapuzzle.objects.get(url='dormouse')
+m = Metapuzzle.objects.get(url='spades')
 metapuzzle_answer_correct(t, m)
-m = Metapuzzle.objects.get(url='tweedles')
+m = Metapuzzle.objects.get(url='diamonds')
 metapuzzle_answer_correct(t, m)
 
 # meet dormouse

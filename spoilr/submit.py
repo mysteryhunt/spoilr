@@ -16,7 +16,7 @@ def compare_answers(a, b):
     return re.sub(r'[^A-Z0-9]', '', a.upper()) == re.sub(r'[^A-Z0-9]', '', b.upper())
 
 def check_bait(answer): # 2014-specific
-    for x in ['dormouse', 'caterpillar', 'tweedles']:
+    for x in ['spades', 'clubs', 'diamonds']:
         mp = Metapuzzle.objects.get(url=x)
         if compare_answers(answer, mp.answer):
             return mp
@@ -123,7 +123,7 @@ def submit_metapuzzle(request, metapuzzle_url):
         team = Team.objects.get(username=username)
     except:
         return HttpResponseBadRequest('cannot find team for user '+username)
-    if metapuzzle_url in ['dormouse', 'caterpillar', 'tweedles']: # 2014-specific
+    if metapuzzle_url in ['spades', 'clubs', 'diamonds']: # 2014-specific
         return
     try:
         metapuzzle = Metapuzzle.objects.get(url=metapuzzle_url)
@@ -169,7 +169,7 @@ def submit_mit_metapuzzle_answer(team, answer, phone): # 2014-specific
         if compare_answers(sub.answer, answer):
             return
     system_log('submit-mit-bait', "%s submitted '%s'" % (team.name, answer), team=team)
-    for x in ['dormouse', 'caterpillar', 'tweedles']: # hack for testing
+    for x in ['spades', 'clubs', 'diamonds']: # hack for testing
         if compare_answers(answer, x):
             metapuzzle_answer_correct(team, Metapuzzle.objects.get(url=x))
             return
@@ -196,7 +196,7 @@ def submit_mit_metapuzzle(request): # 2014-specific
     unresolved = answers.filter(resolved=False).exists()
     resolved = answers.filter(resolved=True).exists()
     solved = []
-    for x in ['dormouse', 'caterpillar', 'tweedles']:
+    for x in ['spades', 'clubs', 'diamonds']:
         for y in MetapuzzleSolve.objects.filter(team=team, metapuzzle__url=x):
             solved.append(y.metapuzzle)
     context = RequestContext(request, {

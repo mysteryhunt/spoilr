@@ -99,11 +99,11 @@ def grant_points(team, amount, reason): # 2014-specific
     if num_wh < 3 and td.points >= DRINK_READY[num_wh]:
         # ...and they've solved a metapuzzle but haven't released the round, release the round (causing the vial to be drunk)
         next_round = None
-        if MetapuzzleSolve.objects.filter(team=team, metapuzzle__url='dormouse').exists() and not RoundAccess.objects.filter(team=team, round__url='tea_party').exists():
+        if MetapuzzleSolve.objects.filter(team=team, metapuzzle__url='spades').exists() and not RoundAccess.objects.filter(team=team, round__url='tea_party').exists():
             next_round = 'tea_party'
-        elif MetapuzzleSolve.objects.filter(team=team, metapuzzle__url='caterpillar').exists() and not RoundAccess.objects.filter(team=team, round__url='mock_turtle').exists():
+        elif MetapuzzleSolve.objects.filter(team=team, metapuzzle__url='clubs').exists() and not RoundAccess.objects.filter(team=team, round__url='mock_turtle').exists():
             next_round = 'mock_turtle'
-        elif MetapuzzleSolve.objects.filter(team=team, metapuzzle__url='tweedles').exists() and not RoundAccess.objects.filter(team=team, round__url='white_queen').exists():
+        elif MetapuzzleSolve.objects.filter(team=team, metapuzzle__url='diamonds').exists() and not RoundAccess.objects.filter(team=team, round__url='white_queen').exists():
             next_round = 'white_queen'
         if not next_round is None:
             team_log(team, 'story', 'You filled a drink-me vial, drank it and jumped into a small hole.')
@@ -275,7 +275,7 @@ def metapuzzle_answer_correct(team, metapuzzle):
     print("metapuzzle answer correct %s/metapuzzle/%s" % (team.url, metapuzzle.url))
     team_log_metapuzzle_solved(team, metapuzzle)
     MetapuzzleSolve.objects.create(team=team, metapuzzle=metapuzzle).save()
-    if metapuzzle.url in ['dormouse', 'caterpillar', 'tweedles']: # 2014-specific
+    if metapuzzle.url in ['spades', 'clubs', 'diamonds']: # 2014-specific
         interaction = Interaction.objects.get(url=metapuzzle.url)
         release_interaction(team, interaction, "Found the right bait")
         # hack for testing:

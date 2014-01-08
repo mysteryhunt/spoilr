@@ -257,11 +257,11 @@ class Y2014MitCard(models.Model):
 
     def mit_meta(self):
         if 'spades' in self.name:
-            return 'dormouse'
+            return 'spades'
         if 'clubs' in self.name:
-            return 'caterpillar'
+            return 'clubs'
         if 'diamonds' in self.name:
-            return 'tweedles'
+            return 'diamonds'
 
     class Meta:
         ordering = ['order']

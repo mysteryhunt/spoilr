@@ -20,7 +20,7 @@ def TeamDict(team, puzzle_objects, puzzle_access, round_objects, round_access):
         s_current = Y2014TeamData.objects.get(team=team).points
         r_released = 3
         r_solved = 0
-        for x in ['dormouse', 'caterpillar', 'tweedles']:
+        for x in ['spades', 'clubs', 'diamonds']:
             solved = MetapuzzleSolve.objects.filter(team=team, metapuzzle__url=x).exists()
             if solved:
                 r_solved += 1
@@ -38,12 +38,12 @@ def TeamDict(team, puzzle_objects, puzzle_access, round_objects, round_access):
                 'released': released,
                 'solved': solved,
             }
-            if mitdata.mit_meta() == 'dormouse':
-                rounds['dormouse']['puzzles'].append(p)
-            elif mitdata.mit_meta() == 'caterpillar':
-                rounds['caterpillar']['puzzles'].append(p)
-            elif mitdata.mit_meta() == 'tweedles':
-                rounds['tweedles']['puzzles'].append(p)
+            if mitdata.mit_meta() == 'spades':
+                rounds['spades']['puzzles'].append(p)
+            elif mitdata.mit_meta() == 'clubs':
+                rounds['clubs']['puzzles'].append(p)
+            elif mitdata.mit_meta() == 'diamonds':
+                rounds['diamonds']['puzzles'].append(p)
     for round in round_objects:
         if round.url == 'mit': # 2014-specific
             continue
@@ -131,7 +131,7 @@ def all_puzzles_update():
         return int(n*100/d)
 
     metas = []
-    for mm in ['dormouse', 'caterpillar', 'tweedles']: # 2014-specific
+    for mm in ['spades', 'clubs', 'diamonds']: # 2014-specific
         meta = Metapuzzle.objects.get(url=mm)
         released = t_total
         solved = MetapuzzleSolve.objects.filter(metapuzzle=meta).count()
@@ -157,11 +157,11 @@ def all_puzzles_update():
             'solved': solved,
             'solvedp': percent(solved, released),
         }
-        if mitdata.mit_meta() == 'dormouse':
+        if mitdata.mit_meta() == 'spades':
             metas[0]['puzzles'].append(p)
-        elif mitdata.mit_meta() == 'caterpillar':
+        elif mitdata.mit_meta() == 'clubs':
             metas[1]['puzzles'].append(p)
-        elif mitdata.mit_meta() == 'tweedles':
+        elif mitdata.mit_meta() == 'diamonds':
             metas[2]['puzzles'].append(p)
     for round in Round.objects.all().order_by('id'):
         if round.url == 'mit': # 2014-specific
