@@ -276,10 +276,18 @@ def metapuzzle_answer_correct(team, metapuzzle):
     team_log_metapuzzle_solved(team, metapuzzle)
     MetapuzzleSolve.objects.create(team=team, metapuzzle=metapuzzle).save()
     if metapuzzle.url in ['spades', 'clubs', 'diamonds']: # 2014-specific
-        interaction = Interaction.objects.get(url=metapuzzle.url)
-        release_interaction(team, interaction, "Found the right bait")
-        # hack for testing:
-        interaction_accomplished(team, interaction)
+        if metapuzzle.url == 'spades':
+            interaction = Interaction.objects.get(url='dormouse')
+        elif metapuzzle.url == 'clubs':
+            interaction = Interaction.objects.get(url='caterpillar')
+        elif metapuzzle.url == 'diamonds':
+            interaction = Interaction.objects.get(url='tweedles')
+        else:
+            interaction = None
+        if interaction:
+            release_interaction(team, interaction, "Found the right bait")
+            # hack for testing:
+            interaction_accomplished(team, interaction)
     if metapuzzle.url in ['tea_party', 'white_queen', 'mock_turtle', 'caucus_race', 'knights', 'white_queen']: # 2014-specific
         if metapuzzle.url == 'tea_party':
             reason = "Solved the Mad Hatter's problem"
