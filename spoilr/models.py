@@ -62,6 +62,8 @@ class Team(models.Model):
     password = models.CharField(max_length=200)
     rounds = models.ManyToManyField(Round, through='RoundAccess')
     puzzles = models.ManyToManyField(Puzzle, through='PuzzleAccess')
+    email = models.CharField(max_length=100)
+    size_desc = models.CharField(max_length=50)
 
     def get_team_dir(self, suffix=None):
         path = os.path.join(settings.TEAMS_DIR, self.url)
