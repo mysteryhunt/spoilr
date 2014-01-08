@@ -393,13 +393,6 @@ def publish_team_round(team, round, suffix=None):
             except Exception as e:
                 print(str(e))
                 logger.error('couldn\'t copy jigsaw piece %d' % i)
-    if round.url == 'white_queen' and round_context['round']['solved']:
-        try:
-            source_file = os.path.join(settings.HUNT_DATA_DIR, 'round', round.url, 'clean_grid', "answers_background.jpg")
-            dest_file = os.path.join(round_dir, 'answers_background.jpg')
-            shutil.copyfile(source_file, dest_file)
-        except Exception as e:
-            print(str(e))
 
 def publish_team_puzzle(team, puzzle, suffix=None):
     print("publish %s/puzzle/%s" % (team.url, puzzle.url))
