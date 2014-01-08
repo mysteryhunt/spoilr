@@ -83,7 +83,7 @@ def load_teams():
                     team_log_puzzle_access(team, mitdata.puzzle, "The hunt begins")
             for puzzle in Puzzle.objects.filter(round__url='events'):
                 PuzzleAccess.objects.create(team=team, puzzle=puzzle).save()
-                team_log_puzzle_access(team, mitdata.puzzle, "The hunt begins")
+                team_log_puzzle_access(team, puzzle, "The hunt begins")
     print("Done loading teams")
 
 def load_team_phones():
