@@ -185,6 +185,8 @@ def load_all_inner():
     load_party_data() # 2014-specific
     load_teams()
     load_team_phones()
+    if Team.objects.filter(url='hunt_hq').exists():
+        this_team_can_see_everything(Team.objects.get(url='hunt_hq'))
 
 def load_all():
     try:
@@ -195,25 +197,27 @@ def load_all():
         print(str(e))
         load_all_inner();
 
+def this_team_can_see_everything(team):
+    td = Y2014TeamData.objects.get(team=team)
+    td.humpty_pieces = 12
+    td.save()
+    for interaction in Interaction.objects.all():
+        InteractionAccess.objects.create(team=team, interaction=interaction, accomplished=True).save()
+    for round in Round.objects.all():
+        if not RoundAccess.objects.filter(team=team, round=round).exists():
+            RoundAccess.objects.create(team=team, round=round).save()
+    for puzzle in Puzzle.objects.all():
+        if not PuzzleAccess.objects.filter(team=team, puzzle=puzzle).exists():
+            PuzzleAccess.objects.create(team=team, puzzle=puzzle).save()
+    for metapuzzle in Metapuzzle.objects.all():
+        if not MetapuzzleSolve.objects.filter(team=team, metapuzzle=metapuzzle).exists():
+            MetapuzzleSolve.objects.create(team=team, metapuzzle=metapuzzle).save()
 
 def everybody_can_see_everything_inner():
     print("Granting full access to every team...")
     InteractionAccess.objects.all().delete()
     for team in Team.objects.all():
-        td = Y2014TeamData.objects.get(team=team)
-        td.humpty_pieces = 12
-        td.save()
-        for interaction in Interaction.objects.all():
-            InteractionAccess.objects.create(team=team, interaction=interaction, accomplished=True).save()
-        for round in Round.objects.all():
-            if not RoundAccess.objects.filter(team=team, round=round).exists():
-                RoundAccess.objects.create(team=team, round=round).save()
-        for puzzle in Puzzle.objects.all():
-            if not PuzzleAccess.objects.filter(team=team, puzzle=puzzle).exists():
-                PuzzleAccess.objects.create(team=team, puzzle=puzzle).save()
-        for metapuzzle in Metapuzzle.objects.all():
-            if not MetapuzzleSolve.objects.filter(team=team, metapuzzle=metapuzzle).exists():
-                MetapuzzleSolve.objects.create(team=team, metapuzzle=metapuzzle).save()
+        this_team_can_see_everything(team)
     print("Done granting full access")
 
 def everybody_can_see_everything():
