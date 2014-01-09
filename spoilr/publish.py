@@ -349,7 +349,7 @@ def publish_team_round(team, round, suffix=None):
     round_context = RoundContext(team, round)
     publish_dir(round_context, os.path.join(settings.HUNT_DATA_DIR, 'round', round.url, 'round'), round_dir, '../..')
     # --- 2014-specific ---
-    if team.url == 'spoiler_alert':
+    if team.url == 'hunt_hq':
         solution_context = RoundContext(team, round)
         solution_context['name'] = round.name
         solution_context['url'] = 'round/' + round.url
@@ -434,7 +434,7 @@ def publish_team_puzzle(team, puzzle, suffix=None):
             puzzle_context['puzzle_js'] = puzzle_js_file.read()
     publish_dir(puzzle_context, os.path.join(settings.HUNT_DATA_DIR, 'round', puzzle.round.url, 'puzzle'), puzzle_dir, '../..')
     # --- 2014-specific ---
-    if team.url == 'spoiler_alert':
+    if team.url == 'hunt_hq':
         solution_context = PuzzleContext(team, puzzle)
         solution_context['name'] = puzzle.name + ' (' + puzzle.round.name + ')'
         solution_context['url'] = 'puzzle/' + puzzle.url
