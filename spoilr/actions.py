@@ -66,7 +66,7 @@ def release_puzzle(team, puzzle, reason):
         release_interaction(team, Interaction.objects.get(url='pwa_garciaparra_url'), '"%s" released' % puzzle.name)
     elif puzzle.url == 'gone_with_the_wind': # 2014-specific
         for p in ['zoinks', 'the_puzzle_your_puzzle_could_smell_like', 'cross_pollination', 'puzzle_with_answer_williams', 'bumblebee_tune_a', 'i_stumbled_across_a_recording']:
-            if PuzzleAccess.objects.filter(team=team, puzzle=p).exists():
+            if PuzzleAccess.objects.filter(team=team, puzzle__url=p).exists():
                 publish_team_puzzle(team, p)
     publish_team_puzzle(team, puzzle)
     publish_team_round(team, puzzle.round)
