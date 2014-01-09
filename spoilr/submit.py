@@ -64,7 +64,7 @@ def submit_puzzle(request, puzzle_url):
         return HttpResponseBadRequest('cannot find puzzle for url '+puzzle_url)
     q_full1 = count_queue(team) >= QUEUE_LIMIT
     q_full2 = PuzzleSubmission.objects.filter(team=team, puzzle=puzzle, resolved=False).count() >= PUZZLE_QUEUE_LIMIT
-    template = loader.get_template('submit-puzzle.html') 
+    template = loader.get_template('submit/puzzle.html') 
     if request.method == "POST":
         if "survey" in request.POST:
             solved = PuzzleAccess.objects.get(team=team, puzzle=puzzle).solved
@@ -146,7 +146,7 @@ def submit_metapuzzle(request, metapuzzle_url):
         return HttpResponseBadRequest('cannot find metapuzzle for url '+metapuzzle_url)
     q_full1 = count_queue(team) >= QUEUE_LIMIT
     q_full2 = MetapuzzleSubmission.objects.filter(team=team, metapuzzle=metapuzzle, resolved=False).count() >= PUZZLE_QUEUE_LIMIT
-    template = loader.get_template('submit-metapuzzle.html') 
+    template = loader.get_template('submit/metapuzzle.html') 
     if not q_full1 and not q_full2 and request.method == "POST":
         maxlen = Metapuzzle._meta.get_field('answer').max_length
         answer = cleanup_answer(request.POST["answer"])[:maxlen]
@@ -201,7 +201,7 @@ def submit_mit_metapuzzle(request): # 2014-specific
         return HttpResponseBadRequest('cannot find team for user '+username)
     q_full1 = count_queue(team) >= QUEUE_LIMIT
     q_full2 = Y2014MitMetapuzzleSubmission.objects.filter(team=team, resolved=False).count() >= PUZZLE_QUEUE_LIMIT
-    template = loader.get_template('submit-mit-metapuzzle.html') 
+    template = loader.get_template('submit/mit-metapuzzle.html') 
     if not q_full1 and not q_full2 and request.method == "POST":
         maxlen = Metapuzzle._meta.get_field('answer').max_length
         answer = cleanup_answer(request.POST["answer"])[:maxlen]
@@ -260,7 +260,7 @@ def submit_pwa_garciaparra_url(request): # 2014-specific
         return
     q_full1 = count_queue(team) >= QUEUE_LIMIT
     q_full2 = Y2014PwaGarciaparraUrlSubmission.objects.filter(team=team, resolved=False).count() >= 1
-    template = loader.get_template('submit-pwa-garciaparra-url.html') 
+    template = loader.get_template('submit/pwa-garciaparra-url.html') 
     if not q_full1 and not q_full2 and request.method == "POST":
         maxlen = Y2014PwaGarciaparraUrlSubmission._meta.get_field('url').max_length
         url = request.POST["url"][:maxlen]
@@ -294,7 +294,7 @@ def submit_contact(request):
         return HttpResponseBadRequest('cannot find team for user '+username)
     # these don't count toward the QUEUE_LIMIT
     q_full2 = ContactRequest.objects.filter(team=team, resolved=False).count() >= CONTACT_LIMIT
-    template = loader.get_template('submit-contact.html') 
+    template = loader.get_template('submit/contact.html') 
     if not q_full2 and request.method == "POST":
         maxlen = ContactRequest._meta.get_field('comment').max_length
         comment = request.POST["comment"][:maxlen]
@@ -399,7 +399,7 @@ def queue(request):
                 handler_name = request.POST["name"]
                 handler = QueueHandler.objects.create(email=handler_email,name=handler_name)
             else:
-                template = loader.get_template('queue-signup.html') 
+                template = loader.get_template('queue/signup.html') 
                 context = RequestContext(request, {
                     'email': handler_email,
                 })
@@ -448,7 +448,7 @@ def queue(request):
         metapuzzle.sort(key=lambda p: p['submission'].metapuzzle.url)
         mitmeta.sort(key=lambda p: p['correct']) # 2014-specific
 
-        template = loader.get_template('queue-handling.html') 
+        template = loader.get_template('queue/handling.html') 
         context = RequestContext(request, {
             'timer': (60*10 - (datetime.now() - handler.team_timestamp).seconds - 3),
             'handler': handler,
@@ -515,7 +515,7 @@ def queue(request):
 
     teams.sort(key=lambda team: -team["oldest"])
 
-    template = loader.get_template('queue.html') 
+    template = loader.get_template('queue/queue.html') 
     context = RequestContext(request, {
         'tq_max': QUEUE_LIMIT,
         't_total': t_total,
