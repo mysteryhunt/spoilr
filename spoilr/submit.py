@@ -263,7 +263,7 @@ def submit_contact_actual(team, phone, comment):
     ContactRequest.objects.create(team=team, phone=phone, comment=comment).save()
 
 def submit_contact(request):
-    username = 'bigjimmy'#request.META['REMOTE_USER']
+    username = request.META['REMOTE_USER']
     try:
         team = Team.objects.get(username=username)
     except:
