@@ -1,20 +1,21 @@
 from django.http import HttpResponse
 from django.template import Context, loader
 from django.core.cache import cache
+from django.db.models import Q
 
 from .models import *
 from .constants import *
 
-def TeamDict(team, puzzle_objects, puzzle_access, round_objects, round_access):
+def TeamDict(team):
     logn = TeamLog.objects.filter(team=team).order_by('-timestamp')[:10]
     log1 = logn[0]
-    p_released = sum(1 for a in puzzle_access if a.team == team)
-    p_solved = sum(1 for a in puzzle_access if a.team == team and a.solved)
-    q_submissions = sum(1 for a in PuzzleSubmission.objects.filter(team=team, resolved=False))
-    q_submissions += sum(1 for a in MetapuzzleSubmission.objects.filter(team=team, resolved=False))
-    q_submissions += sum(1 for a in Y2014MitMetapuzzleSubmission.objects.filter(team=team, resolved=False)) # 2014-specific
-    q_submissions += sum(1 for a in ContactRequest.objects.filter(team=team, resolved=False))
-    q_submissions += sum(1 for a in Y2014PwaGarciaparraUrlSubmission.objects.filter(team=team, resolved=False)) # 2014-specific
+    p_released = PuzzleAccess.objects.filter(team=team).count()
+    p_solved = PuzzleAccess.objects.filter(team=team, solved=True).count()
+    q_submissions = PuzzleSubmission.objects.filter(team=team, resolved=False).count()
+    q_submissions += MetapuzzleSubmission.objects.filter(team=team, resolved=False).count()
+    q_submissions += Y2014MitMetapuzzleSubmission.objects.filter(team=team, resolved=False).count() # 2014-specific
+    q_submissions += ContactRequest.objects.filter(team=team, resolved=False).count()
+    q_submissions += Y2014PwaGarciaparraUrlSubmission.objects.filter(team=team, resolved=False).count() # 2014-specific
     rounds = dict()
     if True: # 2014-specific
         s_current = Y2014TeamData.objects.get(team=team).points
@@ -28,8 +29,8 @@ def TeamDict(team, puzzle_objects, puzzle_access, round_objects, round_access):
         for mitdata in Y2014MitPuzzleData.objects.all().order_by('id'):
             released = False
             solved = False
-            access = [a for a in puzzle_access if a.team == team and a.puzzle == mitdata.puzzle]
-            if len(access):
+            access = PuzzleAccess.objects.filter(team=team, puzzle=mitdata.puzzle)
+            if access.exists():
                 released = True
                 if access[0].solved:
                     solved = True
@@ -44,24 +45,24 @@ def TeamDict(team, puzzle_objects, puzzle_access, round_objects, round_access):
                 rounds['clubs']['puzzles'].append(p)
             elif mitdata.mit_meta() == 'diamonds':
                 rounds['diamonds']['puzzles'].append(p)
-    for round in round_objects:
+    for round in Round.objects.all():
         if round.url == 'mit': # 2014-specific
             continue
         released = False
         solved = False
-        access = [a for a in round_access if a.team == team and a.round == round]
-        if len(access):
+        access = RoundAccess.objects.filter(team=team,round=round)
+        if access.exists():
             released = True
             r_released += 1
             if MetapuzzleSolve.objects.filter(team=team, metapuzzle__url=round.url).exists():
                 solved = True
                 r_solved += 1
         rounds[round.url] = {'puzzles': [], 'released': released, 'solved': solved}
-        for puzzle in (p for p in puzzle_objects if p.round == round):
+        for puzzle in Puzzle.objects.filter(round=round):
             released = False
             solved = False
-            access = [a for a in puzzle_access if a.team == team and a.puzzle == puzzle]
-            if len(access):
+            access = PuzzleAccess.objects.filter(team=team, puzzle=puzzle)
+            if access.exists():
                 released = True
                 if access[0].solved:
                     solved = True
@@ -89,18 +90,19 @@ def all_teams_update():
     print("updating all teams dashboard...")
     template = loader.get_template('all-teams.html') 
     teams = []
-    for team in Team.objects.all():
-        teams.append(TeamDict(team, Puzzle.objects.all(), PuzzleAccess.objects.all(), Round.objects.all(), RoundAccess.objects.all()))
+    for team in Team.objects.filter(~Q(url='hunt_hq')):
+        teams.append(TeamDict(team))
     teams.sort(key=lambda team: -(team['r_solved'] * 5)-team['p_solved'])
-    q_total = PuzzleSubmission.objects.filter(resolved=False).count()
-    q_total += MetapuzzleSubmission.objects.filter(resolved=False).count()
-    q_total += Y2014MitMetapuzzleSubmission.objects.filter(resolved=False).count() # 2014-specific
+    f = ~Q(team__url='hunt_hq') & Q(resolved=False)
+    q_total = PuzzleSubmission.objects.filter(f).count()
+    q_total += MetapuzzleSubmission.objects.filter(f).count()
+    q_total += Y2014MitMetapuzzleSubmission.objects.filter(f).count() # 2014-specific
     q_teams = set()
-    for x in PuzzleSubmission.objects.filter(resolved=False):
+    for x in PuzzleSubmission.objects.filter(f):
         q_teams.add(x.team.url)
-    for x in MetapuzzleSubmission.objects.filter(resolved=False):
+    for x in MetapuzzleSubmission.objects.filter(f):
         q_teams.add(x.team.url)
-    for x in Y2014MitMetapuzzleSubmission.objects.filter(resolved=False): # 2014-specific
+    for x in Y2014MitMetapuzzleSubmission.objects.filter(f): # 2014-specific
         q_teams.add(x.team.url)
     s_total = MAX_POINTS # 2014-specific
     p_total = Puzzle.objects.count()
@@ -123,7 +125,7 @@ def all_teams_view(request):
 def all_puzzles_update():
     print("updating all puzzles dashboard...")
     template = loader.get_template('all-puzzles.html') 
-    t_total = Team.objects.count()
+    t_total = Team.objects.filter(~Q(url='hunt_hq')).count()
 
     def percent(n, d):
         if d == 0 or d < 3:
@@ -134,7 +136,7 @@ def all_puzzles_update():
     for mm in ['spades', 'clubs', 'diamonds']: # 2014-specific
         meta = Metapuzzle.objects.get(url=mm)
         released = t_total
-        solved = MetapuzzleSolve.objects.filter(metapuzzle=meta).count()
+        solved = MetapuzzleSolve.objects.filter(~Q(team__url='hunt_hq') & Q(metapuzzle=meta)).count()
         puzzles = []
 
         m = {
@@ -147,8 +149,8 @@ def all_puzzles_update():
         }
         metas.append(m)
     for mitdata in Y2014MitPuzzleData.objects.all().order_by('id'): # 2014-specific
-        released = PuzzleAccess.objects.filter(puzzle=mitdata.puzzle).count()
-        solved = PuzzleAccess.objects.filter(puzzle=mitdata.puzzle, solved=True).count()
+        released = PuzzleAccess.objects.filter(~Q(team__url='hunt_hq') & Q(puzzle=mitdata.puzzle)).count()
+        solved = PuzzleAccess.objects.filter(~Q(team__url='hunt_hq') & Q(puzzle=mitdata.puzzle) & Q(solved=True)).count()
         p = {
             'puzzle': mitdata.puzzle,
             'info': mitdata.card.name,
@@ -169,8 +171,8 @@ def all_puzzles_update():
         meta = Metapuzzle.objects.get(url=round.url)
         puzzles = []
         for puzzle in Puzzle.objects.filter(round=round).order_by('id'):
-            released = PuzzleAccess.objects.filter(puzzle=puzzle).count()
-            solved = PuzzleAccess.objects.filter(puzzle=puzzle, solved=True).count()
+            released = PuzzleAccess.objects.filter(~Q(team__url='hunt_hq') & Q(puzzle=puzzle)).count()
+            solved = PuzzleAccess.objects.filter(~Q(team__url='hunt_hq') & Q(puzzle=puzzle) & Q(solved=True)).count()
             info = ''
             if round.url == 'tea_party':
                 rounddata = Y2014PartyAnswerData.objects.get(answer=puzzle.answer)
@@ -198,8 +200,8 @@ def all_puzzles_update():
                 'solvedp': percent(solved, released),
             }
             puzzles.append(p)
-        released = RoundAccess.objects.filter(round=round).count()
-        solved = MetapuzzleSolve.objects.filter(metapuzzle=meta).count()
+        released = RoundAccess.objects.filter(~Q(team__url='hunt_hq') & Q(round=round)).count()
+        solved = MetapuzzleSolve.objects.filter(~Q(team__url='hunt_hq') & Q(metapuzzle=meta)).count()
         m = {
             'meta': meta,
             'puzzles': puzzles,
