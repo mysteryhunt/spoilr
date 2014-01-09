@@ -172,6 +172,7 @@ class PuzzleSubmission(models.Model):
         return '%s: %s submitted for %s' % (str(self.timestamp), str(self.team), str(self.puzzle))
 
     class Meta:
+        unique_together = ('team', 'puzzle', 'answer')
         ordering = ['-timestamp']
 
 class MetapuzzleSubmission(models.Model):
@@ -186,6 +187,7 @@ class MetapuzzleSubmission(models.Model):
         return '%s: %s submitted for %s' % (str(self.timestamp), str(self.team), str(self.metapuzzle))
 
     class Meta:
+        unique_together = ('team', 'metapuzzle', 'answer')
         ordering = ['-timestamp']
 
 class ContactRequest(models.Model):
@@ -311,6 +313,7 @@ class Y2014MitMetapuzzleSubmission(models.Model):
         return '%s: %s submitted for MIT Bait' % (str(self.timestamp), str(self.team))
 
     class Meta:
+        unique_together = ('team', 'answer')
         ordering = ['-timestamp']
         verbose_name = '2014 MIT metapuzzle submission'
         verbose_name_plural = '2014 MIT metapuzzle submissions'

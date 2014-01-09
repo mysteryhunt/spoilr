@@ -1,6 +1,7 @@
 from django.http import HttpResponse, HttpResponseBadRequest
 from django.template import RequestContext, loader
 from django.shortcuts import redirect
+from django.db import IntegrityError
 
 import re
 import datetime
@@ -46,7 +47,10 @@ def submit_puzzle_answer(team, puzzle, answer, phone):
     if compare_answers(answer, "BENOISY"): # hack for testing:
         puzzle_answer_correct(team, puzzle)
         return
-    PuzzleSubmission.objects.create(team=team, puzzle=puzzle, phone=phone, answer=answer).save()
+    try:
+        PuzzleSubmission.objects.create(team=team, puzzle=puzzle, phone=phone, answer=answer).save()
+    except IntegrityError:
+        pass        
 
 def submit_puzzle(request, puzzle_url):
     username = request.META['REMOTE_USER']
@@ -123,7 +127,10 @@ def submit_metapuzzle_answer(team, metapuzzle, answer, phone):
     if compare_answers(answer, "BENOISY"): # hack for testing:
         metapuzzle_answer_correct(team, metapuzzle)
         return
-    MetapuzzleSubmission.objects.create(team=team, metapuzzle=metapuzzle, phone=phone, answer=answer).save()
+    try:
+        MetapuzzleSubmission.objects.create(team=team, metapuzzle=metapuzzle, phone=phone, answer=answer).save()
+    except IntegrityError:
+        pass        
 
 def submit_metapuzzle(request, metapuzzle_url):
     username = request.META['REMOTE_USER']
@@ -181,7 +188,10 @@ def submit_mit_metapuzzle_answer(team, answer, phone): # 2014-specific
         if compare_answers(answer, x):
             metapuzzle_answer_correct(team, Metapuzzle.objects.get(url=x))
             return
-    Y2014MitMetapuzzleSubmission.objects.create(team=team, phone=phone, answer=answer).save()
+    try:
+        Y2014MitMetapuzzleSubmission.objects.create(team=team, phone=phone, answer=answer).save()
+    except IntegrityError:
+        pass        
 
 def submit_mit_metapuzzle(request): # 2014-specific
     username = request.META['REMOTE_USER']
