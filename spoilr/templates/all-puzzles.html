@@ -10,10 +10,10 @@
       .n { text-align: right; }
       .d { text-align: right; }
       .p { text-align: right; padding: 0px 5px; }
-      .p0 { background: #eee; color: #666; }
-      .p1 { background: #fff; }
-      .p2 { background: #efe; }
-      .p3 { background: #ffe; }
+      .p_unreleased { background: #eee; color: #666; }
+      .p_no_data { background: #fff; }
+      .p_good { background: #efe; }
+      .p_meh { background: #ffe; }
       .g { width: 100px; padding: 0px 15px 0px 0px; }
       .gb{ background: #000; height: 5px; }
     </style>
@@ -53,7 +53,7 @@
 
 	</tr>
 	{% for puzzle in meta.puzzles %}
-	<tr class={% if puzzle.released %}{% if puzzle.solvedp != '-' %}{% if puzzle.solvedp > 50 %}p3{% else %}p2{% endif %}{% else %}p1{% endif %}{% else %}p0{% endif %}>
+	<tr class={% if puzzle.released %}{% if puzzle.solvedp != '-' %}{% if puzzle.solvedp >= 20 %}p_good{% else %}p_meh{% endif %}{% else %}p_nodata{% endif %}{% else %}p_unreleased{% endif %}>
 	  <td>
 	    {{ puzzle.puzzle.name|truncatechars:40 }}
 	  </td>
