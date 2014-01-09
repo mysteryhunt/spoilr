@@ -206,7 +206,13 @@ def submit_mit_metapuzzle(request): # 2014-specific
     solved = []
     for x in ['spades', 'clubs', 'diamonds']:
         for y in MetapuzzleSolve.objects.filter(team=team, metapuzzle__url=x):
-            solved.append(y.metapuzzle)
+            if x == 'spades':
+                message = 'The Dormouse took the bait'
+            elif x == 'clubs':
+                message = 'The Caterpillar took the bait'
+            elif x == 'diamonds':
+                message = 'Tweedledee and Tweedledum took the bait'
+            solved.append({'meta': y.metapuzzle, 'message': message})
     context = RequestContext(request, {
             'team': team,
             'answers': answers,

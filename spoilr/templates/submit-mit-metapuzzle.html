@@ -4,7 +4,7 @@
     <div style="white-space: nowrap;">
       Team: {{ team.name }}<br>
       {% for m in solved %}
-      {{ m.name }} took the bait: <b>{{ m.answer }}</b><br>
+      {{ m.message }}: <b>{{ m.meta.answer }}</b><br>
       {% endfor %}
       {% if notdone %}
       {% if q_full2 %}
