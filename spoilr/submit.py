@@ -226,7 +226,7 @@ def submit_pwa_garciaparra_url_actual(team, url, phone): # 2014-specific
     Y2014PwaGarciaparraUrlSubmission.objects.create(team=team, phone=phone, url=url).save()
 
 def submit_pwa_garciaparra_url(request): # 2014-specific
-    username = 'bigjimmy'#request.META['REMOTE_USER']
+    username = request.META['REMOTE_USER']
     try:
         team = Team.objects.get(username=username)
     except:
