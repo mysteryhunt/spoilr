@@ -72,13 +72,17 @@
 	  {% endfor %}
 	</table>
       </div>
-      {% if handler %}
+      {% if handler or t.handler %}
       <div style="text-align: right;">
+	{% if t.handler %}
+	{{ t.handler.name }} ({{ t.handler.email }}) is on it, since {{ t.handler.team_timestamp|naturaltime }}.
+	{% else %}
 	<form action="." method="POST" style="display: inline;">
 	  {% csrf_token %}
 	  <input type="hidden" name="claim" value="{{t.team.url}}" />
 	  <input type="submit" value="I'm on it." />
 	</form>
+	{% endif %}
       </div>
       {% endif %}
     </div>

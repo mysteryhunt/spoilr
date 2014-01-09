@@ -53,7 +53,7 @@ def submit_puzzle_answer(team, puzzle, answer, phone):
         pass        
 
 def submit_puzzle(request, puzzle_url):
-    username = request.META['REMOTE_USER']
+    username = 'bigjimmy'#request.META['REMOTE_USER']
     try:
         team = Team.objects.get(username=username)
     except:
@@ -133,7 +133,7 @@ def submit_metapuzzle_answer(team, metapuzzle, answer, phone):
         pass        
 
 def submit_metapuzzle(request, metapuzzle_url):
-    username = request.META['REMOTE_USER']
+    username = 'bigjimmy'#request.META['REMOTE_USER']
     try:
         team = Team.objects.get(username=username)
     except:
@@ -194,7 +194,7 @@ def submit_mit_metapuzzle_answer(team, answer, phone): # 2014-specific
         pass        
 
 def submit_mit_metapuzzle(request): # 2014-specific
-    username = request.META['REMOTE_USER']
+    username = 'bigjimmy'#request.META['REMOTE_USER']
     try:
         team = Team.objects.get(username=username)
     except:
@@ -250,7 +250,7 @@ def submit_pwa_garciaparra_url_actual(team, url, phone): # 2014-specific
     Y2014PwaGarciaparraUrlSubmission.objects.create(team=team, phone=phone, url=url).save()
 
 def submit_pwa_garciaparra_url(request): # 2014-specific
-    username = request.META['REMOTE_USER']
+    username = 'bigjimmy'#request.META['REMOTE_USER']
     try:
         team = Team.objects.get(username=username)
     except:
@@ -287,7 +287,7 @@ def submit_contact_actual(team, phone, comment):
     ContactRequest.objects.create(team=team, phone=phone, comment=comment).save()
 
 def submit_contact(request):
-    username = request.META['REMOTE_USER']
+    username = 'bigjimmy'#request.META['REMOTE_USER']
     try:
         team = Team.objects.get(username=username)
     except:
@@ -334,7 +334,12 @@ def queue(request):
             team = Team.objects.get(url=request.POST['claim'])
             handler.team = team
             handler.team_timestamp = datetime.now()
-            handler.save()
+            try:
+                handler.save()
+            except IntegrityError:
+                template = loader.get_template('queue/yoinked.html') 
+                context = RequestContext(request)
+                return HttpResponse(template.render(context))
             system_log('queue-claim', "'%s' (%s) claimed '%s'" % (handler.name, handler.email, team.name), team=team)
         elif handler and handler.team and "handled" in request.POST:
             for key in request.POST:
@@ -382,6 +387,10 @@ def queue(request):
             handler.team = None
             handler.team_timestamp = None
             handler.save()
+        elif handler and "handled" in request.POST:
+            template = loader.get_template('queue/timedout.html') 
+            context = RequestContext(request)
+            return HttpResponse(template.render(context))
         elif not handler and "email" in request.POST:
             handler_email = request.POST["email"]
             if QueueHandler.objects.filter(email=handler_email).exists():
@@ -500,6 +509,9 @@ def queue(request):
         team_obj(sub.team, sub.timestamp)["submissions"].append({"type": "pwa-garciaparra-url", "thing": sub.url, "timestamp": sub.timestamp})
     for team_obj in teams:
         team_obj["submissions"].sort(key=lambda sub: sub["timestamp"])
+        handlers = QueueHandler.objects.filter(team=team_obj["team"])
+        if handlers.exists():
+            team_obj["handler"] = handlers[0] 
 
     teams.sort(key=lambda team: -team["oldest"])
 
