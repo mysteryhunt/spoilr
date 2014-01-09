@@ -114,7 +114,7 @@ def all_teams_update():
         'r_total': r_total,
         'p_total': p_total,
     })
-    cache.set('all_teams', template.render(context), None)
+    cache.set('all_teams', template.render(context), 60*60)
     print("...done")
 
 def all_teams_view(request):
@@ -215,7 +215,7 @@ def all_puzzles_update():
         't_total': t_total,
         'p_total': p_total,
     })
-    cache.set('all_puzzles', template.render(context), None)
+    cache.set('all_puzzles', template.render(context), 60*60)
     print("...done")
 
 def all_puzzles_view(request):

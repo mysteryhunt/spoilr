@@ -61,7 +61,7 @@ def system_log_update():
     context = Context({
         'entries': entries,
     })
-    cache.set('system_log', template.render(context), None)
+    cache.set('system_log', template.render(context), 60*60)
     print("...done")
 
 def system_log_view(request):
