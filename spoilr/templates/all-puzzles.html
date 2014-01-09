@@ -28,6 +28,24 @@
       </div>
       <table style="border-collapse: collapse;">
 	<tr>
+	  <td>Overall released:</td>
+	  <td class="n">{{ p_released }}</td>
+	  <td>/</td>
+	  <td class="d">{{ p_total }}</td>
+	  <td class="p">{{ p_releasedp }}%</td>
+	  <td style="background: aliceblue; width: {{ p_total4 }}px"><div class="gb" style="width: {{ p_released4 }}px"></div></td>
+	</tr>
+	<tr>
+	  <td>Overall solved:</td>
+	  <td class="n">{{ p_solved }}</td>
+	  <td>/</td>
+	  <td class="d">{{ p_total }}</td>
+	  <td class="p">{{ p_solvedp }}%</td>
+	  <td style="background: aliceblue; width: {{ p_total4 }}px"><div class="gb" style="width: {{ p_solved4 }}px"></div></td>
+	</tr>
+      </table>
+      <table style="border-collapse: collapse;">
+	<tr>
 	  <th>Name</th>
 	  <th>Info</th>
 	  <th colspan="5">Releases</th>

@@ -126,11 +126,15 @@ def all_puzzles_update():
     print("updating all puzzles dashboard...")
     template = loader.get_template('all-puzzles.html') 
     t_total = Team.objects.filter(~Q(url='hunt_hq')).count()
+    p_total = Puzzle.objects.count()
 
     def percent(n, d):
         if d == 0 or d < 3:
             return '-'
         return int(n*100/d)
+
+    p_released = 0
+    p_solved = 0
 
     metas = []
     for mm in ['spades', 'clubs', 'diamonds']: # 2014-specific
@@ -151,6 +155,10 @@ def all_puzzles_update():
     for mitdata in Y2014MitPuzzleData.objects.all().order_by('id'): # 2014-specific
         released = PuzzleAccess.objects.filter(~Q(team__url='hunt_hq') & Q(puzzle=mitdata.puzzle)).count()
         solved = PuzzleAccess.objects.filter(~Q(team__url='hunt_hq') & Q(puzzle=mitdata.puzzle) & Q(solved=True)).count()
+        if released > 0:
+            p_released += 1
+        if solved > 0:
+            p_solved += 1
         p = {
             'puzzle': mitdata.puzzle,
             'info': mitdata.card.name,
@@ -191,6 +199,10 @@ def all_puzzles_update():
             if round.url == 'knights':
                 rounddata = Y2014KnightsAnswerData.objects.get(answer=puzzle.answer)
                 info = '%s %s' % (rounddata.color, rounddata.piece)
+            if released > 0:
+                p_released += 1
+            if solved > 0:
+                p_solved += 1
             p = {
                 'puzzle': puzzle,
                 'info': info,
@@ -211,11 +223,17 @@ def all_puzzles_update():
             'solvedp': percent(solved, released),
         }
         metas.append(m)
-    p_total = Puzzle.objects.count()
     context = Context({
         'metas': metas,
         't_total': t_total,
         'p_total': p_total,
+        'p_total4': p_total * 4,
+        'p_released': p_released,
+        'p_released4': p_released * 4,
+        'p_releasedp': percent(p_released, p_total),
+        'p_solved': p_solved,
+        'p_solved4': p_solved * 4,
+        'p_solvedp': percent(p_solved, p_total),
     })
     cache.set('all_puzzles', template.render(context), 60*60)
     print("...done")
