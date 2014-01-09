@@ -91,10 +91,10 @@ def submit_puzzle(request, puzzle_url):
     wq_answer = None
     if puzzle.round.url == 'white_queen':
         pwa = 'puzzle_with_answer_'
-        if puzzle[:len(pwa)] == pwa:
-            wq_answer = cleanup_answer(puzzle[len(pwa):])
-        elif puzzle[:len('another_'+pwa)] == 'another_'+pwa:
-            wq_answer = cleanup_answer(puzzle[len('another_'+pwa):])
+        if puzzle.url[:len(pwa)] == pwa:
+            wq_answer = cleanup_answer(puzzle.url[len(pwa):])
+        elif puzzle.url[:len('another_'+pwa)] == 'another_'+pwa:
+            wq_answer = cleanup_answer(puzzle.url[len('another_'+pwa):])
     context = RequestContext(request, {
             'team': team,
             'puzzle': puzzle,

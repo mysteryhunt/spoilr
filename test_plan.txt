@@ -60,11 +60,11 @@ puzzle_answer_correct(t, Puzzle.objects.get(url='hedgehogs_and_flamingos'))
 # oyster card released
 
 puzzle_answer_correct(t, Puzzle.objects.get(url='best_of_five'))
-# white queen released
-# white queen gift
 
 puzzle_answer_correct(t, Puzzle.objects.get(url='the_puzzle_your_puzzle_could_smell_like'))
 # level 2 tea cups released
+# white queen released
+# white queen gift
 
 puzzle_answer_correct(t, Puzzle.objects.get(url='monster_potatoes'))
 # ???
