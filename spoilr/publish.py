@@ -116,6 +116,11 @@ class TopContext(Context):
         self['ticketx'] = self['ticket']*10/TRAIN_COST
     def round_obj(self, access):
         ret = {"round": access.round}
+        if access.round.url == 'mit':
+            pass
+        else:
+            if MetapuzzleSolve.objects.filter(team=access.team, metapuzzle__url=access.round.url).exists():
+                ret["solved"] = True
         ret["puzzles"] = [self.puzzle_obj(x) for x in PuzzleAccess.objects.filter(puzzle__round=access.round, team=access.team).order_by('id')]
         return ret
     def puzzle_obj(self, access):
@@ -237,19 +242,6 @@ class RoundContext(TopContext): # todo don't inherit, it'll just slow things dow
                         'meta_url': meta_urls[r*3+c]
                         });
             self['cells'] = cells
-        if round.url == 'tea_party': # 2014-specific
-            chairs = [None, None, None, None]
-            for data in Y2014PartyAnswerData.objects.filter(type1='chair'):
-                try:
-                    puzzle = Puzzle.objects.get(answer=data.answer, round=round)
-                    PuzzleAccess.objects.get(puzzle=puzzle, team=team)
-                    chairs['nesw'.index(data.type2)] = {
-                        'direction': data.type2,
-                        'puzzle': puzzle,
-                    }
-                except:
-                    pass
-            self['chairs'] = chairs
         if round.url == "humpty_dumpty": # 2014-specific
             jigsaw = Y2014TeamData.objects.get(team=team).humpty_pieces
             self['jigsaw'] = jigsaw
