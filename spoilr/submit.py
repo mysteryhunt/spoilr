@@ -53,7 +53,7 @@ def submit_puzzle_answer(team, puzzle, answer, phone):
         pass        
 
 def submit_puzzle(request, puzzle_url):
-    username = 'bigjimmy'#request.META['REMOTE_USER']
+    username = request.META['REMOTE_USER']
     try:
         team = Team.objects.get(username=username)
     except:
@@ -133,7 +133,7 @@ def submit_metapuzzle_answer(team, metapuzzle, answer, phone):
         pass        
 
 def submit_metapuzzle(request, metapuzzle_url):
-    username = 'bigjimmy'#request.META['REMOTE_USER']
+    username = request.META['REMOTE_USER']
     try:
         team = Team.objects.get(username=username)
     except:
@@ -194,7 +194,7 @@ def submit_mit_metapuzzle_answer(team, answer, phone): # 2014-specific
         pass        
 
 def submit_mit_metapuzzle(request): # 2014-specific
-    username = 'bigjimmy'#request.META['REMOTE_USER']
+    username = request.META['REMOTE_USER']
     try:
         team = Team.objects.get(username=username)
     except:
@@ -250,7 +250,7 @@ def submit_pwa_garciaparra_url_actual(team, url, phone): # 2014-specific
     Y2014PwaGarciaparraUrlSubmission.objects.create(team=team, phone=phone, url=url).save()
 
 def submit_pwa_garciaparra_url(request): # 2014-specific
-    username = 'bigjimmy'#request.META['REMOTE_USER']
+    username = request.META['REMOTE_USER']
     try:
         team = Team.objects.get(username=username)
     except:
@@ -287,7 +287,7 @@ def submit_contact_actual(team, phone, comment):
     ContactRequest.objects.create(team=team, phone=phone, comment=comment).save()
 
 def submit_contact(request):
-    username = 'bigjimmy'#request.META['REMOTE_USER']
+    username = request.META['REMOTE_USER']
     try:
         team = Team.objects.get(username=username)
     except:
