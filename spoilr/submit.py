@@ -332,6 +332,11 @@ def queue(request):
             del request.session['handler_email']
         elif "claim" in request.POST:
             team = Team.objects.get(url=request.POST['claim'])
+            if count_queue(team) == 0:
+                if ContactRequest.objects.filter(team=team, resolved=False).count() == 0:
+                    template = loader.get_template('queue/yoinked.html') 
+                    context = RequestContext(request)
+                    return HttpResponse(template.render(context))
             handler.team = team
             handler.team_timestamp = datetime.now()
             try:
