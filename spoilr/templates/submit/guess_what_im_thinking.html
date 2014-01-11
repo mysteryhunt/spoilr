@@ -1,0 +1,7 @@
+{{ response|safe }}
+<form method="post" action=".">
+  {% csrf_token %}
+  Enter another guess:
+  <input type="input" name="guess_what_im_thinking" size="30" style="font-family:monospace" autocomplete="off" />
+  <input type="submit" name="check" value="Check" />
+</form>

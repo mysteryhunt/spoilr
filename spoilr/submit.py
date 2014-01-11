@@ -10,6 +10,8 @@ from .models import *
 from .actions import *
 from .log import *
 
+from . import guess_what_im_thinking
+
 def cleanup_answer(answer):
     return re.sub(r'[^ A-Z0-9]', '', answer.upper()) 
 
@@ -79,14 +81,31 @@ def submit_puzzle(request, puzzle_url):
             if difficulty not in ['1','2','3','4','5']:
                 difficulty = None
             PuzzleSurvey.objects.create(team=team, puzzle=puzzle, fun=fun, difficulty=difficulty, comment=comment).save()
-        elif not q_full1 and not q_full2:
-            maxlen = Puzzle._meta.get_field('answer').max_length
-            answer = cleanup_answer(request.POST["answer"])[:maxlen]
-            phone = request.POST["phone"]
-            phone = check_phone(team, phone)
-            submit_puzzle_answer(team, puzzle, answer, phone)
-            q_full1 = count_queue(team) >= QUEUE_LIMIT
-            q_full2 = PuzzleSubmission.objects.filter(team=team, puzzle=puzzle, resolved=False).count() >= PUZZLE_QUEUE_LIMIT
+        else:
+            if puzzle.url == 'guess_what_im_thinking':
+                if 'guess_what_im_thinking' in request.POST:
+                    gwit = guess_what_im_thinking.response(request.POST["guess_what_im_thinking"], False)
+                    template = loader.get_template('submit/guess_what_im_thinking.html')
+                    context = RequestContext(request, {
+                        'response': gwit
+                    })
+                    return HttpResponse(template.render(context))
+                else:
+                    gwit = guess_what_im_thinking.response(request.POST["answer"])
+                    if gwit:
+                        template = loader.get_template('submit/guess_what_im_thinking.html')
+                        context = RequestContext(request, {
+                            'response': gwit
+                        })
+                        return HttpResponse(template.render(context))
+            if not q_full1 and not q_full2:
+                maxlen = Puzzle._meta.get_field('answer').max_length
+                answer = cleanup_answer(request.POST["answer"])[:maxlen]
+                phone = request.POST["phone"]
+                phone = check_phone(team, phone)
+                submit_puzzle_answer(team, puzzle, answer, phone)
+                q_full1 = count_queue(team) >= QUEUE_LIMIT
+                q_full2 = PuzzleSubmission.objects.filter(team=team, puzzle=puzzle, resolved=False).count() >= PUZZLE_QUEUE_LIMIT
     solved = PuzzleAccess.objects.get(team=team, puzzle=puzzle).solved
     answers = PuzzleSubmission.objects.filter(team=team, puzzle=puzzle)
     unresolved = answers.filter(resolved=False).exists()

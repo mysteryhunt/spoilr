@@ -105,11 +105,14 @@ metapuzzle_answer_correct(t, Metapuzzle.objects.get(url='white_queen_a10'))
 grant_points(t, 14, 'because reasons')
 
 puzzle_answer_correct(t, Puzzle.objects.get(url='modern_cubism_artist'))
-# you've got some nerve released
+# you've got some nerve / gone with the wind released
+# (updates 6 other puzzles)
 puzzle_answer_correct(t, Puzzle.objects.get(url='sat_iii'))
 # cruciform heraldry released
 puzzle_answer_correct(t, Puzzle.objects.get(url='cruciform_heraldry'))
 # let's meet / saturdy released
+
+puzzle_answer_correct(t, Puzzle.objects.get(url='one_tequila_two_tequila_three_tequila_floor'))
 
 puzzle_answer_correct(t, Puzzle.objects.get(url='common_bonds'))
 puzzle_answer_correct(t, Puzzle.objects.get(url='round_tripper'))
