@@ -33,6 +33,8 @@ cp -v spoilr.logrotate /etc/logrotate.d/spoilr
 #Inserting spoilr rsyslog
 cp -v spoilr.rsyslog /etc/rsyslog.d/10-spoilr.conf
 
+#Copying in apache conf
+cp -v spoilr.apacheconf /etc/apache2/conf.d/hunt.conf
 
 echo "Creating Django Cache Directory..."
 mkdir -p /var/cache/spoilr
