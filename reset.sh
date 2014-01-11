@@ -6,6 +6,27 @@ cd /home/djangoapps/spoilr
 
 MANAGE=python\ manage.py
 
+if (( "$UID" != "0" )); then
+	echo YOU NEED TO BE ROOT TO RUN THIS SCRIPT!
+	echo go away.
+	echo
+	exit 255
+fi
+
+
+echo ""
+echo "This script COMPLETELY DESTROYS MYSTERY HUNT.  It will erase the database and reload and restart all teams from scratch.  DO NOT DO THIS AT ALL IF HUNT HAS STARTED!!"
+echo "Also, this script probably ONLY WORKS ON THE MASTER SERVER -- if you're not on corey, you want to run the slave-reset.sh script"
+echo "If you are absolutely sure you want to potentially ruin mystery hunt and are on the master server, type KILLMYSTERYHUNT (otherwise enter anything else)"
+
+read KILLMYSTERYHUNT
+
+if [ "$KILLMYSTERYHUNT" != "KILLMYSTERYHUNT" ]; then
+	echo RESET SEQUENCE ABORTED. HAVE A NICE DAY
+	exit 255
+fi
+
+
 #Inserting spoilr logrotate
 cp -v spoilr.logrotate /etc/logrotate.d/spoilr
 
@@ -49,4 +70,6 @@ cp -v spoilr.rsyslog /etc/rsyslog.d/10-spoilr.conf
 
 /etc/init.d/apache2 restart
 /etc/init.d/rsyslog restart
+
+echo "In case you didn't mean to do this, backup database is stored at /home/hunt/spoilr.sql"
 
