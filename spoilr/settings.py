@@ -20,12 +20,12 @@ LOAD_DIR = '/home/hunt'
 HTPASSWD_FILE = '/home/hunt/htpasswd/htpasswd'
 
 # TODO: RUNTIME: set this to false
-DEBUG = True
+DEBUG = False
 TEMPLATE_DEBUG = DEBUG
 
 # TODO: RUNTIME: populate this with hunt admins
 ADMINS = (
-    # ('Your Name', 'your_email@example.com'),
+    ('admin', 'wind-up-birds-systems@wind-up-birds.org'),
 )
 
 MANAGERS = ADMINS
@@ -54,7 +54,7 @@ CACHES = {
 
 # Hosts/domain names that are valid for this site; required if DEBUG is False
 # See https://docs.djangoproject.com/en/1.5/ref/settings/#allowed-hosts
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
@@ -164,11 +164,6 @@ INSTALLED_APPS = (
 
 SESSION_SERIALIZER = 'django.contrib.sessions.serializers.JSONSerializer'
 
-# A sample logging configuration. The only tangible logging
-# performed by this configuration is to send an email to
-# the site admins on every HTTP 500 error when DEBUG=False.
-# See http://docs.djangoproject.com/en/dev/topics/logging for
-# more details on how to customize your logging configuration.
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -182,7 +177,8 @@ LOGGING = {
     },
     'handlers': {
         'syslog': {
-            'level': 'DEBUG',
+#            'level': 'DEBUG',
+            'level': 'INFO',
             'class': 'logging.handlers.SysLogHandler',
 	    'formatter':  'verbose',
 	    'facility': 'local1',
@@ -192,7 +188,8 @@ LOGGING = {
     'loggers': {
         'django': {
             'handlers': ['syslog'],
-            'level': 'DEBUG',
+#            'level': 'DEBUG',
+            'level': 'INFO',
             'propagate': True,
         },
     }
