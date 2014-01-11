@@ -6,6 +6,9 @@ cd /home/djangoapps/spoilr
 
 MANAGE=python\ manage.py
 
+#Inserting spoilr logrotate
+cp spoilr.logrotate /etc/logrotate.d/spoilr
+
 echo "Creating Django Cache Directory..."
 mkdir -p /var/cache/spoilr
 chown -R $OWNER /var/cache/spoilr
