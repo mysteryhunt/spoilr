@@ -6,6 +6,9 @@ from django.db.models import Q
 from .models import *
 from .constants import *
 
+import logging
+logger = logging.getLogger(__name__)
+
 def TeamDict(team):
     logn = TeamLog.objects.filter(team=team).order_by('-timestamp')[:10]
     log1 = logn[0]
@@ -87,7 +90,7 @@ def TeamDict(team):
         }
 
 def all_teams_update():
-    print("updating all teams dashboard...")
+    logger.info("updating all teams dashboard...")
     template = loader.get_template('all-teams.html') 
     teams = []
     for team in Team.objects.filter(~Q(url='hunt_hq')):
@@ -117,13 +120,13 @@ def all_teams_update():
         'p_total': p_total,
     })
     cache.set('all_teams', template.render(context), 60*60)
-    print("...done")
+    logger.info("...done")
 
 def all_teams_view(request):
     return HttpResponse(cache.get('all_teams'))
 
 def all_puzzles_update():
-    print("updating all puzzles dashboard...")
+    logger.info("updating all puzzles dashboard...")
     template = loader.get_template('all-puzzles.html') 
     t_total = Team.objects.filter(~Q(url='hunt_hq')).count()
     p_total = Puzzle.objects.count()
@@ -236,7 +239,7 @@ def all_puzzles_update():
         'p_solvedp': percent(p_solved, p_total),
     })
     cache.set('all_puzzles', template.render(context), 60*60)
-    print("...done")
+    logger.info("...done")
 
 def all_puzzles_view(request):
     return HttpResponse(cache.get('all_puzzles'))

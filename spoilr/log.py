@@ -4,6 +4,9 @@ from django.core.cache import cache
 
 from .models import *
 
+import logging
+logger = logging.getLogger(__name__)
+
 PUZZLE_ACCESS = 'puzzle-access'
 ROUND_ACCESS = 'round-access'
 PUZZLE_SOLVED = 'puzzle-solved'
@@ -13,6 +16,7 @@ METAPUZZLE_INCORRECT = 'metapuzzle-incorrect'
 INTERACTION = 'interaction'
 
 def system_log(event_type, message, team=None, object_id=''):
+    logger.debug('Hunt System Log: type=%s message=\'%s\' team=%s object=%s', event_type, message, team, object_id)
     SystemLog.objects.create(event_type=event_type, message=message, team=team, object_id=object_id).save()
 
 def team_log(team, event_type, message, object_id='', link=''):

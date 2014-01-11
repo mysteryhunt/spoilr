@@ -12,6 +12,9 @@ from .log import *
 
 from . import guess_what_im_thinking
 
+import logging
+logger = logging.getLogger(__name__)
+
 def cleanup_answer(answer):
     return re.sub(r'[^ A-Z0-9]', '', answer.upper()) 
 
@@ -28,7 +31,9 @@ def check_bait(answer): # 2014-specific
 def check_phone(team, phone):
     if TeamPhone.objects.filter(team=team, phone=phone).exists():
         return phone
-    return TeamPhone.objects.filter(team=team)[:1].get()
+    fallback = TeamPhone.objects.filter(team=team)[:1].get()
+    logger.warning('team %s submitted with phone %s, but they don\'t have that phone in the database - shenanigans? - anyway falling back to %s', team, phone, fallback)
+    return fallback
 
 def count_queue(team):
     q = PuzzleSubmission.objects.filter(team=team, resolved=False).count()
@@ -52,6 +57,7 @@ def submit_puzzle_answer(team, puzzle, answer, phone):
     try:
         PuzzleSubmission.objects.create(team=team, puzzle=puzzle, phone=phone, answer=answer).save()
     except IntegrityError:
+        logger.warning('integrity error adding puzzle submission - this is probably because the team submitted the same answer twice with very little time in between - team:%s puzzle:%s answer:%s', team, puzzle, answer)
         pass        
 
 def submit_puzzle(request, puzzle_url):
@@ -59,11 +65,18 @@ def submit_puzzle(request, puzzle_url):
     try:
         team = Team.objects.get(username=username)
     except:
+        logger.exception('cannot find team for user %s', username)
         return HttpResponseBadRequest('cannot find team for user '+username)
     try:
         puzzle = Puzzle.objects.get(url=puzzle_url)
     except:
-        return HttpResponseBadRequest('cannot find puzzle for url '+puzzle_url)
+        logger.exception('cannot find puzzle %s', puzzle_url)
+        return HttpResponseBadRequest('cannot find puzzle '+puzzle_url)
+    try:
+        access = PuzzleAccess.objects.get(team=team, puzzle=puzzle)
+    except:
+        logger.exception('team %s submitted for puzzle %s, but does not have access to it - shenanigans?', team, puzzle)
+        return HttpResponseBadRequest('cannot find puzzle '+puzzle_url)
     q_full1 = count_queue(team) >= QUEUE_LIMIT
     q_full2 = PuzzleSubmission.objects.filter(team=team, puzzle=puzzle, resolved=False).count() >= PUZZLE_QUEUE_LIMIT
     template = loader.get_template('submit/puzzle.html') 
@@ -71,6 +84,7 @@ def submit_puzzle(request, puzzle_url):
         if "survey" in request.POST:
             solved = PuzzleAccess.objects.get(team=team, puzzle=puzzle).solved
             if not solved:
+                logger.exception('team %s submitted survey for puzzle %s, but has not solved it - shenanigans?', team, puzzle)
                 return HttpResponseBadRequest('cannot submit survey until the puzzle is solved')
             maxlen = PuzzleSurvey._meta.get_field('comment').max_length
             comment = request.POST["comment"][:maxlen]
@@ -119,19 +133,19 @@ def submit_puzzle(request, puzzle_url):
         elif puzzle.url[:len('another_'+pwa)] == 'another_'+pwa:
             wq_answer = cleanup_answer(puzzle.url[len('another_'+pwa):])
     context = RequestContext(request, {
-            'team': team,
-            'puzzle': puzzle,
-            'wq_answer': wq_answer,
-            'solved': solved,
-            'answers': answers,
-            'unresolved': unresolved,
-            'resolved': resolved,
-            'commentlen': commentlen,
-            'q_full1': q_full1,
-            'q_full2': q_full2,
-            'q_lim1': QUEUE_LIMIT,
-            'q_lim2': PUZZLE_QUEUE_LIMIT,
-            })
+        'team': team,
+        'puzzle': puzzle,
+        'wq_answer': wq_answer,
+        'solved': solved,
+        'answers': answers,
+        'unresolved': unresolved,
+        'resolved': resolved,
+        'commentlen': commentlen,
+        'q_full1': q_full1,
+        'q_full2': q_full2,
+        'q_lim1': QUEUE_LIMIT,
+        'q_lim2': PUZZLE_QUEUE_LIMIT,
+    })
     return HttpResponse(template.render(context))
 
 def submit_metapuzzle_answer(team, metapuzzle, answer, phone):
@@ -149,6 +163,7 @@ def submit_metapuzzle_answer(team, metapuzzle, answer, phone):
     try:
         MetapuzzleSubmission.objects.create(team=team, metapuzzle=metapuzzle, phone=phone, answer=answer).save()
     except IntegrityError:
+        logger.warning('integrity error adding metapuzzle submission - this is probably because the team submitted the same answer twice with very little time in between - team:%s metapuzzle:%s answer:%s', team, metapuzzle, answer)
         pass        
 
 def submit_metapuzzle(request, metapuzzle_url):
@@ -156,13 +171,15 @@ def submit_metapuzzle(request, metapuzzle_url):
     try:
         team = Team.objects.get(username=username)
     except:
+        logger.exception('cannot find team for user %s', username)
         return HttpResponseBadRequest('cannot find team for user '+username)
     if metapuzzle_url in ['spades', 'clubs', 'diamonds']: # 2014-specific
         return
     try:
         metapuzzle = Metapuzzle.objects.get(url=metapuzzle_url)
     except:
-        return HttpResponseBadRequest('cannot find metapuzzle for url '+metapuzzle_url)
+        logger.exception('cannot find metapuzzle %s', metapuzzle_url)
+        return HttpResponseBadRequest('cannot find metapuzzle '+metapuzzle_url)
     q_full1 = count_queue(team) >= QUEUE_LIMIT
     q_full2 = MetapuzzleSubmission.objects.filter(team=team, metapuzzle=metapuzzle, resolved=False).count() >= PUZZLE_QUEUE_LIMIT
     template = loader.get_template('submit/metapuzzle.html') 
@@ -182,18 +199,18 @@ def submit_metapuzzle(request, metapuzzle_url):
     resolved = answers.filter(resolved=True).exists()
     solved = MetapuzzleSolve.objects.filter(team=team, metapuzzle=metapuzzle).exists()
     context = RequestContext(request, {
-            'team': team,
-            'describe': describe,
-            'metapuzzle': metapuzzle,
-            'solved': solved,
-            'answers': answers,
-            'unresolved': unresolved,
-            'resolved': resolved,
-            'q_full1': q_full1,
-            'q_full2': q_full2,
-            'q_lim1': QUEUE_LIMIT,
-            'q_lim2': PUZZLE_QUEUE_LIMIT,
-            })
+        'team': team,
+        'describe': describe,
+        'metapuzzle': metapuzzle,
+        'solved': solved,
+        'answers': answers,
+        'unresolved': unresolved,
+        'resolved': resolved,
+        'q_full1': q_full1,
+        'q_full2': q_full2,
+        'q_lim1': QUEUE_LIMIT,
+        'q_lim2': PUZZLE_QUEUE_LIMIT,
+    })
     return HttpResponse(template.render(context))
 
 def submit_mit_metapuzzle_answer(team, answer, phone): # 2014-specific
@@ -210,6 +227,7 @@ def submit_mit_metapuzzle_answer(team, answer, phone): # 2014-specific
     try:
         Y2014MitMetapuzzleSubmission.objects.create(team=team, phone=phone, answer=answer).save()
     except IntegrityError:
+        logger.warning('integrity error adding bait submission - this is probably because the team submitted the same answer twice with very little time in between - team:%s answer:%s', team, answer)
         pass        
 
 def submit_mit_metapuzzle(request): # 2014-specific
@@ -217,6 +235,7 @@ def submit_mit_metapuzzle(request): # 2014-specific
     try:
         team = Team.objects.get(username=username)
     except:
+        logger.exception('cannot find team for user %s', username)
         return HttpResponseBadRequest('cannot find team for user '+username)
     q_full1 = count_queue(team) >= QUEUE_LIMIT
     q_full2 = Y2014MitMetapuzzleSubmission.objects.filter(team=team, resolved=False).count() >= PUZZLE_QUEUE_LIMIT
@@ -243,17 +262,17 @@ def submit_mit_metapuzzle(request): # 2014-specific
                 message = 'Tweedledee and Tweedledum took the bait'
             solved.append({'meta': y.metapuzzle, 'message': message})
     context = RequestContext(request, {
-            'team': team,
-            'answers': answers,
-            'resolved': resolved,
-            'unresolved': unresolved,
-            'solved': solved,
-            'notdone': len(solved) != 3,
-            'q_full1': q_full1,
-            'q_full2': q_full2,
-            'q_lim1': QUEUE_LIMIT,
-            'q_lim2': PUZZLE_QUEUE_LIMIT,
-            })
+        'team': team,
+        'answers': answers,
+        'resolved': resolved,
+        'unresolved': unresolved,
+        'solved': solved,
+        'notdone': len(solved) != 3,
+        'q_full1': q_full1,
+        'q_full2': q_full2,
+        'q_lim1': QUEUE_LIMIT,
+        'q_lim2': PUZZLE_QUEUE_LIMIT,
+    })
     return HttpResponse(template.render(context))
 
 def submit_pwa_garciaparra_url_actual(team, url, phone): # 2014-specific
@@ -273,6 +292,7 @@ def submit_pwa_garciaparra_url(request): # 2014-specific
     try:
         team = Team.objects.get(username=username)
     except:
+        logger.exception('cannot find team for user %s', username)
         return HttpResponseBadRequest('cannot find team for user '+username)
     ia = InteractionAccess.objects.get(team=team, url='pwa_garciaparra_url')
     if ia.accomplished:
@@ -289,15 +309,14 @@ def submit_pwa_garciaparra_url(request): # 2014-specific
         q_full1 = count_queue(team) >= QUEUE_LIMIT
         q_full2 = Y2014PwaGarciaparraUrlSubmission.objects.filter(team=team, resolved=False).count() >= 1
     urls = Y2014PwaGarciaparraUrlSubmission.objects.filter(team=team, resolved=False)
-    print(str(urls))
     context = RequestContext(request, {
-            'team': team,
-            'urls': urls,
-            'q_full1': q_full1,
-            'q_full2': q_full2,
-            'q_lim1': QUEUE_LIMIT,
-            'q_lim2': PUZZLE_QUEUE_LIMIT,
-            })
+        'team': team,
+        'urls': urls,
+        'q_full1': q_full1,
+        'q_full2': q_full2,
+        'q_lim1': QUEUE_LIMIT,
+        'q_lim2': PUZZLE_QUEUE_LIMIT,
+    })
     return HttpResponse(template.render(context))
 
 
@@ -310,6 +329,7 @@ def submit_contact(request):
     try:
         team = Team.objects.get(username=username)
     except:
+        logger.exception('cannot find team for user %s', username)
         return HttpResponseBadRequest('cannot find team for user '+username)
     # these don't count toward the QUEUE_LIMIT
     q_full2 = ContactRequest.objects.filter(team=team, resolved=False).count() >= CONTACT_LIMIT
@@ -324,11 +344,11 @@ def submit_contact(request):
         q_full2 = ContactRequest.objects.filter(team=team, resolved=False).count() >= CONTACT_LIMIT
     requests = ContactRequest.objects.filter(team=team, resolved=False)
     context = RequestContext(request, {
-            'team': team,
-            'requests': requests,
-            'q_full2': q_full2,
-            'q_lim2': CONTACT_LIMIT,
-            })
+        'team': team,
+        'requests': requests,
+        'q_full2': q_full2,
+        'q_lim2': CONTACT_LIMIT,
+    })
     return HttpResponse(template.render(context))
 
 def queue(request):
@@ -340,6 +360,7 @@ def queue(request):
                 h.team = None
                 h.team_timestamp = None
                 h.save()
+                logger.warning("handler '%s' (%s) timed out while handling '%s'", h.name, h.email, team.name)
                 system_log('queue-timeout', "'%s' (%s) had been handling '%s' for %s seconds, but timed out" % (h.name, h.email, team.name, delta.seconds), team=team)
 
     handler_email = request.session.get('handler_email')

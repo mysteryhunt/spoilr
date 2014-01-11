@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.template import Template, Context
 
+import platform
 import time
 import logging
 import os
@@ -19,16 +20,16 @@ def publish_htpasswd():
     except ImportError:
         return
     saltchars = string.ascii_letters + string.digits
-    print('Writing htpasswd file...')
+    logger.info('Writing htpasswd file...')
     try:
         with open(settings.HTPASSWD_FILE, 'w') as htpasswd_file:
             for team in Team.objects.all():
                 salt = random.choice(saltchars) + random.choice(saltchars)
                 htpasswd_file.write('%s:%s\n' % (team.username, crypt.crypt(team.password, salt)))
     except IOError as e:
-        logger.error('Failed to write htpasswd file %s, IT MAY BE IN AN INVALID STATE: %s', settings.HTPASSWD_FILE, str(e))
+        logger.exception('Failed to write htpasswd file %s, IT MAY BE IN AN INVALID STATE', settings.HTPASSWD_FILE)
         raise e
-    print('Done writing htpasswd file')
+    logger.info('Done writing htpasswd file')
 
 def prestart_team(team, suffix=None):
     team_path = team.get_team_dir(suffix)
@@ -38,14 +39,14 @@ def prestart_team(team, suffix=None):
             os.mkdir(team_path)
             with open(os.path.join(team_path, '.team-dir-marker'), 'a'):
                 pass
-        except OSError as e:
-            logger.error('Failed to create team directory %s: %s', team_path, str(e))
+        except:
+            logger.exception('Failed to create team directory %s', team_path)
             return False
-    if not os.path.lexists(user_symlink):
+    if platform.system() != 'Windows' and not os.path.lexists(user_symlink):
         try:
             os.symlink(team.get_team_dir(), user_symlink)
-        except OSError as e:
-            logger.error('Failed to create symlink at %s to %s: %s', user_symlink, team.get_team_dir(), str(e))
+        except:
+            logger.exception('Failed to create symlink at %s to %s', user_symlink, team.get_team_dir())
     try:
         team_htaccess_path = os.path.join(team_path, '.htaccess')
         with open(team_htaccess_path, 'w') as htaccess_file:
@@ -54,18 +55,18 @@ AuthName "Mystery Hunt"
 AuthUserFile %s
 Require User %s''' % (settings.HTPASSWD_FILE, team.username))
             htaccess_file.close()
-    except IOError as e:
-        logger.error('Failed to initialize team directory %s, IT MAY BE IN AN INVALID STATE: %s', team_path, str(e))
+    except:
+        logger.exception('Failed to initialize team directory %s, IT MAY BE IN AN INVALID STATE', team_path)
         raise e
     return True
 
 def prestart_all():
     teams = Team.objects.all()
-    print('Prestarting hunt for %d teams...' % len(teams))
+    logger.info('Prestarting hunt for %d teams...', len(teams))
     for team in teams:
-        print('  Team "%s"...' % team.url)
+        logger.info('  Team "%s"...', team.url)
         prestart_team(team)
-    print('Done prestarting hunt')
+    logger.info('Done prestarting hunt')
 
 def start_team(team):
     # TODO: insert mh2014 start logic here
@@ -73,11 +74,11 @@ def start_team(team):
 
 def start_all():
     teams = Team.objects.all()
-    print('Starting hunt for %d teams...' % len(teams))
+    logger.info('Starting hunt for %d teams...', len(teams))
     for team in teams:
-        print('  Team "%s"...' % team.url)
+        logger.info('  Team "%s"...', team.url)
         start_team(team)
-    print('Done starting hunt')
+    logger.info('Done starting hunt')
 
 log_entry_protect = re.compile(r"\[\[([^\]]*)\]\]")
 
@@ -98,6 +99,7 @@ class TopContext(Context):
         try:
             self['gone_with_the_wind_released'] = PuzzleAccess.objects.filter(team=team, puzzle=Puzzle.objects.get(url='gone_with_the_wind')).exists()
         except:
+            logger.exception('couldn\'t determine if gone_with_the_wind has been released')
             pass
         self['team_data'] = Y2014TeamData.objects.get(team=team)
         points = self['team_data'].points
@@ -130,7 +132,7 @@ class TopContext(Context):
                 d = Y2014MitPuzzleData.objects.get(puzzle=access.puzzle)
                 ret["card"] = d.card
             except:
-                logger.error('puzzle "%s" doesn\'t have a card assigned' % access.puzzle.url)
+                logger.exception('puzzle "%s" doesn\'t have a card assigned', access.puzzle.url)
         if access.puzzle.round.url == 'tea_party': # 2014-specific
             data = Y2014PartyAnswerData.objects.get(answer=access.puzzle.answer)
             if data.type1 == 'cup':
@@ -145,7 +147,7 @@ class RoundContext(TopContext): # todo don't inherit, it'll just slow things dow
         try:
             team.rounds.get(url=round.url)
         except:
-            logger.error('[bug] team "%s" doesn\'t have access to round "%s"', team.url, round.url)
+            logger.exception('team "%s" doesn\'t have access to round "%s"', team.url, round.url)
             return
         self['round'] = self.round_obj(RoundAccess.objects.get(team=team, round=round))
         self['puzzles'] = self['round']['puzzles']
@@ -251,14 +253,14 @@ class PuzzleContext(RoundContext): # todo don't inherit, it'll just slow things 
         try:
             round = team.rounds.get(url=puzzle.round.url)
         except:
-            logger.error('[bug] team "%s" doesn\'t have access to round "%s"', team.url, puzzle.round.url)
+            logger.exception('team "%s" doesn\'t have access to round "%s"', team.url, puzzle.round.url)
             TopContext.__init__(self, team)
             return
         RoundContext.__init__(self, team, round)
         try:
             team.puzzles.get(url=puzzle.url)
         except:
-            logger.error('[bug] team "%s" doesn\'t have access to puzzle "%s"', team.url, puzzle.url)
+            logger.exception('team "%s" doesn\'t have access to puzzle "%s"', team.url, puzzle.url)
             return
         self['puzzle'] = self.puzzle_obj(PuzzleAccess.objects.get(team=team, puzzle=puzzle))
         if puzzle.url == 'puzzle_with_answer_garciaparra': # 2014-specific
@@ -285,19 +287,24 @@ def publish_dir(context, source_path, dest_path, root_path, except_for=[]):
                 with open(source_file, 'r') as file_in:
                     try:
                         result = Template(file_in.read()).render(context)
-                    except Exception as e:
-                        logger.error('error running template "%s": %s', os.path.abspath(source_file), str(e))
+                    except:
+                        logger.exception('error running template "%s"', os.path.abspath(source_file))
                         continue
                     with open(dest_file, 'w') as file_out:
                         file_out.write(result)
             else:
                 dest_file = os.path.join(dest_path, relpath, filename)
                 if not os.path.exists(dest_file) or os.path.getmtime(dest_file) < os.path.getmtime(source_file):
-                    try:
-                        os.symlink(source_file, os.path.abspath(dest_file))
-                    except OSError as e:
-                        #logger.error('Failed to create symlink at %s to %s: %s', dest_file, source_file, str(e))
-                        shutil.copyfile(source_file, dest_file)
+                    if platform.system() == 'Windows':
+                        try:
+                            shutil.copyfile(source_file, dest_file)
+                        except:
+                            logger.exception('Failed to copy %s to %s', source_file, dest_file)
+                    else:
+                        try:
+                            os.symlink(source_file, os.path.abspath(dest_file))
+                        except:
+                            logger.exception('Failed to create symlink at %s to %s', dest_file, source_file)
         for dirname in dirnames:
             if relpath == '.' and dirname in except_for:
                 continue
@@ -305,8 +312,8 @@ def publish_dir(context, source_path, dest_path, root_path, except_for=[]):
             if not os.path.isdir(dest_dir):
                 try:
                     os.mkdir(dest_dir)
-                except OSError as e:
-                    logger.error('can\'t create directory "%s": %s', os.path.abspath(dest_dir), str(e))
+                except:
+                    logger.exception('can\'t create directory "%s": %s', os.path.abspath(dest_dir))
                     continue
 
 def ensure_team_dir(team, suffix=None):
@@ -316,7 +323,7 @@ def ensure_team_dir(team, suffix=None):
     return True
 
 def publish_team_top(team, suffix=None):
-    print("publish %s/top" % team.url)
+    logger.info("publish %s/top", team.url)
     if not ensure_team_dir(team, suffix):
         return
     team_path = team.get_team_dir(suffix)
@@ -327,7 +334,7 @@ def publish_team_top(team, suffix=None):
     publish_dir(top_context, os.path.join(settings.HUNT_DATA_DIR, 'top'), team_path, '.', except_for)
 
 def publish_team_round(team, round, suffix=None):
-    print("publish %s/round/%s" % (team.url, round.url))
+    logger.info("publish %s/round/%s", team.url, round.url)
     if not ensure_team_dir(team, suffix):
         return
     team_path = team.get_team_dir(suffix)
@@ -335,8 +342,8 @@ def publish_team_round(team, round, suffix=None):
     if not os.path.isdir(os.path.abspath(round_dir)):
         try:
             os.makedirs(os.path.abspath(round_dir))
-        except OSError as e:
-            logger.error('couldn\'t create directory "%s": %s', round_dir, str(e))
+        except:
+            logger.exception('couldn\'t create directory "%s"', round_dir)
             return
     round_context = RoundContext(team, round)
     publish_dir(round_context, os.path.join(settings.HUNT_DATA_DIR, 'round', round.url, 'round'), round_dir, '../..')
@@ -347,47 +354,48 @@ def publish_team_round(team, round, suffix=None):
         solution_context['url'] = 'round/' + round.url
         solution_source = os.path.join(settings.HUNT_DATA_DIR, 'round-solution', round.url)
         if os.path.isdir(solution_source):
-            print("  and solution")
+            logger.info("  and solution")
             solution_dir = os.path.join(team_path, 'round-solution', round.url)
             if not os.path.isdir(os.path.abspath(solution_dir)):
                 try:
                     os.makedirs(os.path.abspath(solution_dir))
-                except OSError as e:
-                    logger.error('couldn\'t create directory "%s": %s', solution_dir, str(e))
+                except:
+                    logger.exception('couldn\'t create directory "%s"', solution_dir)
                     return
             publish_dir(solution_context, solution_source, solution_dir, '../..', ['index.html', 'solution.css'])
             try:
                 with open(os.path.join(solution_source, 'index.html'), 'r') as index_html_file:
                     solution_context['index_html'] = index_html_file.read()
-            except Exception as e:
-                logger.error('couldn\'t read solution html: %s', solution_dir, str(e))
+            except:
+                logger.exception('couldn\'t read solution html for round %s', round.url)
                 return
             if os.path.isfile(os.path.join(solution_source, 'solution.css')):
                 with open(os.path.join(solution_source, 'solution.css'), 'r') as solution_css_file:
                     solution_context['solution_css'] = solution_css_file.read()
             publish_dir(solution_context, os.path.join(settings.HUNT_DATA_DIR, 'round', round.url, 'solution'), solution_dir, '../..')
+        else:
+            logger.warning('no solution for round %s', round.url)
     if round.url == 'humpty_dumpty':
         jigsaw = Y2014TeamData.objects.get(team=team).humpty_pieces
         if not os.path.isdir(os.path.join(round_dir, 'jigsaw')):
             try:
                 os.makedirs(os.path.join(round_dir, 'jigsaw'))
-            except Exception as e:
-                print(str(e))
-                logger.error('couldn\'t create directory %s' % os.path.join(round_dir, 'jigsaw'))
-        for i in range(1,jigsaw+1):
-            try:
-                source_file = os.path.join(settings.HUNT_DATA_DIR, 'round', round.url, 'jigsaw', "%02d.png" % i)
-                dest_file = os.path.join(round_dir, 'jigsaw', "%02d.png" % i)
-                shutil.copyfile(source_file, dest_file)
-                source_file = os.path.join(settings.HUNT_DATA_DIR, 'round', round.url, 'jigsaw', "%02d-thumb.png" % i)
-                dest_file = os.path.join(round_dir, 'jigsaw', "%02d-thumb.png" % i)
-                shutil.copyfile(source_file, dest_file)
-            except Exception as e:
-                print(str(e))
-                logger.error('couldn\'t copy jigsaw piece %d' % i)
+            except:
+                logger.exception("couldn't create directory %s", os.path.join(round_dir, 'jigsaw'))
+        if os.path.isdir(os.path.join(round_dir, 'jigsaw')):
+            for i in range(1,jigsaw+1):
+                try:
+                    source_file = os.path.join(settings.HUNT_DATA_DIR, 'round', round.url, 'jigsaw', "%02d.png" % i)
+                    dest_file = os.path.join(round_dir, 'jigsaw', "%02d.png" % i)
+                    shutil.copyfile(source_file, dest_file)
+                    source_file = os.path.join(settings.HUNT_DATA_DIR, 'round', round.url, 'jigsaw', "%02d-thumb.png" % i)
+                    dest_file = os.path.join(round_dir, 'jigsaw', "%02d-thumb.png" % i)
+                    shutil.copyfile(source_file, dest_file)
+                except:
+                    logger.exception('couldn\'t copy jigsaw piece %d', i)
 
 def publish_team_puzzle(team, puzzle, suffix=None):
-    print("publish %s/puzzle/%s" % (team.url, puzzle.url))
+    logger.info("publish %s/puzzle/%s", team.url, puzzle.url)
     if not ensure_team_dir(team, suffix):
         return
     team_path = team.get_team_dir(suffix)
@@ -395,8 +403,8 @@ def publish_team_puzzle(team, puzzle, suffix=None):
     if not os.path.isdir(os.path.abspath(puzzle_dir)):
         try:
             os.makedirs(os.path.abspath(puzzle_dir))
-        except OSError as e:
-            logger.error('couldn\'t create directory "%s": %s', puzzle_dir, str(e))
+        except:
+            logger.exception('couldn\'t create directory "%s"', puzzle_dir)
             return
     puzzle_context = PuzzleContext(team, puzzle)
     puzzle_source = os.path.join(settings.HUNT_DATA_DIR, 'puzzle', puzzle.url)
@@ -415,8 +423,8 @@ def publish_team_puzzle(team, puzzle, suffix=None):
         elif os.path.isfile(html_path+'.tmpl'):
             with open(html_path+'.tmpl', 'r') as index_html_file:
                 puzzle_context['index_html'] = Template(index_html_file.read()).render(puzzle_context)
-    except Exception as e:
-        logger.error('couldn\'t read puzzle html: %s', puzzle_dir, str(e))
+    except:
+        logger.exception('couldn\'t read puzzle html for puzzle %s', puzzle.url)
         return
     if os.path.isfile(os.path.join(puzzle_source, 'puzzle.css')):
         with open(os.path.join(puzzle_source, 'puzzle.css'), 'r') as puzzle_css_file:
@@ -432,25 +440,27 @@ def publish_team_puzzle(team, puzzle, suffix=None):
         solution_context['url'] = 'puzzle/' + puzzle.url
         solution_source = os.path.join(settings.HUNT_DATA_DIR, 'puzzle-solution', puzzle.url)
         if os.path.isdir(solution_source):
-            print("  and solution")
+            logger.info("  and solution")
             solution_dir = os.path.join(team_path, 'puzzle-solution', puzzle.url)
             if not os.path.isdir(os.path.abspath(solution_dir)):
                 try:
                     os.makedirs(os.path.abspath(solution_dir))
-                except OSError as e:
-                    logger.error('couldn\'t create directory "%s": %s', solution_dir, str(e))
+                except:
+                    logger.exception('couldn\'t create directory "%s"', solution_dir)
                     return
             publish_dir(solution_context, solution_source, solution_dir, '../..', ['index.html', 'solution.css'])
             try:
                 with open(os.path.join(solution_source, 'index.html'), 'r') as index_html_file:
                     solution_context['index_html'] = index_html_file.read()
-            except Exception as e:
-                logger.error('couldn\'t read solution html: %s', solution_dir, str(e))
+            except:
+                logger.exception('couldn\'t read solution html for puzzle %s', puzzle.url)
                 return
             if os.path.isfile(os.path.join(solution_source, 'solution.css')):
                 with open(os.path.join(solution_source, 'solution.css'), 'r') as solution_css_file:
                     solution_context['solution_css'] = solution_css_file.read()
             publish_dir(solution_context, os.path.join(settings.HUNT_DATA_DIR, 'round', puzzle.round.url, 'solution'), solution_dir, '../..')
+        else:
+            logger.warning('no solution for puzzle %s', puzzle.url)
     if puzzle.round.url == 'mit':
         try:
             card = Y2014MitPuzzleData.objects.get(puzzle=puzzle).card
@@ -460,18 +470,16 @@ def publish_team_puzzle(team, puzzle, suffix=None):
             source_file = os.path.join(settings.HUNT_DATA_DIR, 'round', 'mit', 'edges', card.name+'.png')
             dest_file = os.path.join(puzzle_dir, 'paths.png')
             shutil.copyfile(source_file, dest_file)
-        except Exception as e:
-            print(str(e))
-            logger.error('puzzle "%s" doesn\'t have a card assigned' % puzzle.url)
+        except:
+            logger.exception('puzzle "%s" doesn\'t have a card assigned', puzzle.url)
     if puzzle.round.url == 'knights':
         try:
             data = Y2014KnightsAnswerData.objects.get(answer=puzzle.answer)
             source_file = os.path.join(settings.HUNT_DATA_DIR, 'round', 'knights', 'pieces', data.color+'_'+data.piece+'.png')
             dest_file = os.path.join(puzzle_dir, 'piece.png')
             shutil.copyfile(source_file, dest_file)
-        except Exception as e:
-            print(str(e))
-            logger.error('puzzle "%s" doesn\'t have a chess piece assigned' % puzzle.url)
+        except:
+            logger.exception('puzzle "%s" doesn\'t have a chess piece assigned', puzzle.url)
 
 
 def publish_team(team, suffix=None):
@@ -483,10 +491,10 @@ def publish_team(team, suffix=None):
 
 def publish_all():
     teams = Team.objects.all()
-    print('Publishing hunt for %d teams...' % len(teams))
+    logger.info('Publishing hunt for %d teams...', len(teams))
     for team in teams:
         publish_team(team)
-    print('Done publishing hunt')
+    logger.info('Done publishing hunt')
 
 def republish_team_start(team):
     team_path_new = team.get_team_dir(".__new__")
@@ -502,18 +510,20 @@ def republish_team_finish(team):
     try:
         if os.path.exists(team_path):
             shutil.rmtree(team_path)
-    except OSError as e:
-        logger.error('Failed to remove "%s": %s', team_path, str(e))
+    except:
+        logger.exception('Failed to remove "%s"', team_path)
         return
     last_error = None
     for i in range(1,5):
         try:
             os.rename(team_path_new, team_path)
             return
-        except OSError as e:
-            last_error = e
+        except:
+            if i == 1:
+                logger.warning('couldn\'t move "%s" to "%s", trying again...', team_path_new, team_path, exc_info=True)
+            last_error = sys.exc_info()
             time.sleep(i)
-    logger.error('Failed to move "%s" to "%s": %s', team_path_new, team_path, str(e))
+    logger.error('Failed to move "%s" to "%s"', team_path_new, team_path, exc_info=last_error)
 
 def republish_team(team):
     republish_team_start(team)
@@ -522,11 +532,11 @@ def republish_team(team):
 def republish_all():
     publish_htpasswd()
     teams = Team.objects.all()
-    print('Republishing hunt for %d teams...' % len(teams))
+    logger.info('Republishing hunt for %d teams...', len(teams))
     for team in teams:
-        print('  Start Team "%s"...' % team.url)
+        logger.info('  Start Team "%s"...', team.url)
         republish_team_start(team)
     for team in teams:
-        print('  Finish Team "%s"...' % team.url)
+        logger.info('  Finish Team "%s"...', team.url)
         republish_team_finish(team)
-    print('Done republishing hunt')
+    logger.info('Done republishing hunt')

@@ -12,61 +12,61 @@ def get_team_path(team):
     return os.path.join(settings.TEAMS_DIR, team.url)
 
 def load_metapuzzles():
-    print("Loading metapuzzles from metapuzzles.txt...")
+    logger.info("Loading metapuzzles from metapuzzles.txt...")
     with open(os.path.join(settings.LOAD_DIR, 'metapuzzles.txt'), 'r') as team_file:
         for row in csv.DictReader(team_file, delimiter='\t'):
             if Metapuzzle.objects.filter(name=row["name"]).exists():
                 continue
-            print("  Metapuzzle \"%s\"..." % row["name"])
+            logger.info("  Metapuzzle \"%s\"...", row["name"])
             metapuzzle = Metapuzzle.objects.create(**row)
             metapuzzle.save() 
             system_log('load-metapuzzle', 'Loaded metapuzzle "%s"' % metapuzzle.name, object_id=metapuzzle.url)
-    print("Done loading metapuzzles")
+    logger.info("Done loading metapuzzles")
 
 def load_interactions():
-    print("Loading interactions from interactions.txt...")
+    logger.info("Loading interactions from interactions.txt...")
     with open(os.path.join(settings.LOAD_DIR, 'interactions.txt'), 'r') as team_file:
         for row in csv.DictReader(team_file, delimiter='\t'):
             if Interaction.objects.filter(name=row["name"]).exists():
                 continue
-            print("  Interaction \"%s\"..." % row["name"])
+            logger.info("  Interaction \"%s\"...", row["name"])
             interaction = Interaction.objects.create(**row)
             interaction.save() 
             system_log('load-interaction', 'Loaded interaction "%s"' % interaction.name, object_id=interaction.url)
-    print("Done loading interactions")
+    logger.info("Done loading interactions")
 
 def load_rounds():
-    print("Loading rounds from rounds.txt...")
+    logger.info("Loading rounds from rounds.txt...")
     with open(os.path.join(settings.LOAD_DIR, 'rounds.txt'), 'r') as team_file:
         for row in csv.DictReader(team_file, delimiter='\t'):
             if Round.objects.filter(url=row["url"]).exists():
                 continue
-            print("  Round \"%s\"..." % row["name"])
+            logger.info("  Round \"%s\"...", row["name"])
             round = Round.objects.create(**row)
             round.save() 
             system_log('load-round', 'Loaded round "%s"' % round.name, object_id=round.url)
-    print("Done loading rounds")
+    logger.info("Done loading rounds")
 
 def load_puzzles():
-    print("Loading puzzles from puzzles.txt...")
+    logger.info("Loading puzzles from puzzles.txt...")
     with open(os.path.join(settings.LOAD_DIR, 'puzzles.txt'), 'r') as team_file:
         for row in csv.DictReader(team_file, delimiter='\t'):
             if Puzzle.objects.filter(url=row["url"]).exists():
                 continue
-            print("  Puzzle \"%s\"..." % row["name"])
+            logger.info("  Puzzle \"%s\"...", row["name"])
             row["round"] = Round.objects.get(url=row["round"])
             puzzle = Puzzle.objects.create(**row)
             puzzle.save() 
             system_log('load-puzzle', 'Loaded puzzle "%s" into round "%s"' % (puzzle.name, puzzle.round.name), object_id=puzzle.url)
-    print("Done loading puzzles")
+    logger.info("Done loading puzzles")
 
 def load_teams():
-    print("Loading teams from teams.txt...")
+    logger.info("Loading teams from teams.txt...")
     with open(os.path.join(settings.LOAD_DIR, 'teams.txt'), 'r') as team_file:
         for row in csv.DictReader(team_file, delimiter='\t'):
             if Team.objects.filter(url=row["url"]).exists():
                 continue
-            print("  Team \"%s\"..." % row["name"])
+            logger.info("  Team \"%s\"...", row["name"])
             team = Team.objects.create(**row)
             team.save() 
             system_log('load-team', 'Loaded team "%s"' % team.name, object_id=team.url)
@@ -84,93 +84,93 @@ def load_teams():
             for puzzle in Puzzle.objects.filter(round__url='events'):
                 PuzzleAccess.objects.create(team=team, puzzle=puzzle).save()
                 team_log_puzzle_access(team, puzzle, "The hunt begins")
-    print("Done loading teams")
+    logger.info("Done loading teams")
 
 def load_team_phones():
-    print("Loading team phones from team_phones.txt...")
+    logger.info("Loading team phones from team_phones.txt...")
     with open(os.path.join(settings.LOAD_DIR, 'team_phones.txt'), 'r') as team_file:
         for row in csv.DictReader(team_file, delimiter='\t'):
             try:
                 team = Team.objects.get(url=row["team"])
             except:
-                print('ERROR: no such node "%s"' % row["node1"])
+                logger.exception('no such team %s for team phone %s', row["team"], row["phone"])
                 continue
             TeamPhone.objects.filter(phone=row["phone"]).delete()
             TeamPhone.objects.create(team=team, phone=row["phone"]).save()
-    print("Done loading team phones")
+    logger.info("Done loading team phones")
 
 def load_mit_cards(): # 2014-specific
-    print("Loading mit cards from mit_cards.txt...")
+    logger.info("Loading mit cards from mit_cards.txt...")
     Y2014MitCard.objects.all().delete()
     with open(os.path.join(settings.LOAD_DIR, 'mit_cards.txt'), 'r') as node_file:
         for row in csv.DictReader(node_file, delimiter='\t'):
             row['start'] = (row['start'] == 'yes')
             Y2014MitCard.objects.create(**row).save()
-    print("Done loading mit cards")
+    logger.info("Done loading mit cards")
 
 def load_mit_edges(): # 2014-specific
-    print("Loading mit map edges from mit_edges.txt...")
+    logger.info("Loading mit map edges from mit_edges.txt...")
     Y2014MitMapEdge.objects.all().delete()
     with open(os.path.join(settings.LOAD_DIR, 'mit_edges.txt'), 'r') as edge_file:
         for row in csv.DictReader(edge_file, delimiter='\t'):
             try:
                 card1 = Y2014MitCard.objects.get(name=row["card1"])
             except:
-                print('ERROR: no such card "%s"' % row["card1"])
+                logger.exception('no such card %s for edge %s <-> %s', row["card1"], row["card1"], row["card2"])
                 continue
             try:
                 card2 = Y2014MitCard.objects.get(name=row["card2"])
             except:
-                print('ERROR: no such card "%s"' % row["card2"])
+                logger.exception('no such card %s for edge %s <-> %s', row["card2"], row["card1"], row["card2"])
                 continue
             Y2014MitMapEdge.objects.create(card1=card1, card2=card2).save()
-    print("Done loading mit edges")
+    logger.info("Done loading mit edges")
 
 def load_mit_data(): # 2014-specific
-    print("Loading mit data from mit_data.txt...")
+    logger.info("Loading mit data from mit_data.txt...")
     Y2014MitPuzzleData.objects.all().delete()
     with open(os.path.join(settings.LOAD_DIR, 'mit_data.txt'), 'r') as data_file:
         for row in csv.DictReader(data_file, delimiter='\t'):
             try:
                 card = Y2014MitCard.objects.get(name=row["card"])
             except:
-                print('ERROR: no such card "%s"' % row["card"])
+                logger.exception('no such card %s for puzzle %s', row["card"], row["url"])
                 continue
             try:
                 puzzle = Puzzle.objects.get(url=row["url"])
             except:
-                print('ERROR: no such puzzle "%s"' % row["url"])
+                logger.exception('no such puzzle %s for card %s', row["url"], row["card"])
                 continue
             if puzzle.round.url != "mit":
-                print('ERROR: puzzle "%s" isn\'t in round "mit"' % row["url"])
+                logger.error("puzzle %s isn't in round 'mit'", row["url"])
                 continue
             Y2014MitPuzzleData.objects.create(puzzle=puzzle, card=card).save()
-    print("Done loading mit data")
+    logger.info("Done loading mit data")
 
 
 def load_caucus_data(): # 2014-specific
-    print("Loading caucus data from caucus_data.txt...")
+    logger.info("Loading caucus data from caucus_data.txt...")
     Y2014CaucusAnswerData.objects.all().delete()
     with open(os.path.join(settings.LOAD_DIR, 'caucus_data.txt'), 'r') as data_file:
         for row in csv.DictReader(data_file, delimiter='\t'):
             Y2014CaucusAnswerData.objects.create(**row).save()
-    print("Done loading caucus data")
+    logger.info("Done loading caucus data")
 
 def load_knights_data(): # 2014-specific
-    print("Loading knights data from knights_data.txt...")
+    logger.info("Loading knights data from knights_data.txt...")
     Y2014KnightsAnswerData.objects.all().delete()
     with open(os.path.join(settings.LOAD_DIR, 'knights_data.txt'), 'r') as data_file:
         for row in csv.DictReader(data_file, delimiter='\t'):
             Y2014KnightsAnswerData.objects.create(**row).save()
-    print("Done loading knights data")
+    logger.info("Done loading knights data")
 
 def load_party_data(): # 2014-specific
-    print("Loading party data from party_data.txt...")
+    logger.info("Loading party data from party_data.txt...")
     Y2014PartyAnswerData.objects.all().delete()
     with open(os.path.join(settings.LOAD_DIR, 'party_data.txt'), 'r') as data_file:
         for row in csv.DictReader(data_file, delimiter='\t'):
             Y2014PartyAnswerData.objects.create(**row).save()
-    print("Done loading party data")
+    logger.info("Done loading party data")
 
 def load_all_inner():
     load_metapuzzles()
@@ -192,10 +192,17 @@ def load_all():
     try:
         from django.db import transaction # Django 1.6 required here
         with transaction.atomic():
+            try:
+                load_all_inner();
+            except:
+                logger.exception("load_all failed")
+                return
+    except:
+        try:
             load_all_inner();
-    except Exception as e:
-        print(str(e))
-        load_all_inner();
+        except:
+            logger.exception("load_all failed")
+            return
 
 def this_team_can_see_everything(team):
     td = Y2014TeamData.objects.get(team=team)
@@ -214,11 +221,11 @@ def this_team_can_see_everything(team):
             MetapuzzleSolve.objects.create(team=team, metapuzzle=metapuzzle).save()
 
 def everybody_can_see_everything_inner():
-    print("Granting full access to every team...")
+    logger.info("Granting full access to every team...")
     InteractionAccess.objects.all().delete()
     for team in Team.objects.all():
         this_team_can_see_everything(team)
-    print("Done granting full access")
+    logger.info("Done granting full access")
 
 def everybody_can_see_everything():
     try:
