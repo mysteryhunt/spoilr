@@ -30,8 +30,6 @@ def release_round(team, round, reason):
         # teams must complete 'white_queen_gift' before seeing puzzles
         interaction = Interaction.objects.get(url='white_queen_gift')
         release_interaction(team, interaction, 'Round "%s" released' % round.name)
-        # hack for testing:
-        interaction_accomplished(team, interaction)
     elif round.url == 'caucus_race': # 2014-specific
         count = 2
         for abird in Y2014CaucusAnswerData.objects.all():
@@ -286,8 +284,6 @@ def metapuzzle_answer_correct(team, metapuzzle):
             interaction = None
         if interaction:
             release_interaction(team, interaction, "Found the right bait")
-            # hack for testing:
-            interaction_accomplished(team, interaction)
     if metapuzzle.url in ['tea_party', 'white_queen', 'mock_turtle', 'caucus_race', 'knights', 'white_queen']: # 2014-specific
         if metapuzzle.url == 'tea_party':
             reason = "Solved the Mad Hatter's problem"

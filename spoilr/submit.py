@@ -51,9 +51,6 @@ def submit_puzzle_answer(team, puzzle, answer, phone):
     if PuzzleAccess.objects.filter(team=team, puzzle=puzzle, solved=True).exists():
         return
     system_log('submit-puzzle', "%s submitted '%s' for %s" % (team.name, answer, str(puzzle)), team=team, object_id=puzzle.url)
-    if compare_answers(answer, "BENOISY"): # hack for testing:
-        puzzle_answer_correct(team, puzzle)
-        return
     try:
         PuzzleSubmission.objects.create(team=team, puzzle=puzzle, phone=phone, answer=answer).save()
     except IntegrityError:
@@ -157,9 +154,6 @@ def submit_metapuzzle_answer(team, metapuzzle, answer, phone):
     if MetapuzzleSolve.objects.filter(team=team, metapuzzle=metapuzzle).exists():
         return
     system_log('submit-metapuzzle', "%s submitted '%s' for %s" % (team.name, answer, str(metapuzzle)), team=team, object_id=metapuzzle.url)
-    if compare_answers(answer, "BENOISY"): # hack for testing:
-        metapuzzle_answer_correct(team, metapuzzle)
-        return
     try:
         MetapuzzleSubmission.objects.create(team=team, metapuzzle=metapuzzle, phone=phone, answer=answer).save()
     except IntegrityError:
@@ -220,10 +214,6 @@ def submit_mit_metapuzzle_answer(team, answer, phone): # 2014-specific
         if compare_answers(sub.answer, answer):
             return
     system_log('submit-mit-bait', "%s submitted '%s'" % (team.name, answer), team=team)
-    for x in ['spades', 'clubs', 'diamonds']: # hack for testing
-        if compare_answers(answer, x):
-            metapuzzle_answer_correct(team, Metapuzzle.objects.get(url=x))
-            return
     try:
         Y2014MitMetapuzzleSubmission.objects.create(team=team, phone=phone, answer=answer).save()
     except IntegrityError:
@@ -282,9 +272,6 @@ def submit_pwa_garciaparra_url_actual(team, url, phone): # 2014-specific
         if sub.url == url:
             return
     system_log('submit-pwa-garciaparra-url', "%s submitted '%s'" % (team.name, url), team=team)
-    if compare_answers(url, 'BENOISY'): # hack for testing
-        interaction_accomplished(team, Interaction.objects.get(url='pwa_garciaparra_url'))
-        return
     Y2014PwaGarciaparraUrlSubmission.objects.create(team=team, phone=phone, url=url).save()
 
 def submit_pwa_garciaparra_url(request): # 2014-specific
