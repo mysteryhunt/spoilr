@@ -7,7 +7,11 @@ cd /home/djangoapps/spoilr
 MANAGE=python\ manage.py
 
 #Inserting spoilr logrotate
-cp spoilr.logrotate /etc/logrotate.d/spoilr
+cp -v spoilr.logrotate /etc/logrotate.d/spoilr
+
+#Inserting spoilr rsyslog
+cp -v spoilr.rsyslog /etc/rsyslog.d/10-spoilr.conf
+
 
 echo "Creating Django Cache Directory..."
 mkdir -p /var/cache/spoilr
@@ -37,4 +41,12 @@ su -c "$MANAGE republish --traceback" $OWNER
 echo "Installing Cron Jobs..."
 cp -v spoilrcron /etc/cron.d/spoilrcron
 
+#Inserting spoilr logrotate
+cp -v spoilr.logrotate /etc/logrotate.d/spoilr
+
+#Inserting spoilr rsyslog
+cp -v spoilr.rsyslog /etc/rsyslog.d/10-spoilr.conf
+
+/etc/init.d/apache2 restart
+/etc/init.d/rsyslog restart
 
