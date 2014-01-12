@@ -4,7 +4,7 @@ CONTACT_LIMIT = 5
 
 # ----- 2014-specific -----
 
-DRINK_COST = [12, 16, 20]
+DRINK_COST = [14, 24, 34]
 TRAIN_COST = 90
 
 DRINK_READY = [DRINK_COST[0],
