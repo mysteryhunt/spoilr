@@ -2,6 +2,7 @@ from .log import *
 from .models import *
 from .constants import *
 from .publish import *
+from django.db.models import Q
 
 import logging
 logger = logging.getLogger(__name__)
@@ -30,8 +31,6 @@ def release_round(team, round, reason):
         # teams must complete 'white_queen_gift' before seeing puzzles
         interaction = Interaction.objects.get(url='white_queen_gift')
         release_interaction(team, interaction, 'Round "%s" released' % round.name)
-        # hack for testing:
-        interaction_accomplished(team, interaction)
     elif round.url == 'caucus_race': # 2014-specific
         count = 2
         for abird in Y2014CaucusAnswerData.objects.all():
@@ -286,8 +285,11 @@ def metapuzzle_answer_correct(team, metapuzzle):
             interaction = None
         if interaction:
             release_interaction(team, interaction, "Found the right bait")
-            # hack for testing:
-            interaction_accomplished(team, interaction)
+        if InteractionAccess.objects.filter(Q(team=team) & (Q(interaction__url='dormouse') | Q(interaction__url='caterpillar') | Q(interaction__url='tweedles'))).count() == 3:
+            release_interaction(team, Interaction.objects.get(url='mit_runaround_start'), "Found bait for all Wonderland creatures")
+            publish_team_round(team, Round.objects.get(url='mit'))
+    if metapuzzle.url == 'jabberwock':
+        publish_team_round(team, Round.objects.get(url='mit'))
     if metapuzzle.url in ['tea_party', 'white_queen', 'mock_turtle', 'caucus_race', 'knights', 'white_queen']: # 2014-specific
         if metapuzzle.url == 'tea_party':
             reason = "Solved the Mad Hatter's problem"
@@ -327,8 +329,8 @@ def metapuzzle_answer_incorrect(team, metapuzzle, answer):
     # publish the log
     publish_team_top(team)
 
-def mit_bait_incorrect(team, answer): # 2014-specific
-    team_log_mit_bait_incorrect(team, answer)
+def mit_meta_incorrect(team, answer): # 2014-specific
+    team_log_mit_meta_incorrect(team, answer)
     # publish the log
     publish_team_top(team)
 
@@ -366,6 +368,11 @@ def interaction_accomplished(team, interaction):
                 team_log(team, 'points', 'Consumed %d drink-me point(s) (Jumped into a rabbit hole)' % DRINK_COST[num_wh])
         else:
             team_log_hole_discovered_no_vial(team)
+        publish_team_round(team, Round.objects.get(url='mit'))
+    elif interaction.url == 'mit_runaround_start': # 2014-specific
+        release_interaction(team, Interaction.objects.get(url='mit_runaround'), 'You started the MIT runaround')
+        publish_team_round(team, Round.objects.get(url='mit'))
+    elif interaction.url == 'mit_runaround': # 2014-specific
         publish_team_round(team, Round.objects.get(url='mit'))
     elif interaction.url == 'white_queen_gift': # 2014-specific
         pwa = 'puzzle_with_answer_'

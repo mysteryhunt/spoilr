@@ -16,7 +16,6 @@ puzzle_answer_correct(t, p)
 puzzle_answer_correct(t, Puzzle.objects.get(url='safety_first'))
 puzzle_answer_correct(t, Puzzle.objects.get(url='build_your_own_sudoku'))
 puzzle_answer_correct(t, Puzzle.objects.get(url='bumblebee_tune_a'))
-puzzle_answer_correct(t, Puzzle.objects.get(url='the_despair_of_cooking'))
 puzzle_answer_correct(t, Puzzle.objects.get(url='zoinks'))
 puzzle_answer_correct(t, Puzzle.objects.get(url='opposites_are_not_downbeats'))
 puzzle_answer_correct(t, Puzzle.objects.get(url='how_puzzling_all_these_changes_are'))
@@ -28,16 +27,19 @@ m = Metapuzzle.objects.get(url='clubs')
 metapuzzle_answer_incorrect(t, m, 'NOPE')
 metapuzzle_answer_correct(t, m)
 
-# meet caterpillar
+interaction_accomplished(t, Interaction.objects.get(url='caterpillar'))
 # mock turtle released
 
-m = Metapuzzle.objects.get(url='spades')
-metapuzzle_answer_correct(t, m)
-m = Metapuzzle.objects.get(url='diamonds')
-metapuzzle_answer_correct(t, m)
+metapuzzle_answer_correct(t, Metapuzzle.objects.get(url='spades'))
+metapuzzle_answer_correct(t, Metapuzzle.objects.get(url='diamonds'))
 
-# meet dormouse
-# meet tweedles
+interaction_accomplished(t, Interaction.objects.get(url='dormouse'))
+interaction_accomplished(t, Interaction.objects.get(url='tweedles'))
+
+interaction_accomplished(t, Interaction.objects.get(url='mit_runaround_start'))
+interaction_accomplished(t, Interaction.objects.get(url='mit_runaround'))
+
+metapuzzle_answer_correct(t, Metapuzzle.objects.get(url='jabberwock'))
 
 puzzle_answer_correct(t, Puzzle.objects.get(url='find_your_way_across'))
 puzzle_answer_correct(t, Puzzle.objects.get(url='local_shorts'))

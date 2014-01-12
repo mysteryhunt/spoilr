@@ -119,7 +119,8 @@ class TopContext(Context):
     def round_obj(self, access):
         ret = {"round": access.round}
         if access.round.url == 'mit':
-            pass
+            if MetapuzzleSolve.objects.filter(team=access.team, metapuzzle__url='jabberwock').exists():
+                ret["solved"] = True
         else:
             if MetapuzzleSolve.objects.filter(team=access.team, metapuzzle__url=access.round.url).exists():
                 ret["solved"] = True
@@ -177,6 +178,15 @@ class RoundContext(TopContext): # todo don't inherit, it'll just slow things dow
             if count < 1:
                 self['vial1'] = min(DRINK_COST[0],max(0, points))
                 self['vial1x'] = self['vial1']*10/DRINK_COST[0]
+            if InteractionAccess.objects.filter(team=team, interaction__url='mit_runaround', accomplished=True).exists():
+                if MetapuzzleSolve.objects.filter(team=team, metapuzzle__url='jabberwock').exists():
+                    self['meta_status'] = 'solved'
+                else:
+                    self['meta_status'] = 'solving'
+            elif InteractionAccess.objects.filter(team=team, interaction__url='mit_runaround', accomplished=False).exists():
+                self['meta_status'] = 'runaround'
+            elif InteractionAccess.objects.filter(team=team, interaction__url='mit_runaround_start', accomplished=False).exists():
+                self['meta_status'] = 'runaround_start'
         if round.url == 'caucus_race': # 2014-specific
             birds = []
             for bird in Y2014CaucusAnswerData.objects.all():

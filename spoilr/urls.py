@@ -18,7 +18,7 @@ urlpatterns = patterns('',
 
     url(r'^submit/puzzle/(\w+)/$', submit_puzzle),
     url(r'^submit/meta/(\w+)/$', submit_metapuzzle),
-    url(r'^submit/bait/$', submit_mit_metapuzzle),
+    url(r'^submit/mit/$', submit_mit_metapuzzle),
     url(r'^submit/contact/$', submit_contact),
     url(r'^submit/pwa-garciaparra-url/$', submit_pwa_garciaparra_url),
 
