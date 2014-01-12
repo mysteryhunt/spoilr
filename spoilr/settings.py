@@ -192,5 +192,11 @@ LOGGING = {
             'level': 'INFO',
             'propagate': True,
         },
+	'spoilr': {
+	    'handlers': ['syslog'],
+            'level': 'INFO',
+#            'level': 'DEBUG',
+            'propagate': True,
+        },
     }
 }
