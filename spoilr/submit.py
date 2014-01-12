@@ -21,8 +21,8 @@ def cleanup_answer(answer):
 def compare_answers(a, b):
     return re.sub(r'[^A-Z0-9]', '', a.upper()) == re.sub(r'[^A-Z0-9]', '', b.upper())
 
-def check_bait(answer): # 2014-specific
-    for x in ['spades', 'clubs', 'diamonds']:
+def check_mit(answer): # 2014-specific
+    for x in ['spades', 'clubs', 'diamonds', 'jabberwock']:
         mp = Metapuzzle.objects.get(url=x)
         if compare_answers(answer, mp.answer):
             return mp
@@ -207,17 +207,17 @@ def submit_metapuzzle(request, metapuzzle_url):
     })
     return HttpResponse(template.render(context))
 
-def submit_mit_metapuzzle_answer(team, answer, phone): # 2014-specific
+def submit_mit_answer(team, answer, phone): # 2014-specific
     if len(answer) == 0:
         return
     for sub in Y2014MitMetapuzzleSubmission.objects.filter(team=team):
         if compare_answers(sub.answer, answer):
             return
-    system_log('submit-mit-bait', "%s submitted '%s'" % (team.name, answer), team=team)
+    system_log('submit-mit', "%s submitted '%s'" % (team.name, answer), team=team)
     try:
         Y2014MitMetapuzzleSubmission.objects.create(team=team, phone=phone, answer=answer).save()
     except IntegrityError:
-        logger.warning('integrity error adding bait submission - this is probably because the team submitted the same answer twice with very little time in between - team:%s answer:%s', team, answer)
+        logger.warning('integrity error adding mit submission - this is probably because the team submitted the same answer twice with very little time in between - team:%s answer:%s', team, answer)
         pass        
 
 def submit_mit_metapuzzle(request): # 2014-specific
@@ -235,14 +235,14 @@ def submit_mit_metapuzzle(request): # 2014-specific
         answer = cleanup_answer(request.POST["answer"])[:maxlen]
         phone = request.POST["phone"]
         phone = check_phone(team, phone)
-        submit_mit_metapuzzle_answer(team, answer, phone)
+        submit_mit_answer(team, answer, phone)
         q_full1 = count_queue(team) >= QUEUE_LIMIT
         q_full2 = Y2014MitMetapuzzleSubmission.objects.filter(team=team, resolved=False).count() >= PUZZLE_QUEUE_LIMIT
     answers = Y2014MitMetapuzzleSubmission.objects.filter(team=team)
     unresolved = answers.filter(resolved=False).exists()
     resolved = answers.filter(resolved=True).exists()
     solved = []
-    for x in ['spades', 'clubs', 'diamonds']:
+    for x in ['spades', 'clubs', 'diamonds', 'jabberwock']:
         for y in MetapuzzleSolve.objects.filter(team=team, metapuzzle__url=x):
             if x == 'spades':
                 message = 'The Dormouse took the bait'
@@ -250,6 +250,8 @@ def submit_mit_metapuzzle(request): # 2014-specific
                 message = 'The Caterpillar took the bait'
             elif x == 'diamonds':
                 message = 'Tweedledee and Tweedledum took the bait'
+            elif x == 'jabberwock':
+                message = 'You found the Jabberwock\'s secret message'
             solved.append({'meta': y.metapuzzle, 'message': message})
     context = RequestContext(request, {
         'team': team,
@@ -257,7 +259,8 @@ def submit_mit_metapuzzle(request): # 2014-specific
         'resolved': resolved,
         'unresolved': unresolved,
         'solved': solved,
-        'notdone': len(solved) != 3,
+        'bait_wait': len(solved) < 3,
+        'jabberwock_wait': InteractionAccess.objects.filter(team=team, interaction__url='mit_runaround', accomplished=True).exists() and len(solved) < 4,
         'q_full1': q_full1,
         'q_full2': q_full2,
         'q_lim1': QUEUE_LIMIT,
@@ -397,11 +400,11 @@ def queue(request):
                     p = Y2014MitMetapuzzleSubmission.objects.get(team=handler.team, resolved=False, id=key[2:])
                     p.resolved = True
                     system_log('queue-resolution', "'%s' (%s) resolved bait '%s' for team '%s'" % (handler.name, handler.email, p.answer, handler.team.name), team=handler.team)
-                    bait_meta = check_bait(p.answer)
-                    if bait_meta:
-                        metapuzzle_answer_correct(handler.team, bait_meta)
+                    mit_meta = check_mit(p.answer)
+                    if mit_meta:
+                        metapuzzle_answer_correct(handler.team, mit_meta)
                     else:
-                        mit_bait_incorrect(handler.team, p.answer)
+                        mit_meta_incorrect(handler.team, p.answer)
                     p.save()
                 if key[:2] == 'c_':
                     p = ContactRequest.objects.get(team=handler.team, resolved=False, id=key[2:])
@@ -462,8 +465,8 @@ def queue(request):
             add_phone(p.phone)
         mitmeta = [] # 2014-specific
         for p in Y2014MitMetapuzzleSubmission.objects.filter(team=team, resolved=False): # 2014-specific
-            bait_meta = check_bait(p.answer)
-            mitmeta.append({'submission': p, 'correct': not bait_meta is None})
+            mit_meta = check_mit(p.answer)
+            mitmeta.append({'submission': p, 'correct': not mit_meta is None})
             add_phone(p.phone)
         contact = []
         for p in ContactRequest.objects.filter(team=team, resolved=False):

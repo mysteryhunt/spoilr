@@ -6,7 +6,7 @@
       {% for m in solved %}
       {{ m.message }}: <b>{{ m.meta.answer }}</b><br>
       {% endfor %}
-      {% if notdone %}
+      {% if bait_wait or jabberwock_wait %}
       {% if q_full2 %}
       Your team has reached the per-item queue limit ({{ q_lim2 }}).<br/>
       Try again after those have been resolved.
@@ -16,7 +16,7 @@
       {% else %}
       <form action="." method="POST">
 	{% csrf_token %}
-	Bait: <input id="answer" type="text" name="answer" size="38" autofocus><br />
+	{% if bait_wait %}Bait{% else %}The Jabberwock's Secret Message{% endif %}: <input id="answer" type="text" name="answer" size="38" autofocus><br />
 	Phone: <select name="phone">
 	  {% for p in team.teamphone_set.all %}
 	  <option value="{{ p.phone }}">{{ p.phone }}</option>

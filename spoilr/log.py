@@ -46,8 +46,8 @@ def team_log_metapuzzle_solved(team, metapuzzle):
 def team_log_metapuzzle_incorrect(team, metapuzzle, answer):
     system_log(METAPUZZLE_INCORRECT, 'Incorrect answer "[[%s]]" for metapuzzle "%s"' % (answer, metapuzzle.name), team=team, object_id=metapuzzle.url)
 
-def team_log_mit_bait_incorrect(team, answer):
-    system_log(METAPUZZLE_INCORRECT, 'Incorrect bait "[[%s]]"' % answer, team=team)
+def team_log_mit_meta_incorrect(team, answer):
+    system_log(METAPUZZLE_INCORRECT, 'Incorrect mit submission "[[%s]]"' % answer, team=team)
 
 def team_log_interaction_accomplished(team, interaction):
     team_log(team, INTERACTION, 'Accomplished interaction "%s"' % interaction.name, object_id=interaction.url)
