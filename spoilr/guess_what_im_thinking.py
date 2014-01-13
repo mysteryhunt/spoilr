@@ -23,28 +23,44 @@ CORRECT = {20: 'WORDOFTENWITHNEITHER',
            23: 'JETSTARPACIFICSIATACODE',
            24: 'COMEDIANEDDIEOFTHERICHES'}
 
+SOLVED = {20: False,
+          21: False,
+          22: False,
+          23: False,
+          24: False}
+          
+
 
 def response(answer, form=True):
     """
-    Returns appropriate response for a given answer string.
+    Returns appropriate formatted response for a given answer string.
     If wrong length and form is True, returns None.
     """
-    guess = alphabetize(answer)
+    guess = alphanumeric(answer)
+    
+        
+#    guess = alphabetize(answer)
     length = len(guess)
     if 20 <= length <= 24:
-        return formatresponse(guess, processresponse(length, guess), False)
+        if re.compile("[0-9]").search(guess):
+            return formatresponse(guess, "<font color=darkred>Sorry, there was a problem.</font> You entered something that's the right length, but it contained at least one digit. Please try again with letters only and no digits.", False)
+        else:
+            return formatresponse(guess, processresponse(length, guess), False)
     else:
         if form:
             return None
         else:
-            return formatresponse(guess, "Sorry, you entered something that's the wrong length. If you were trying to submit a final answer for this puzzle, please do so <a href=\"%s\">here</a>." % MAIN, True)
+            return formatresponse(guess, "<font color=darkred>Sorry, you entered something that's the wrong length.</font> If you were trying to submit a final answer for this puzzle, please do so <a href=\"%s\">here</a>." % MAIN, True)
     
 def processresponse(length, ans):
+    """
+    Return response for answer of given length.
+    """
     cor = CORRECT[length]
     if ans == cor:
         return "<font color=darkgreen>Nice! You correctly guessed one of the things I'm thinking of!</font>"
 
-    response = "<font color=darkred>Sorry, that was not quite right.</font><br/><br/>\n"
+    response = "<font color=darkred>Sorry, that was not quite right.</font>\n"
 
     if length == 20:
         ret = monofmt(mastermind(ans, cor))
@@ -68,18 +84,28 @@ def formatresponse(guess, res, allfive):
     Formats entire response text.
     """
     fmtans = monofmt(guess)
-    if allfive:
-        blanktext = "I am thinking of these five things:"
-    else:
-        blanktext = "By the way, I'm also thinking of these four things:"
+#    if allfive:
+    blanktext = "I am thinking of these five things:"
+#    else:
+#        blanktext = "By the way, I'm also thinking of these four things:"
 
     length = len(guess)
     blanks = ""
     for i in range(20, 25):
-        if i != length:
-            blanks += "_ "*i + "<br/>\n"
+#        if i != length:
+        blanks += processblanks(i) + "<br/>\n"
 
-    return "<hr/>\n<h2>I see you tried to guess what I'm thinking.</h2>\n<p>This is what you guessed:<br/><br/>%s</p>\n<p>%s</p>\n<hr/><p>%s</p><p>%s</p><hr/><br/>\n" % (fmtans, res, blanktext, blanks)
+    return "<p>You tried to guess what I'm thinking! This is what you guessed:<br/><br/>%s</p>\n<p>%s</p>\n<p><i>%s</i><br/>%s</p><br/>\n" % (fmtans, res, blanktext, blanks)
+
+def processblanks(n):
+    """
+    Produces blanks.
+    """
+    if SOLVED[n]:
+        ret = "<b>" + ' '.join(list(CORRECT[n])) + "</b>"
+    else:
+        ret = '_ '*n
+    return "<tt>%s</tt>" % ret
 
 
 def responsefmt(text):
@@ -95,11 +121,11 @@ def monofmt(text):
     return "<big><b><tt>%s</tt></b></big>" % text
 
 
-def alphabetize(text):
+def alphanumeric(text):
     """
-    Strips non-alphabetic characters from text and converts to uppercase.
+    Strips non-alphanumeric characters from text and converts to uppercase.
     """
-    pattern = re.compile('[^A-Za-z]')
+    pattern = re.compile('[^A-Za-z0-9]')
     return re.sub(pattern, '', text).upper()
 
 def mastermind(ans, cor):
@@ -227,10 +253,13 @@ def pigpen(ans, cor):
     elif len(missing) == 0:
         ret += "Your guess has the following extra strokes that aren't in what I'm thinking of:<br/><br/>" + fmtex
     else:
-        ret += "Your guess has the following extra strokes that aren't in what I'm thinking of:<br/><br/>%s<br/><br/>It's also missing the following strokes that <i>are</i> in what I'm thinking of:<br/><br/>%s" % (fmtex, fmtmi)
+        ret += "Your guess has the following extra strokes that aren't in what I'm thinking of:<br/><br/><small>%s</small><br/><br/>It's also missing the following strokes that <i>are</i> in what I'm thinking of:<br/><br/><small>%s</small>" % (fmtex, fmtmi)
     return ret + "<br/><br/>Please keep guessing!"
 
 def pigpentransform(text):
+    """
+    Maps pigpen responses into displayed characters.
+    """
     ret = text
     ret = re.sub("A", "&#8213; ", ret)
     ret = re.sub("B", "| ", ret)
