@@ -26,6 +26,36 @@ if [ "$KILLMYSTERYHUNT" != "KILLMYSTERYHUNT" ]; then
 	exit 255
 fi
 
+echo "Creating /var/www/spoilr docroot..."
+mkdir -pv /var/www/spoilr
+chown www-data /var/www/spoilr
+chmod 755 /var/www/spoilr
+
+echo "Creating /var/www/spoilr symlinks into /home/hunt..."
+ln -s /home/hunt/spoilrdocroot/hq /var/www/spoilr/hq
+ln -s /home/hunt/spoilrdocroot/logout /var/www/spoilr/logout
+ln -s /home/hunt/spoilrdocroot/static /var/www/spoilr/static
+chown -R www-data /var/www/spoilr/hq
+chown -R www-data /var/www/spoilr/logout
+chown -R www-data /var/www/spoilr/static
+chmod -R 755 /var/www/spoilr/hq
+chmod -R 755 /var/www/spoilr/logout
+chmod -R 755 /var/www/spoilr/static
+
+echo "Creating /var/www/spoilr/teams and /var/www/spoilr/users"
+mkdir -p /var/www/spoilr/teams
+mkdir -p /var/www/spoilr/users
+chown www-data.www-data /var/www/spoilr/teams
+chown www-data.www-data /var/www/spoilr/users
+chmod 755 /var/www/spoilr/teams
+chmod 755 /var/www/spoilr/users
+
+echo "Creating other symlinks in /var/www/spoilr"
+ln -s /usr/lib/python2.7/dist-packages/django/contrib/admin/static/admin /var/www/spoilr/admin
+ln -s /usr/share/php-htmlpurifier /var/www/spoilr/htmlpurifier
+
+echo "Inserting /var/www/spoilr/.htaccess"
+cp -v /home/hunt/spoilrdocroot/.htaccess /var/www/spoilr/.htaccess
 
 #Inserting spoilr logrotate
 cp -v spoilr.logrotate /etc/logrotate.d/spoilr
