@@ -42,7 +42,7 @@ class Puzzle(models.Model):
     round = models.ForeignKey(Round)
     url = models.CharField(max_length=50, unique=True, verbose_name="id")
     name = models.CharField(max_length=200, unique=True)
-    answer = models.CharField(max_length=50)
+    answer = models.CharField(max_length=100)
     order = models.IntegerField()
 
     def __str__(self):
@@ -165,7 +165,7 @@ class PuzzleSubmission(models.Model):
     phone = models.CharField(max_length=100)
     puzzle = models.ForeignKey(Puzzle)
     timestamp = models.DateTimeField(default=datetime.now)
-    answer = models.CharField(max_length=50)
+    answer = models.CharField(max_length=100)
     resolved = models.BooleanField(default=False)
 
     def __str__(self):
@@ -352,7 +352,7 @@ class Y2014KnightsAnswerData(models.Model):
     COLOR_CHOICES = [('white', 'white'), ('red', 'red')]
     color = models.CharField(max_length=10, choices=COLOR_CHOICES)
     order = models.IntegerField()
-    answer = models.CharField(max_length=50)
+    answer = models.CharField(max_length=100)
 
     def __str__(self):
         return '%s %s %s' % (self.color, self.piece, self.answer)
@@ -364,7 +364,7 @@ class Y2014KnightsAnswerData(models.Model):
         verbose_name_plural = '2014 Knights answer data'
 
 class Y2014PartyAnswerData(models.Model):
-    answer = models.CharField(max_length=50)
+    answer = models.CharField(max_length=100)
     TYPE1_CHOICES = [('chair', 'chair'), ('cup', 'cup')]
     type1 = models.CharField(max_length=10, choices=TYPE1_CHOICES)
     TYPE2_CHOICES = [('n', 'n'), ('e', 'e'), ('s', 's'), ('w', 'w'), ('yule', 'yule'), ('moon', 'moon'), ('oolong', 'oolong')]
