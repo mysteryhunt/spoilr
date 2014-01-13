@@ -521,7 +521,7 @@ def queue(request):
     teams = []
 
     def team_obj(team, timestamp):
-        sec = (datetime.now() - timestamp).seconds
+        sec = (datetime.now() - timestamp).total_seconds()
         if not team.url in teams_dict:
             team_obj = {"team": team, "youngest": sec, "oldest": sec, "submissions": []}
             teams_dict[team.url] = team_obj
