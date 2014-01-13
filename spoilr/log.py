@@ -32,7 +32,7 @@ def team_log_puzzle_access(team, puzzle, reason):
     team_log(team, PUZZLE_ACCESS, 'Released puzzle "%s" (%s)' % (puzzle.name, reason), object_id=puzzle.url, link="/puzzle/%s/" % puzzle.url)
 
 def team_log_interaction_access(team, interaction, reason):
-    team_log(team, INTERACTION, 'Ready for interaction "%s" (%s)' % (interaction.name, reason), object_id=interaction.url, link="/interaction/%s/" % interaction.url)
+    team_log(team, INTERACTION, 'Ready for interaction "%s" (%s)' % (interaction.name, reason), object_id=interaction.url)
 
 def team_log_puzzle_solved(team, puzzle):
     team_log(team, PUZZLE_SOLVED, 'Solved puzzle "%s"' % puzzle.name, object_id=puzzle.url, link="/puzzle/%s" % puzzle.url)
