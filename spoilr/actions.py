@@ -47,6 +47,8 @@ def release_round(team, round, reason):
     else: # 2014-specific
         # it's a wonderland round, let's release some puzzles in it...
         count = WL_RELEASE_INIT
+        if round.url == 'knights':
+            count = 5
         for apuzzle in Puzzle.objects.filter(round=round):
             if count > 0:
                 release_initial(apuzzle)
