@@ -20,6 +20,23 @@ def TeamDict(team):
     q_submissions += ContactRequest.objects.filter(team=team, resolved=False).count()
     q_submissions += Y2014PwaGarciaparraUrlSubmission.objects.filter(team=team, resolved=False).count() # 2014-specific
     rounds = dict()
+    i_released = InteractionAccess.objects.filter(team=team).count()
+    i_solved = InteractionAccess.objects.filter(team=team, accomplished=True).count()
+    interactions = []
+    for interaction in Interaction.objects.all().order_by('id'):
+        released = False
+        solved = False
+        access = InteractionAccess.objects.filter(team=team, interaction=interaction)
+        if access.exists():
+            released = True
+            if access[0].solved:
+                solved = True
+        i = {
+            'interaction': interaction,
+            'released': released,
+            'solved': solved,
+        }
+        interactions.append(i)
     if True: # 2014-specific
         s_current = Y2014TeamData.objects.get(team=team).points
         r_released = 3
@@ -78,6 +95,7 @@ def TeamDict(team):
     return {
         'team': team,
         'rounds': rounds,
+        'interactions': interactions,
         'logn': logn,
         'log1': log1,
         's_current': s_current, # 2014-specific
@@ -87,6 +105,9 @@ def TeamDict(team):
         'p_solved': p_solved,
         'p_open': p_released - p_solved,
         'q_submissions': q_submissions,
+        'i_released': i_released,
+        'i_solved': i_solved,
+        'i_open': i_released - i_solved,
         }
 
 def all_teams_update():
@@ -111,6 +132,8 @@ def all_teams_update():
     p_total = Puzzle.objects.count()
     r_total = Round.objects.count()
     r_total = r_total - 1 + 3 # 2014-specific
+    i_total = Interaction.objects.count()
+    
     context = Context({
         'teams': teams,
         'q_total': q_total,
@@ -118,6 +141,7 @@ def all_teams_update():
         's_total': s_total, # 2014-specific
         'r_total': r_total,
         'p_total': p_total,
+        'i_total': i_total,
     })
     cache.set('all_teams', template.render(context), 60*60)
     logger.info("...done")
