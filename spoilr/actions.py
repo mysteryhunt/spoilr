@@ -251,15 +251,17 @@ def puzzle_answer_correct(team, puzzle):
             if td.humpty_pieces < 12:
                 td.humpty_pieces = td.humpty_pieces + 1
                 td.save()
-        # release more puzzles
-        count = WL_RELEASE_INCR
-        for apuzzle in Puzzle.objects.filter(round=puzzle.round):
-            if count > 0 and not PuzzleAccess.objects.filter(team=team, puzzle=apuzzle).exists():
-                try:
-                    release_puzzle(team, apuzzle, 'solved "%s"' % puzzle.name)
-                except:
-                    logger.exception('error releasing puzzle %s for standard release', apuzzle.url)
-                count = count - 1        
+        # release more puzzles (3 for every 2)
+        solved_count = PuzzleAccess.objects.filter(team=team, puzzle__round=puzzle.round, solved=True).count()
+        if solved_count % 2 == 0:
+            count = 3
+            for apuzzle in Puzzle.objects.filter(round=puzzle.round):
+                if count > 0 and not PuzzleAccess.objects.filter(team=team, puzzle=apuzzle).exists():
+                    try:
+                        release_puzzle(team, apuzzle, 'solved "%s"' % puzzle.name)
+                    except:
+                        logger.exception('error releasing puzzle %s for standard release', apuzzle.url)
+                    count = count - 1        
     publish_team_top(team)
     publish_team_round(team, puzzle.round)
 
