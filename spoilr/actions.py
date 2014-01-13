@@ -115,15 +115,15 @@ def grant_points(team, amount, reason): # 2014-specific
     # If they've got a full train ticket now...
     num_wc = 0
     for access in RoundAccess.objects.filter(team=team):
-        if access.round.url in ["caucus_race", "knights", "humpty_dumpty"]:
+        if access.round.url in ["knights", "caucus_race", "humpty_dumpty"]:
             num_wc = num_wc + 1
     if num_wc < 3 and td.points >= TRAIN_READY[num_wc]:
         # release the next wonderland round
         next_round = None
-        if not RoundAccess.objects.filter(team=team, round__url='caucus_race').exists():
-            next_round = 'caucus_race'
-        elif not RoundAccess.objects.filter(team=team, round__url='knights').exists():
+        if not RoundAccess.objects.filter(team=team, round__url='knights').exists():
             next_round = 'knights'
+        elif not RoundAccess.objects.filter(team=team, round__url='caucus_race').exists():
+            next_round = 'caucus_race'
         elif not RoundAccess.objects.filter(team=team, round__url='humpty_dumpty').exists():
             next_round = 'humpty_dumpty'
         release_round(team, Round.objects.get(url=next_round), 'You completed a train ticket, and gained access to another location.')
@@ -294,16 +294,16 @@ def metapuzzle_answer_correct(team, metapuzzle):
             publish_team_round(team, Round.objects.get(url='mit'))
     if metapuzzle.url == 'jabberwock':
         publish_team_round(team, Round.objects.get(url='mit'))
-    if metapuzzle.url in ['tea_party', 'white_queen', 'mock_turtle', 'caucus_race', 'knights', 'white_queen']: # 2014-specific
+    if metapuzzle.url in ['tea_party', 'white_queen', 'mock_turtle', 'knights', 'caucus_race', 'white_queen']: # 2014-specific
         if metapuzzle.url == 'tea_party':
             reason = "Solved the Mad Hatter's problem"
         elif metapuzzle.url == 'white_queen':
             reason = "Solved the White Queen's problem"
         elif metapuzzle.url == 'mock_turtle':
             reason = "Solved the Mock Turtle's problem"
-        elif metapuzzle.url == 'caucus_race':
-            reason = "Found a Weakness of the Beast"
         elif metapuzzle.url == 'knights':
+            reason = "Found a Weakness of the Beast"
+        elif metapuzzle.url == 'caucus_race':
             reason = "Found a Weakness of the Beast"
         elif metapuzzle.url == 'white_queen':
             reason = "Found a Weakness of the Beast"
