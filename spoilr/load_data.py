@@ -206,7 +206,8 @@ def this_team_can_see_everything(team):
     td.humpty_pieces = 12
     td.save()
     for interaction in Interaction.objects.all():
-        InteractionAccess.objects.create(team=team, interaction=interaction, accomplished=True).save()
+        if not InteractionAccess.objects.filter(team=team, interaction=interaction).exists():
+            InteractionAccess.objects.create(team=team, interaction=interaction, accomplished=True).save()
     for round in Round.objects.all():
         if not RoundAccess.objects.filter(team=team, round=round).exists():
             RoundAccess.objects.create(team=team, round=round).save()
