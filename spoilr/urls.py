@@ -17,6 +17,7 @@ urlpatterns = patterns('',
     url(r'^admin/', include(admin.site.urls)),
 
     url(r'^submit/puzzle/(\w+)/$', submit_puzzle),
+    url(r'^submit/survey/(\w+)/$', submit_survey),
     url(r'^submit/meta/(\w+)/$', submit_metapuzzle),
     url(r'^submit/mit/$', submit_mit_metapuzzle),
     url(r'^submit/contact/$', submit_contact),

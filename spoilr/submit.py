@@ -79,45 +79,30 @@ def submit_puzzle(request, puzzle_url):
     q_full2 = PuzzleSubmission.objects.filter(team=team, puzzle=puzzle, resolved=False).count() >= PUZZLE_QUEUE_LIMIT
     template = loader.get_template('submit/puzzle.html') 
     if request.method == "POST":
-        if "survey" in request.POST:
-            solved = PuzzleAccess.objects.get(team=team, puzzle=puzzle).solved
-            if not solved:
-                logger.exception('team %s submitted survey for puzzle %s, but has not solved it - shenanigans?', team, puzzle)
-                return HttpResponseBadRequest('cannot submit survey until the puzzle is solved')
-            maxlen = PuzzleSurvey._meta.get_field('comment').max_length
-            comment = request.POST["comment"][:maxlen]
-            fun = request.POST["fun"]
-            if fun not in ['1','2','3','4','5']:
-                fun = None
-            difficulty = request.POST["difficulty"]
-            if difficulty not in ['1','2','3','4','5']:
-                difficulty = None
-            PuzzleSurvey.objects.create(team=team, puzzle=puzzle, fun=fun, difficulty=difficulty, comment=comment).save()
-        else:
-            if puzzle.url == 'guess_what_im_thinking':
-                if 'guess_what_im_thinking' in request.POST:
-                    gwit = guess_what_im_thinking.response(request.POST["guess_what_im_thinking"], False)
+        if puzzle.url == 'guess_what_im_thinking':
+            if 'guess_what_im_thinking' in request.POST:
+                gwit = guess_what_im_thinking.response(request.POST["guess_what_im_thinking"], False)
+                template = loader.get_template('submit/guess_what_im_thinking.html')
+                context = RequestContext(request, {
+                    'response': gwit
+                })
+                return HttpResponse(template.render(context))
+            else:
+                gwit = guess_what_im_thinking.response(request.POST["answer"])
+                if gwit:
                     template = loader.get_template('submit/guess_what_im_thinking.html')
                     context = RequestContext(request, {
                         'response': gwit
                     })
                     return HttpResponse(template.render(context))
-                else:
-                    gwit = guess_what_im_thinking.response(request.POST["answer"])
-                    if gwit:
-                        template = loader.get_template('submit/guess_what_im_thinking.html')
-                        context = RequestContext(request, {
-                            'response': gwit
-                        })
-                        return HttpResponse(template.render(context))
-            if not q_full1 and not q_full2:
-                maxlen = Puzzle._meta.get_field('answer').max_length
-                answer = cleanup_answer(request.POST["answer"])[:maxlen]
-                phone = request.POST["phone"]
-                phone = check_phone(team, phone)
-                submit_puzzle_answer(team, puzzle, answer, phone)
-                q_full1 = count_queue(team) >= QUEUE_LIMIT
-                q_full2 = PuzzleSubmission.objects.filter(team=team, puzzle=puzzle, resolved=False).count() >= PUZZLE_QUEUE_LIMIT
+        if not q_full1 and not q_full2:
+            maxlen = Puzzle._meta.get_field('answer').max_length
+            answer = cleanup_answer(request.POST["answer"])[:maxlen]
+            phone = request.POST["phone"]
+            phone = check_phone(team, phone)
+            submit_puzzle_answer(team, puzzle, answer, phone)
+            q_full1 = count_queue(team) >= QUEUE_LIMIT
+            q_full2 = PuzzleSubmission.objects.filter(team=team, puzzle=puzzle, resolved=False).count() >= PUZZLE_QUEUE_LIMIT
     solved = PuzzleAccess.objects.get(team=team, puzzle=puzzle).solved
     answers = PuzzleSubmission.objects.filter(team=team, puzzle=puzzle)
     unresolved = answers.filter(resolved=False).exists()
@@ -143,6 +128,48 @@ def submit_puzzle(request, puzzle_url):
         'q_full2': q_full2,
         'q_lim1': QUEUE_LIMIT,
         'q_lim2': PUZZLE_QUEUE_LIMIT,
+    })
+    return HttpResponse(template.render(context))
+
+def submit_survey(request, puzzle_url):
+    username = request.META['REMOTE_USER']
+    try:
+        team = Team.objects.get(username=username)
+    except:
+        logger.exception('cannot find team for user %s', username)
+        return HttpResponseBadRequest('cannot find team for user '+username)
+    try:
+        puzzle = Puzzle.objects.get(url=puzzle_url)
+    except:
+        logger.exception('cannot find puzzle %s', puzzle_url)
+        return HttpResponseBadRequest('cannot find puzzle '+puzzle_url)
+    try:
+        access = PuzzleAccess.objects.get(team=team, puzzle=puzzle)
+    except:
+        logger.exception('team %s submitted for puzzle %s, but does not have access to it - shenanigans?', team, puzzle)
+        return HttpResponseBadRequest('cannot find puzzle '+puzzle_url)
+    if not access.solved:
+        logger.exception('team %s requesting survey for puzzle %s, but has not solved it - shenanigans?', team, puzzle)
+        return HttpResponseBadRequest('cannot request survey until the puzzle is solved')
+    template = loader.get_template('submit/survey.html') 
+    complete = False
+    if request.method == "POST":
+        maxlen = PuzzleSurvey._meta.get_field('comment').max_length
+        comment = request.POST["comment"][:maxlen]
+        fun = request.POST["fun"]
+        if fun not in ['1','2','3','4','5']:
+            fun = None
+        difficulty = request.POST["difficulty"]
+        if difficulty not in ['1','2','3','4','5']:
+            difficulty = None
+        PuzzleSurvey.objects.create(team=team, puzzle=puzzle, fun=fun, difficulty=difficulty, comment=comment).save()
+        complete = True
+    commentlen = PuzzleSurvey._meta.get_field('comment').max_length
+    context = RequestContext(request, {
+        'team': team,
+        'puzzle': puzzle,
+        'commentlen': commentlen,
+        'complete': complete,
     })
     return HttpResponse(template.render(context))
 
