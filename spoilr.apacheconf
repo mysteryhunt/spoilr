@@ -5,8 +5,11 @@
         ServerAdmin webmaster@localhost
 
 	DocumentRoot /var/www/spoilr
+
         RewriteLog /var/log/apache2/rewrite.log
 	RewriteLogLevel 0
+
+	ErrorDocument 404 /static/404.html
 
 	<Directory />
 		Options FollowSymLinks
