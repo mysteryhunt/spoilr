@@ -19,6 +19,8 @@ puzzle_answer_correct(t, Puzzle.objects.get(url='bumblebee_tune_a'))
 puzzle_answer_correct(t, Puzzle.objects.get(url='zoinks'))
 puzzle_answer_correct(t, Puzzle.objects.get(url='opposites_are_not_downbeats'))
 puzzle_answer_correct(t, Puzzle.objects.get(url='how_puzzling_all_these_changes_are'))
+# 14 points: filled vial 1
+
 puzzle_answer_correct(t, Puzzle.objects.get(url='ring_around_the_music'))
 puzzle_answer_correct(t, Puzzle.objects.get(url='down_the_rabbit_hole_2'))
 puzzle_answer_correct(t, Puzzle.objects.get(url='a_meta_puzzle'))
@@ -41,7 +43,7 @@ interaction_accomplished(t, Interaction.objects.get(url='mit_runaround'))
 
 metapuzzle_answer_correct(t, Metapuzzle.objects.get(url='jabberwock'))
 
-puzzle_answer_correct(t, Puzzle.objects.get(url='find_your_way_across'))
+puzzle_answer_correct(t, Puzzle.objects.get(url='cut_and_tape'))
 puzzle_answer_correct(t, Puzzle.objects.get(url='local_shorts'))
 puzzle_answer_correct(t, Puzzle.objects.get(url='sneaky_fox'))
 

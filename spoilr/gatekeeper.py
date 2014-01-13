@@ -15,6 +15,7 @@ def gatekeeper_view(request):
         last_points = recent_points[0]
     context = RequestContext(request, {
         'interactions': Interaction.objects.all(),
+        'events': Puzzle.objects.filter(round__url='events').order_by('order'),
         'last_points': last_points
     })
     return HttpResponse(template.render(context))
@@ -53,6 +54,26 @@ def gatekeeper_interaction_view(request):
             'teams_not_ready': teams_not_ready,
             'teams_ready': teams_ready,
             'teams_accomplished': teams_accomplished,
+        })
+    return HttpResponse(template.render(context))
+
+def gatekeeper_event_view(request):
+    if request.method != 'POST' or 'event' not in request.POST:
+        return HttpResponseBadRequest()
+    event_url = request.POST['event']
+    event = Puzzle.objects.get(url=event_url)
+    template = loader.get_template('gatekeeper/event.html') 
+    if 'go' in request.POST:
+        system_log('admin-event', 'Releasing event "%s" (because it has occurred)' % (event.name))
+        for team in Team.objects.all():
+            release_puzzle(team, event, 'This event has occurred')
+        context = RequestContext(request, {
+            'event': event,
+            'done': True,
+        })
+    else:
+        context = RequestContext(request, {
+            'event': event,
         })
     return HttpResponse(template.render(context))
 

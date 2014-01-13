@@ -30,4 +30,5 @@ urlpatterns = patterns('',
     url(r'^hq/gatekeeper/$', gatekeeper_view),
     url(r'^hq/gatekeeper/interaction/$', gatekeeper_interaction_view),
     url(r'^hq/gatekeeper/points/$', gatekeeper_points_view),
+    url(r'^hq/gatekeeper/event/$', gatekeeper_event_view),
 )

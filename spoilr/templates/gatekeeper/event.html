@@ -1,0 +1,27 @@
+<html>
+  <head>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+  </head>
+  <body>
+    {% if done %}
+    Okay, the event '{{ event.name }}' has been released to all teams.
+    <br><br>
+    <a href="..">Back to the admin page</a>
+    {% else %}
+    <h3>{{ event.name }}</h3>
+    <p>
+      <form id="form" action="." method="POST">
+	{% csrf_token %}
+	<input type="hidden" name="go" value="true" />
+	<input type="hidden" name="event" value="{{event.url}}" />
+	<input type="submit" value="'{{event.name}}' has occurred, release it to all teams." />
+	Or go <a href="..">back to the admin page</a>
+      </form>
+      <script type="text/javascript">
+	$('#form').bind('submit', function(e) {
+          $(this).find('input:submit').attr('disabled', 'disabled');
+        });
+      </script>
+      {% endif %}
+  </body>
+</html>

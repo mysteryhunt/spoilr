@@ -33,5 +33,17 @@
       {% else %}
       <em>&nbsp;&nbsp;&nbsp;This hasn't happened yet</em>
       {% endif %}
+    <p>
+      <form action="event/" method="POST" style="display: inline;">
+	{% csrf_token %}
+	<b>Event:</b> Release event 
+	<select name="event">
+	  {% for e in events %}
+	  <option value="{{e.url}}">{{e.name}}</option>
+	  {% endfor %}
+	</select>
+	to all teams (do this only <em>after</em> the event occurs)
+	<input type="submit" value="Go" />
+      </form>
   </body>
 </html>
