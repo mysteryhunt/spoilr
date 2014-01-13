@@ -283,7 +283,7 @@ class PuzzleContext(RoundContext): # todo don't inherit, it'll just slow things 
                 try:
                     self['stage2url'] = Y2014PwaGarciaparraUrlSubmission.objects.filter(team=team).order_by('-id')[0].url
                 except:
-                    self['stage2url'] = '???'                
+                    self['stage2url'] = '???'
 
 def publish_dir(context, source_path, dest_path, root_path, except_for=[]):
     for dirpath, dirnames, filenames in os.walk(source_path):
