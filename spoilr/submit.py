@@ -2,6 +2,7 @@ from django.http import HttpResponse, HttpResponseBadRequest
 from django.template import RequestContext, loader
 from django.shortcuts import redirect
 from django.db import IntegrityError
+from django.db.models import Q
 
 import re
 import datetime
@@ -499,7 +500,7 @@ def queue(request):
 
         return HttpResponse(template.render(context))
 
-    t_total = Team.objects.count()
+    t_total = Team.objects.filter(~Q(url='hunt_hq')).count()
     q_total = PuzzleSubmission.objects.filter(resolved=False).count()
     q_total += MetapuzzleSubmission.objects.filter(resolved=False).count()
     q_total += Y2014MitMetapuzzleSubmission.objects.filter(resolved=False).count() # 2014-specific
