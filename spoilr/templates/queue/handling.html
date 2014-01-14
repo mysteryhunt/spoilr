@@ -68,10 +68,11 @@
         }, 1000);
       </script>
       <br />
+      <iframe name="call_frame" src="javascript: void 0" style="position: absolute; visibility: hidden;"></iframe>
       <div>
 	Phone numbers in this set of submissions: ({% if handler.hq_phone %}click one of these and wait{% else %}call one or more of these{% endif %})<br />
 	{% for p in phones_now %}
-	&nbsp;&nbsp;&nbsp;{% if handler.hq_phone %}<a href="http://photostein.xvm.mit.edu/call/?from={{ handler.hq_phone|urlencode:"" }}&to={{ p|urlencode:"" }}">{% endif %}<b>{{ p }}</b>{% if handler.hq_phone %}</a>{% endif %}<br />
+	&nbsp;&nbsp;&nbsp;{% if handler.hq_phone %}<a target="call_frame" href="http://photostein.xvm.mit.edu/call/?from={{ handler.hq_phone|urlencode:"" }}&to={{ p|urlencode:"" }}">{% endif %}<b>{{ p }}</b>{% if handler.hq_phone %}</a>{% endif %}<br />
 	{% endfor %}
 	{% if phones_other %}
 	Other phones for this team: (just in case)<br />
