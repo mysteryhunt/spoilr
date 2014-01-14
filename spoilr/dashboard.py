@@ -14,6 +14,7 @@ def TeamDict(team):
     log1 = logn[0]
     p_released = PuzzleAccess.objects.filter(team=team).count()
     p_solved = PuzzleAccess.objects.filter(team=team, solved=True).count()
+    p_surveyed = PuzzleSurvey.objects.filter(team=team).values('puzzle__url').distinct().count()
     q_submissions = PuzzleSubmission.objects.filter(team=team, resolved=False).count()
     q_submissions += MetapuzzleSubmission.objects.filter(team=team, resolved=False).count()
     q_submissions += Y2014MitMetapuzzleSubmission.objects.filter(team=team, resolved=False).count() # 2014-specific
@@ -108,6 +109,7 @@ def TeamDict(team):
         'p_released': p_released,
         'p_solved': p_solved,
         'p_open': p_released - p_solved,
+        'p_surveyed': p_surveyed,
         'q_submissions': q_submissions,
         'i_released': i_released,
         'i_solved': i_solved,
@@ -197,10 +199,12 @@ def all_puzzles_update():
             p_released += 1
         if solved > 0:
             p_solved += 1
+        surveys = PuzzleSurvey.objects.filter(~Q(team__url='hunt_hq') & Q(puzzle=mitdata.puzzle)).values('team__url').distinct().count()
         p = {
             'puzzle': mitdata.puzzle,
             'info': mitdata.card.name,
             'first': first_release,
+            'surveys': surveys,
             'released': released,
             'releasedp': percent(released, t_total),
             'solved': solved,
@@ -221,6 +225,7 @@ def all_puzzles_update():
             pf = PuzzleAccess.objects.filter(~Q(team__url='hunt_hq') & Q(puzzle=puzzle))
             released = pf.count()
             solved = PuzzleAccess.objects.filter(~Q(team__url='hunt_hq') & Q(puzzle=puzzle) & Q(solved=True)).count()
+            surveys = PuzzleSurvey.objects.filter(~Q(team__url='hunt_hq') & Q(puzzle=mitdata.puzzle)).values('team__url').distinct().count()
             info = ''
             if round.url == 'tea_party':
                 rounddata = Y2014PartyAnswerData.objects.get(answer=puzzle.answer)
@@ -249,6 +254,7 @@ def all_puzzles_update():
                 'puzzle': puzzle,
                 'info': info,
                 'first': first_release,
+                'surveys': surveys,
                 'released': released,
                 'releasedp': percent(released, t_total),
                 'solved': solved,

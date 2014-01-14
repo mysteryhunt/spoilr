@@ -56,6 +56,7 @@
 	  <th class="f">First Release</th>
 	  <th colspan="5">Releases</th>
 	  <th colspan="5">Solves</th>
+	  <th>Surveys</th>
 	</tr>
 	{% for meta in metas %}
 	<tr style="border-top: 1px solid black;">
@@ -76,6 +77,8 @@
 	  <td class="d">{{ meta.released }}</td>
 	  <td class="p">{% if meta.solvedp != '-' %}{{ meta.solvedp }}%{% else %}-{% endif %}</td>
           <td class="g">{% if meta.solvedp != '-' %}<div class="gb" style="width: {{ meta.solvedp }}px"></div>{% else %}-{% endif %}</td>
+	  
+	  <td></td>
 
 	</tr>
 	{% for puzzle in meta.puzzles %}
@@ -101,11 +104,13 @@
 	  <td class="p">{% if puzzle.solvedp != '-' %}{{ puzzle.solvedp }}%{% else %}-{% endif %}</td>
           <td class="g">{% if puzzle.solvedp != '-' %}<div class="gb" style="width: {{ puzzle.solvedp }}px"></div>{% else %}-{% endif %}</td>
 
+	  <td>{{ puzzle.surveys }}</td>
+
 	</tr>
 	{% endfor %}
 	{% endfor %}
 	<tr style="border-top: 1px solid black;">
-	  <td colspan="13">
+	  <td colspan="14">
 	    <b>Interactions</b>
 	  </td>
 	</tr>
@@ -131,6 +136,8 @@
 	  <td class="d">{{ interaction.released }}</td>
 	  <td class="p">{% if interaction.solvedp != '-' %}{{ interaction.solvedp }}%{% else %}-{% endif %}</td>
           <td class="g">{% if interaction.solvedp != '-' %}<div class="gb" style="width: {{ interaction.solvedp }}px"></div>{% else %}-{% endif %}</td>
+
+	  <td></td>
 
 	</tr>
 	{% endfor %}

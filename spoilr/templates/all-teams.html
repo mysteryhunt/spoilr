@@ -23,7 +23,13 @@
 	{{ p_total }} puzzles,
 	{{ i_total }} interactions<br />
 	{{ i_pending }} pending interactions among {{ i_teams }} teams //
-	{{ q_total }} queue entries among {{ q_teams }} teams
+	{{ q_total }} queue entries among {{ q_teams }} teams<br />
+	R=Rounds (solved/released/total)
+	P=Puzzles (solved/released/total (open))
+	I=Interactions pending
+	S=Score (gained/target)
+	Q=Queue entries
+	V=Puzzles surveyed
       </div>
       {% for team in teams %}
       <div id="team_{{ team.team.url }}" class="team" style="border-top: 1px solid black; border-radius 5px; padding: 3px;">
@@ -53,6 +59,7 @@
 	      I:<b title="Interactions Pending">{{ team.i_open }}</b>
 	      S:<b title="Points Gained">{{ team.s_current }}</b>/{{ s_total }}
 	      Q:<b title="Entries in Queue">{{ team.q_submissions }}</b>
+	      V:<b title="Puzzles Surveyed">{{ team.p_surveyed }}</b>
 	    </td>
 	  </tr>
 	  <tr>
