@@ -312,7 +312,7 @@ def submit_pwa_garciaparra_url(request): # 2014-specific
     except:
         logger.exception('cannot find team for user %s', username)
         return HttpResponseBadRequest('cannot find team for user '+username)
-    ia = InteractionAccess.objects.get(team=team, url='pwa_garciaparra_url')
+    ia = InteractionAccess.objects.get(team=team, interaction__url='pwa_garciaparra_url')
     if ia.accomplished:
         return
     q_full1 = count_queue(team) >= QUEUE_LIMIT
