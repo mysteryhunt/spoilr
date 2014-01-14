@@ -124,14 +124,14 @@
 	  <tr id="team_log1_{{ team.team.url }}" class="log1">
 	    <td colspan="6">
 	      Last Log Entry:
-	      {{ team.log1.timestamp|date:'Y-m-d H:i:s' }}: {{ team.log1.message }}
+	      {{ team.log1.timestamp|date:'D H:i:s' }}: {{ team.log1.message }}
 	    </td>
 	  </tr>
 	  <tr id="team_logn_{{ team.team.url }}" class="logn" style="display: none;">
 	    <td colspan="6">
 	      Recent Log Entries:<br />
 	      {% for log in team.logn %}
-	      {{ log.timestamp|date:'Y-m-d H:i:s' }}: {{ log.message }}<br />
+	      {{ log.timestamp|date:'D H:i:s' }}: {{ log.message }}<br />
 	      {% endfor %}
 	    </td>
 	  </tr>

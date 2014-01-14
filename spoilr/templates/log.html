@@ -33,7 +33,7 @@
       <th>Object ID
     </tr>
     {% for e in entries %}
-    <tr><td>{{ e.timestamp|date:'Y-m-d H:i:s' }}
+    <tr><td>{{ e.timestamp|date:'D H:i:s' }}
       <td>{{ e.event_type }}
       <td>{{ e.message }}
       <td>{{ e.team }}

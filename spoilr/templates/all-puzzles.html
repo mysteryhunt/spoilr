@@ -7,6 +7,7 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
     <style type="text/css">
       th { text-align: left; }
+      .f { padding: 0px 5px; }
       .n { text-align: right; }
       .d { text-align: right; }
       .p { text-align: right; padding: 0px 5px; }
@@ -48,6 +49,7 @@
 	<tr>
 	  <th>Name</th>
 	  <th>Info</th>
+	  <th class="f">First Release</th>
 	  <th colspan="5">Releases</th>
 	  <th colspan="5">Solves</th>
 	</tr>
@@ -56,6 +58,8 @@
 	  <td colspan="2">
 	    <b>{{ meta.meta.name }}</b>
 	  </td>
+
+	  <td class="f">{{ meta.first|date:'D H:i' }}</td>
 
 	  <td class="n">{{ meta.released }}</td>
 	  <td>/</td>
@@ -79,6 +83,8 @@
 	    {{ puzzle.info }}
 	  </td>
 
+	  <td class="f">{{ puzzle.first|date:'D H:i' }}</td>
+
 	  <td class="n">{{ puzzle.released }}</td>
 	  <td>/</td>
 	  <td class="d">{{ t_total }}</td>
@@ -94,10 +100,37 @@
 	</tr>
 	{% endfor %}
 	{% endfor %}
+	<tr style="border-top: 1px solid black;">
+	  <td colspan="13">
+	    <b>Interactions</b>
+	  </td>
+	</tr>
+	{% for interaction in interactions %}
+	<tr class={% if interaction.released %}{% if interaction.solvedp != '-' %}{% if interaction.solvedp >= 20 %}p_good{% else %}p_meh{% endif %}{% else %}p_nodata{% endif %}{% else %}p_unreleased{% endif %}>
+	  <td>
+	    {{ interaction.interaction.name|truncatechars:40 }}
+	  </td>
+	  <td>
+	    {{ interaction.info }}
+	  </td>
+
+	  <td></td>
+
+	  <td class="n">{{ interaction.released }}</td>
+	  <td>/</td>
+	  <td class="d">{{ t_total }}</td>
+	  <td class="p">{% if interaction.releasedp != '-' %}{{ interaction.releasedp }}%{% else %}-{% endif %}</td>
+          <td class="g">{% if interaction.releasedp != '-' %}<div class="gb" style="width: {{ interaction.releasedp }}px"></div>{% else %}-{% endif %}</td>
+
+	  <td class="n">{{ interaction.solved }}</td>
+	  <td>/</td>
+	  <td class="d">{{ interaction.released }}</td>
+	  <td class="p">{% if interaction.solvedp != '-' %}{{ interaction.solvedp }}%{% else %}-{% endif %}</td>
+          <td class="g">{% if interaction.solvedp != '-' %}<div class="gb" style="width: {{ interaction.solvedp }}px"></div>{% else %}-{% endif %}</td>
+
+	</tr>
+	{% endfor %}
       </table>
     </div>
-    <script type="text/javascript">
-      $(document).tooltip();
-    </script>
   </body>
 </html>

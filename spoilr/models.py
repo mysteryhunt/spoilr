@@ -137,6 +137,7 @@ class InteractionAccess(models.Model):
 class RoundAccess(models.Model):
     team = models.ForeignKey(Team)
     round = models.ForeignKey(Round)
+    timestamp = models.DateTimeField(default=datetime.now)
 
     def __str__(self):
         return '%s can see %s' % (str(self.team), str(self.round))
@@ -149,6 +150,7 @@ class PuzzleAccess(models.Model):
     team = models.ForeignKey(Team)
     puzzle = models.ForeignKey(Puzzle)
     solved = models.BooleanField(default=False)
+    timestamp = models.DateTimeField(default=datetime.now)
 
     def __str__(self):
         s = 'can see'

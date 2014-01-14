@@ -188,15 +188,19 @@ def all_puzzles_update():
         }
         metas.append(m)
     for mitdata in Y2014MitPuzzleData.objects.all().order_by('id'): # 2014-specific
-        released = PuzzleAccess.objects.filter(~Q(team__url='hunt_hq') & Q(puzzle=mitdata.puzzle)).count()
+        pf = PuzzleAccess.objects.filter(~Q(team__url='hunt_hq') & Q(puzzle=mitdata.puzzle))
+        released = pf.count()
         solved = PuzzleAccess.objects.filter(~Q(team__url='hunt_hq') & Q(puzzle=mitdata.puzzle) & Q(solved=True)).count()
+        first_release = None
         if released > 0:
+            first_release = pf.order_by('id')[0].timestamp
             p_released += 1
         if solved > 0:
             p_solved += 1
         p = {
             'puzzle': mitdata.puzzle,
             'info': mitdata.card.name,
+            'first': first_release,
             'released': released,
             'releasedp': percent(released, t_total),
             'solved': solved,
@@ -214,7 +218,8 @@ def all_puzzles_update():
         meta = Metapuzzle.objects.get(url=round.url)
         puzzles = []
         for puzzle in Puzzle.objects.filter(round=round).order_by('id'):
-            released = PuzzleAccess.objects.filter(~Q(team__url='hunt_hq') & Q(puzzle=puzzle)).count()
+            pf = PuzzleAccess.objects.filter(~Q(team__url='hunt_hq') & Q(puzzle=puzzle))
+            released = pf.count()
             solved = PuzzleAccess.objects.filter(~Q(team__url='hunt_hq') & Q(puzzle=puzzle) & Q(solved=True)).count()
             info = ''
             if round.url == 'tea_party':
@@ -234,32 +239,54 @@ def all_puzzles_update():
             if round.url == 'knights':
                 rounddata = Y2014KnightsAnswerData.objects.get(answer=puzzle.answer)
                 info = '%s %s' % (rounddata.color, rounddata.piece)
+            first_release = None
             if released > 0:
                 p_released += 1
+                first_release = pf.order_by('id')[0].timestamp
             if solved > 0:
                 p_solved += 1
             p = {
                 'puzzle': puzzle,
                 'info': info,
+                'first': first_release,
                 'released': released,
                 'releasedp': percent(released, t_total),
                 'solved': solved,
                 'solvedp': percent(solved, released),
             }
             puzzles.append(p)
-        released = RoundAccess.objects.filter(~Q(team__url='hunt_hq') & Q(round=round)).count()
+        rf = RoundAccess.objects.filter(~Q(team__url='hunt_hq') & Q(round=round))
+        released = rf.count()
         solved = MetapuzzleSolve.objects.filter(~Q(team__url='hunt_hq') & Q(metapuzzle=meta)).count()
+        first_release = None
+        if released > 0:
+            first_release = rf.order_by('id')[0].timestamp
         m = {
             'meta': meta,
             'puzzles': puzzles,
+            'first': first_release,
             'released': released,
             'releasedp': percent(released, t_total),
             'solved': solved,
             'solvedp': percent(solved, released),
         }
         metas.append(m)
+    interactions = []
+    for interaction in Interaction.objects.all().order_by('id'):
+        released = InteractionAccess.objects.filter(~Q(team__url='hunt_hq') & Q(interaction=interaction)).count()
+        solved = InteractionAccess.objects.filter(~Q(team__url='hunt_hq') & Q(interaction=interaction) & Q(accomplished=True)).count()
+        i = {
+            'interaction': interaction,
+            'released': released,
+            'releasedp': percent(released, t_total),
+            'solved': solved,
+            'solvedp': percent(solved, released),
+        }
+        interactions.append(i)
+        
     context = Context({
         'metas': metas,
+        'interactions': interactions,
         't_total': t_total,
         'p_total': p_total,
         'p_total4': p_total * 4,
