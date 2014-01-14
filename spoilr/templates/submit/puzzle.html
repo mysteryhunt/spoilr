@@ -8,7 +8,7 @@
       Team: {{ team.name }}<br>
       Puzzle: {{ puzzle.name }}<br>
       {% if solved %}
-      Solved! Answer: <b>{{ puzzle.answer }}</b><br>
+      Solved! {% if wq_answer %}Title{% else %}Answer{% endif %}: <b>{{ puzzle.answer }}</b><br>
       {% elif q_full2 %}
       Your team has reached the per-item queue limit ({{ q_lim2 }}).<br/>
       Try again after those have been resolved.
