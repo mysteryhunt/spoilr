@@ -16,7 +16,7 @@
       {% else %}
       <form action="." method="POST">
 	{% csrf_token %}
-	{% if bait_wait %}Bait{% else %}The Jabberwock's Secret Message{% endif %}: <input id="answer" type="text" name="answer" size="38" autofocus><br />
+	{% if bait_wait %}Bait{% else %}The Jabberwock's Secret Message{% endif %}: <input id="answer" type="text" name="answer" size="38" autocomplete="off" autofocus><br />
 	Phone: <select name="phone">
 	  {% for p in team.teamphone_set.all %}
 	  <option value="{{ p.phone }}">{{ p.phone }}</option>

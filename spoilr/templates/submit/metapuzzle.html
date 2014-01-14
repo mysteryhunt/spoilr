@@ -15,7 +15,7 @@
       {% else %}
       <form action="." method="POST">
 	{% csrf_token %}
-	{% if metapuzzle.url == "white_queen" or metapuzzle.url == "tea_party" or metapuzzle.url == "mock_turtle" %}Solution{% elif metapuzzle.url == "caucus_race" or metapuzzle.url == "knights" or metapuzzle.url == "humpty_dumpty" %}Weakness:{% else %}Answer{% endif %}: <input id="answer" type="text" name="answer" size="38" autofocus><br />
+	{% if metapuzzle.url == "white_queen" or metapuzzle.url == "tea_party" or metapuzzle.url == "mock_turtle" %}Solution{% elif metapuzzle.url == "caucus_race" or metapuzzle.url == "knights" or metapuzzle.url == "humpty_dumpty" %}Weakness:{% else %}Answer{% endif %}: <input id="answer" type="text" name="answer" size="38" autocomplete="off" autofocus><br />
 	Phone: <select name="phone">
 	  {% for p in team.teamphone_set.all %}
 	  <option value="{{ p.phone }}">{{ p.phone }}</option>

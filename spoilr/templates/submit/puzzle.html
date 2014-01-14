@@ -19,7 +19,7 @@
       <form action="." method="POST">
 	{% csrf_token %}{% if wq_answer %}
 	Answer: <b>{{ wq_answer }}</b><br />{% endif %}
-	{% if wq_answer %}Title{% else %}Answer{% endif %}: <input id="answer" type="text" name="answer" size="38" autofocus><br />
+	{% if wq_answer %}Title{% else %}Answer{% endif %}: <input id="answer" type="text" name="answer" size="38" autocomplete="off" autofocus><br />
 	Phone: <select name="phone">
 	  {% for p in team.teamphone_set.all %}
 	  <option value="{{ p.phone }}">{{ p.phone }}</option>

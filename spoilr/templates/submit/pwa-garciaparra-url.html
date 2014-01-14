@@ -22,7 +22,7 @@
       {% else %}
       <form action="." method="POST">
 	{% csrf_token %}
-	URL: <input id="url" type="text" name="url" size="38" autofocus><br />
+	URL: <input id="url" type="text" name="url" size="38" autocomplete="off" autofocus><br />
 	Phone: <select name="phone">
 	  {% for p in team.teamphone_set.all %}
 	  <option value="{{ p.phone }}">{{ p.phone }}</option>
