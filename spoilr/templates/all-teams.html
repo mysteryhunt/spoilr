@@ -77,10 +77,10 @@
 	      <img title="{{ puzzle.puzzle.name }}" src="{% if puzzle.solved %}{% static "p_solved.png" %}{% elif puzzle.released %}{% static "p_released.png" %}{% else %}{% static "p_unreleased.png" %}{% endif %}" />
 	      {% endfor %}
 	    </td>
-	    <td>caucus:</td>
-	    <td colspan="3" class="{% if team.rounds.caucus_race.solved %}msolved{% endif %}">
-	      <img title="The Caucus Race" src="{% if team.rounds.caucus_race.solved %}{% static "r_solved.png" %}{% elif team.rounds.caucus_race.released %}{% static "r_released.png" %}{% else %}{% static "r_unreleased.png" %}{% endif %}" />
-	      {% for puzzle in team.rounds.caucus_race.puzzles %}
+	    <td>knights:</td>
+	    <td colspan="3" class="{% if team.rounds.knights.solved %}msolved{% endif %}">
+	      <img title="The Red and White Knights" src="{% if team.rounds.knights.solved %}{% static "r_solved.png" %}{% elif team.rounds.knights.released %}{% static "r_released.png" %}{% else %}{% static "r_unreleased.png" %}{% endif %}" />
+	      {% for puzzle in team.rounds.knights.puzzles %}
 	      <img title="{{ puzzle.puzzle.name }}" src="{% if puzzle.solved %}{% static "p_solved.png" %}{% elif puzzle.released %}{% static "p_released.png" %}{% else %}{% static "p_unreleased.png" %}{% endif %}" />
 	      {% endfor %}
 	    </td>
@@ -100,10 +100,10 @@
 	      <img title="{{ puzzle.puzzle.name }}" src="{% if puzzle.solved %}{% static "p_solved.png" %}{% elif puzzle.released %}{% static "p_released.png" %}{% else %}{% static "p_unreleased.png" %}{% endif %}" />
 	      {% endfor %}
 	    </td>
-	    <td>knights:</td>
-	    <td colspan="3" class="{% if team.rounds.knights.solved %}msolved{% endif %}">
-	      <img title="The Red and White Knights" src="{% if team.rounds.knights.solved %}{% static "r_solved.png" %}{% elif team.rounds.knights.released %}{% static "r_released.png" %}{% else %}{% static "r_unreleased.png" %}{% endif %}" />
-	      {% for puzzle in team.rounds.knights.puzzles %}
+	    <td>caucus:</td>
+	    <td colspan="3" class="{% if team.rounds.caucus_race.solved %}msolved{% endif %}">
+	      <img title="The Caucus Race" src="{% if team.rounds.caucus_race.solved %}{% static "r_solved.png" %}{% elif team.rounds.caucus_race.released %}{% static "r_released.png" %}{% else %}{% static "r_unreleased.png" %}{% endif %}" />
+	      {% for puzzle in team.rounds.caucus_race.puzzles %}
 	      <img title="{{ puzzle.puzzle.name }}" src="{% if puzzle.solved %}{% static "p_solved.png" %}{% elif puzzle.released %}{% static "p_released.png" %}{% else %}{% static "p_unreleased.png" %}{% endif %}" />
 	      {% endfor %}
 	    </td>
