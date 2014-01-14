@@ -284,10 +284,12 @@ def all_puzzles_update():
         }
         interactions.append(i)
         
+    i_total = Interaction.objects.count()
     context = Context({
         'metas': metas,
         'interactions': interactions,
         't_total': t_total,
+        'i_total': i_total,
         'p_total': p_total,
         'p_total4': p_total * 4,
         'p_released': p_released,
