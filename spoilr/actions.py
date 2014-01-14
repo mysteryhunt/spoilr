@@ -98,13 +98,13 @@ def grant_points(team, amount, reason): # 2014-specific
         if access.round.url in ["tea_party", "mock_turtle", "white_queen"]:
             num_wh = num_wh + 1
     if num_wh < 3 and td.points >= DRINK_READY[num_wh]:
-        # ...and they've solved a metapuzzle but haven't released the round, release the round (causing the vial to be drunk)
+        # ...and they've completed a critter interaction but haven't released the round, release the round (causing the vial to be drunk)
         next_round = None
-        if MetapuzzleSolve.objects.filter(team=team, metapuzzle__url='spades').exists() and not RoundAccess.objects.filter(team=team, round__url='tea_party').exists():
+        if InteractionAccess.objects.filter(team=team, interaction__url='dormouse', accomplished=True).exists() and not RoundAccess.objects.filter(team=team, round__url='tea_party').exists():
             next_round = 'tea_party'
-        elif MetapuzzleSolve.objects.filter(team=team, metapuzzle__url='clubs').exists() and not RoundAccess.objects.filter(team=team, round__url='mock_turtle').exists():
+        elif InteractionAccess.objects.filter(team=team, interaction__url='caterpillar', accomplished=True).exists() and not RoundAccess.objects.filter(team=team, round__url='mock_turtle').exists():
             next_round = 'mock_turtle'
-        elif MetapuzzleSolve.objects.filter(team=team, metapuzzle__url='diamonds').exists() and not RoundAccess.objects.filter(team=team, round__url='white_queen').exists():
+        elif InteractionAccess.objects.filter(team=team, interaction__url='tweedles', accomplished=True).exists() and not RoundAccess.objects.filter(team=team, round__url='white_queen').exists():
             next_round = 'white_queen'
         if not next_round is None:
             team_log(team, 'story', 'You filled a drink-me vial, drank it and jumped into a small hole.')
