@@ -165,9 +165,11 @@ def submit_survey(request, puzzle_url):
         PuzzleSurvey.objects.create(team=team, puzzle=puzzle, fun=fun, difficulty=difficulty, comment=comment).save()
         complete = True
     commentlen = PuzzleSurvey._meta.get_field('comment').max_length
+    count = PuzzleSurvey.objects.filter(team=team, puzzle=puzzle).count()
     context = RequestContext(request, {
         'team': team,
         'puzzle': puzzle,
+        'count': count,
         'commentlen': commentlen,
         'complete': complete,
     })

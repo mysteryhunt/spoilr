@@ -10,6 +10,7 @@
       {% else %}
       Team: {{ team.name }}<br>
       Puzzle: {{ puzzle.name }}<br>
+      Your team has submitted {{ count }} survey responses for this puzzle.  Respond as many times as you like (within reason).
       <form action="." method="POST">
 	{% csrf_token %}
 	Fun: <select id="fun" name="fun">
