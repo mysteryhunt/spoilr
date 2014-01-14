@@ -46,12 +46,14 @@ metapuzzle_answer_correct(t, Metapuzzle.objects.get(url='jabberwock'))
 puzzle_answer_correct(t, Puzzle.objects.get(url='cut_and_tape'))
 puzzle_answer_correct(t, Puzzle.objects.get(url='local_shorts'))
 puzzle_answer_correct(t, Puzzle.objects.get(url='sneaky_fox'))
-
-# tea party released
-
 puzzle_answer_correct(t, Puzzle.objects.get(url='feed_your_head'))
 puzzle_answer_correct(t, Puzzle.objects.get(url='across_the_hall'))
 puzzle_answer_correct(t, Puzzle.objects.get(url='dressing_down'))
+puzzle_answer_correct(t, Puzzle.objects.get(url='common_bonds'))
+puzzle_answer_correct(t, Puzzle.objects.get(url='assemble_me'))
+# tea party released
+
+puzzle_answer_correct(t, Puzzle.objects.get(url='safer_sephiroth'))
 
 puzzle_answer_correct(t, Puzzle.objects.get(url='disemvoweled'))
 puzzle_answer_correct(t, Puzzle.objects.get(url='operator_test'))
@@ -67,14 +69,17 @@ puzzle_answer_correct(t, Puzzle.objects.get(url='best_of_five'))
 
 puzzle_answer_correct(t, Puzzle.objects.get(url='the_puzzle_your_puzzle_could_smell_like'))
 # level 2 tea cups released
-# white queen released
-# white queen gift
-
 puzzle_answer_correct(t, Puzzle.objects.get(url='monster_potatoes'))
-# ???
+# ocd released
 
 puzzle_answer_correct(t, Puzzle.objects.get(url='can_tab_rig_ian'))
 # level 3 tea cups released
+
+puzzle_answer_correct(t, Puzzle.objects.get(url='oyster_card'))
+puzzle_answer_correct(t, Puzzle.objects.get(url='uncommon_nonsense'))
+# white queen released
+
+interaction_accomplished(t, Interaction.objects.get(url='white_queen_gift'))
 
 metapuzzle_answer_correct(t, Metapuzzle.objects.get(url='tea_party'))
 # caucus race released

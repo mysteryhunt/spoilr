@@ -20,6 +20,8 @@ def TeamDict(team):
     q_submissions += ContactRequest.objects.filter(team=team, resolved=False).count()
     q_submissions += Y2014PwaGarciaparraUrlSubmission.objects.filter(team=team, resolved=False).count() # 2014-specific
     rounds = dict()
+    j_released = InteractionAccess.objects.filter(team=team, interaction__url='mit_runaround', accomplished=True).exists()
+    j_solved = MetapuzzleSolve.objects.filter(team=team, metapuzzle__url='jabberwock').exists()
     i_released = InteractionAccess.objects.filter(team=team).count()
     i_solved = InteractionAccess.objects.filter(team=team, accomplished=True).count()
     interactions = []
@@ -29,7 +31,7 @@ def TeamDict(team):
         access = InteractionAccess.objects.filter(team=team, interaction=interaction)
         if access.exists():
             released = True
-            if access[0].solved:
+            if access[0].accomplished:
                 solved = True
         i = {
             'interaction': interaction,
@@ -99,6 +101,8 @@ def TeamDict(team):
         'logn': logn,
         'log1': log1,
         's_current': s_current, # 2014-specific
+        'j_released': j_released, # 2014-specific
+        'j_solved': j_solved, # 2014-specific
         'r_released': r_released,
         'r_solved': r_solved,
         'p_released': p_released,
@@ -133,6 +137,8 @@ def all_teams_update():
     r_total = Round.objects.count()
     r_total = r_total - 1 + 3 # 2014-specific
     i_total = Interaction.objects.count()
+    i_pending = InteractionAccess.objects.filter(accomplished=False).count()
+    i_teams = InteractionAccess.objects.filter(accomplished=False).values('team__url').distinct().count()
     
     context = Context({
         'teams': teams,
@@ -141,6 +147,8 @@ def all_teams_update():
         's_total': s_total, # 2014-specific
         'r_total': r_total,
         'p_total': p_total,
+        'i_pending': i_pending,
+        'i_teams': i_teams,
         'i_total': i_total,
     })
     cache.set('all_teams', template.render(context), 60*60)
