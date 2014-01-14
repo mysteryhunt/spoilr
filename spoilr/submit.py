@@ -101,8 +101,7 @@ def submit_puzzle(request, puzzle_url):
             phone = request.POST["phone"]
             phone = check_phone(team, phone)
             submit_puzzle_answer(team, puzzle, answer, phone)
-            q_full1 = count_queue(team) >= QUEUE_LIMIT
-            q_full2 = PuzzleSubmission.objects.filter(team=team, puzzle=puzzle, resolved=False).count() >= PUZZLE_QUEUE_LIMIT
+            return redirect(request.path)
     solved = PuzzleAccess.objects.get(team=team, puzzle=puzzle).solved
     answers = PuzzleSubmission.objects.filter(team=team, puzzle=puzzle)
     unresolved = answers.filter(resolved=False).exists()
@@ -213,8 +212,7 @@ def submit_metapuzzle(request, metapuzzle_url):
         phone = request.POST["phone"]
         phone = check_phone(team, phone)
         submit_metapuzzle_answer(team, metapuzzle, answer, phone)
-        q_full1 = count_queue(team) >= QUEUE_LIMIT
-        q_full2 = MetapuzzleSubmission.objects.filter(team=team, metapuzzle=metapuzzle, resolved=False).count() >= PUZZLE_QUEUE_LIMIT
+        return redirect(request.path)
     describe = "Round: %s" % metapuzzle.name
     if metapuzzle.url.startswith("white_queen_a"):
         describe = "Puzzle: ???"
@@ -266,8 +264,7 @@ def submit_mit_metapuzzle(request): # 2014-specific
         phone = request.POST["phone"]
         phone = check_phone(team, phone)
         submit_mit_answer(team, answer, phone)
-        q_full1 = count_queue(team) >= QUEUE_LIMIT
-        q_full2 = Y2014MitMetapuzzleSubmission.objects.filter(team=team, resolved=False).count() >= PUZZLE_QUEUE_LIMIT
+        return redirect(request.path)
     answers = Y2014MitMetapuzzleSubmission.objects.filter(team=team)
     unresolved = answers.filter(resolved=False).exists()
     resolved = answers.filter(resolved=True).exists()
@@ -326,8 +323,7 @@ def submit_pwa_garciaparra_url(request): # 2014-specific
         phone = request.POST["phone"]
         phone = check_phone(team, phone)
         submit_pwa_garciaparra_url_actual(team, url, phone)
-        q_full1 = count_queue(team) >= QUEUE_LIMIT
-        q_full2 = Y2014PwaGarciaparraUrlSubmission.objects.filter(team=team, resolved=False).count() >= 1
+        return redirect(request.path)
     urls = Y2014PwaGarciaparraUrlSubmission.objects.filter(team=team, resolved=False)
     context = RequestContext(request, {
         'team': team,
@@ -360,8 +356,7 @@ def submit_contact(request):
         phone = request.POST["phone"]
         phone = check_phone(team, phone)
         submit_contact_actual(team, phone, comment)
-        # these don't count toward the QUEUE_LIMIT
-        q_full2 = ContactRequest.objects.filter(team=team, resolved=False).count() >= CONTACT_LIMIT
+        return redirect(request.path)
     requests = ContactRequest.objects.filter(team=team, resolved=False)
     context = RequestContext(request, {
         'team': team,
