@@ -5,7 +5,7 @@
       Team: {{ team.name }}<br>
       {{ describe }}<br>
       {% if solved %}
-      Solved! {% if metapuzzle.url == "white_queen" or metapuzzle.url == "tea_party" or metapuzzle.url == "mock_turtle" %}Solution{% elif metapuzzle.url == "caucus_race" or metapuzzle.url == "knights" or metapuzzle.url == "humpty_dumpty" %}Weakness:{% else %}Answer{% endif %}: <b>{{ metapuzzle.answer }}</b><br>
+      Solved! {% if metapuzzle.url == "white_queen" or metapuzzle.url == "tea_party" or metapuzzle.url == "mock_turtle" %}Solution{% elif metapuzzle.url == "caucus_race" or metapuzzle.url == "knights" or metapuzzle.url == "humpty_dumpty" %}Weakness{% else %}Answer{% endif %}: <b>{{ metapuzzle.answer }}</b><br>
       {% elif q_full2 %}
       Your team has reached the per-item queue limit ({{ q_lim2 }}).<br/>
       Try again after those have been resolved.
@@ -15,7 +15,7 @@
       {% else %}
       <form action="." method="POST">
 	{% csrf_token %}
-	{% if metapuzzle.url == "white_queen" or metapuzzle.url == "tea_party" or metapuzzle.url == "mock_turtle" %}Solution{% elif metapuzzle.url == "caucus_race" or metapuzzle.url == "knights" or metapuzzle.url == "humpty_dumpty" %}Weakness:{% else %}Answer{% endif %}: <input id="answer" type="text" name="answer" size="38" autocomplete="off" autofocus><br />
+	{% if metapuzzle.url == "white_queen" or metapuzzle.url == "tea_party" or metapuzzle.url == "mock_turtle" %}Solution{% elif metapuzzle.url == "caucus_race" or metapuzzle.url == "knights" or metapuzzle.url == "humpty_dumpty" %}Weakness{% else %}Answer{% endif %}: <input id="answer" type="text" name="answer" size="38" autocomplete="off" autofocus><br />
 	Phone: <select name="phone">
 	  {% for p in team.teamphone_set.all %}
 	  <option value="{{ p.phone }}">{{ p.phone }}</option>
