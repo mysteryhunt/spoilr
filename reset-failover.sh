@@ -13,18 +13,13 @@ if (( "$UID" != "0" )); then
 	exit 255
 fi
 
+echo "This script recreates the /var/www/spoilr docroot and prepares for a republish in case we are failing over to a slave.  You want to run this on a slave after corey is shut down and DNS has been failed over. Press ENTER to continue."
+read WAIT
 
-echo ""
-echo "This script COMPLETELY DESTROYS MYSTERY HUNT.  It will erase the database and reload and restart all teams from scratch.  DO NOT DO THIS AT ALL IF HUNT HAS STARTED!!"
-echo "Also, this script probably ONLY WORKS ON THE MASTER SERVER -- if you're not on corey, you want to run the slave-reset.sh script"
-echo "If you are absolutely sure you want to potentially ruin mystery hunt and are on the master server, type KILLMYSTERYHUNT (otherwise enter anything else)"
+umount -f /var/www/spoilr
+umount -f /home/hunt/htpasswd
+umount -f /var/cache/spoilr
 
-read KILLMYSTERYHUNT
-
-if [ "$KILLMYSTERYHUNT" != "KILLMYSTERYHUNT" ]; then
-	echo RESET SEQUENCE ABORTED. HAVE A NICE DAY
-	exit 255
-fi
 
 echo "Creating /var/www/spoilr docroot..."
 mkdir -pv /var/www/spoilr
@@ -74,18 +69,6 @@ chown -R $OWNER /var/cache/spoilr
 echo "Backing old spoilr mysql database into /home/hunt/spoilr.sql..."
 /usr/bin/mysqldump --events --all-databases > /home/hunt/spoilr.sql
 
-#Wipe mysql db and re-init
-echo "Wiping old spoilr mysql database and recreating empty one..." 
-cat mysqlinit.sql | /usr/bin/mysql -u root 
-
-# recreate database, this will ask for admin username/password
-echo "Asking django to load schema into the spoilr mysql database..."
-su -c "$MANAGE syncdb --traceback" $OWNER
-
-# load hunt data
-echo "Loading hunt data from /home/hunt into the spoilr mysql database..."
-su -c "$MANAGE load_data --traceback" $OWNER
-
 # publish team files
 echo "Publishing hunt for teams..."
 su -c "$MANAGE republish --traceback" $OWNER
@@ -103,5 +86,5 @@ cp -v spoilr.rsyslog /etc/rsyslog.d/10-spoilr.conf
 /etc/init.d/apache2 restart
 /etc/init.d/rsyslog restart
 
-echo "In case you didn't mean to do this, backup database is stored at /home/hunt/spoilr.sql"
+echo "backup database is stored at /home/hunt/spoilr.sql"
 

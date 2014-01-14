@@ -5,6 +5,11 @@
     <title>All Teams Dashboard</title>
     <meta http-equiv="refresh" content="30">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+    <style type="text/css">
+      .msolved {
+        background: #dfd;
+      }
+    </style>
   </head>
   <body>
     <em>(This may be several minutes behind)</em>
@@ -13,6 +18,7 @@
 	{{ teams|length }} teams,
 	{{ r_total }} rounds,
 	{{ p_total }} puzzles,
+	{{ i_total }} interactions,
 	{{ q_teams }} teams in queue with {{ q_total }} submissions
       </div>
       {% for team in teams %}
@@ -21,36 +27,42 @@
 	  <tr>
 	    <td colspan="2" style="overflow: hidden;"><b>{{ team.team.name }}</b></td>
 	    <td>events:</td>
-	    <td>
+	    <td class="{% if team.rounds.events.solved %}msolved{% endif %}">
 	      <img title="Events" src="{% if team.rounds.events.solved %}{% static "r_solved.png" %}{% elif team.rounds.events.released %}{% static "r_released.png" %}{% else %}{% static "r_unreleased.png" %}{% endif %}" />
 	      {% for puzzle in team.rounds.events.puzzles %}
 	      <img title="{{ puzzle.puzzle.name }}" src="{% if puzzle.solved %}{% static "p_solved.png" %}{% elif puzzle.released %}{% static "p_released.png" %}{% else %}{% static "p_unreleased.png" %}{% endif %}" />
+	      {% endfor %}
+	    <td style="text-align: right;">interactions:</td>
+	    <td>
+	      {% for interaction in team.interactions %}
+	      <img title="{{ interaction.interaction.name }}" src="{% if interaction.solved %}{% static "p_solved.png" %}{% elif interaction.released %}{% static "p_released.png" %}{% else %}{% static "p_unreleased.png" %}{% endif %}" />
 	      {% endfor %}
 	    </td>
 	    <td colspan="2">
 	      R:<b title="MIT Metas and Non-MIT Rounds Solved">{{ team.r_solved }}</b>/<span title="Non-MIT Rounds Released (+3 MIT Metas)">{{ team.r_released }}</span>/{{ r_total }}
 	      P:<b title="Puzzles Solved">{{ team.p_solved }}</b>/<span title="Puzzles Released">{{ team.p_released }}</span>/{{ p_total }} <span title="Puzzles Released and Unsolved">({{ team.p_open }})</span>
+	      I:<b title="Interactions Pending">{{ team.i_open }}</b>
 	      S:<b title="Points Gained">{{ team.s_current }}</b>/{{ s_total }}
 	      Q:<b title="Entries in Queue">{{ team.q_submissions }}</b>
 	    </td>
 	  </tr>
 	  <tr>
 	    <td>spades:</td>
-	    <td>
+	    <td class="{% if team.rounds.spades.solved %}msolved{% endif %}">
 	      <img title="Spades" src="{% if team.rounds.spades.solved %}{% static "r_solved.png" %}{% elif team.rounds.spades.released %}{% static "r_released.png" %}{% else %}{% static "r_unreleased.png" %}{% endif %}" />
 	      {% for puzzle in team.rounds.spades.puzzles %}
 	      <img title="{{ puzzle.puzzle.name }}" src="{% if puzzle.solved %}{% static "p_solved.png" %}{% elif puzzle.released %}{% static "p_released.png" %}{% else %}{% static "p_unreleased.png" %}{% endif %}" />
 	      {% endfor %}
 	    </td>
 	    <td>party:</td>
-	    <td>
+	    <td colspan="3" class="{% if team.rounds.tea_party.solved %}msolved{% endif %}">
 	      <img title="The Tea Party" src="{% if team.rounds.tea_party.solved %}{% static "r_solved.png" %}{% elif team.rounds.tea_party.released %}{% static "r_released.png" %}{% else %}{% static "r_unreleased.png" %}{% endif %}" />
 	      {% for puzzle in team.rounds.tea_party.puzzles %}
 	      <img title="{{ puzzle.puzzle.name }}" src="{% if puzzle.solved %}{% static "p_solved.png" %}{% elif puzzle.released %}{% static "p_released.png" %}{% else %}{% static "p_unreleased.png" %}{% endif %}" />
 	      {% endfor %}
 	    </td>
 	    <td>caucus:</td>
-	    <td>
+	    <td class="{% if team.rounds.caucus_race.solved %}msolved{% endif %}">
 	      <img title="The Caucus Race" src="{% if team.rounds.caucus_race.solved %}{% static "r_solved.png" %}{% elif team.rounds.caucus_race.released %}{% static "r_released.png" %}{% else %}{% static "r_unreleased.png" %}{% endif %}" />
 	      {% for puzzle in team.rounds.caucus_race.puzzles %}
 	      <img title="{{ puzzle.puzzle.name }}" src="{% if puzzle.solved %}{% static "p_solved.png" %}{% elif puzzle.released %}{% static "p_released.png" %}{% else %}{% static "p_unreleased.png" %}{% endif %}" />
@@ -59,21 +71,21 @@
 	  </tr>
 	  <tr>
 	    <td>clubs:</td>
-	    <td>
+	    <td class="{% if team.rounds.clubs.solved %}msolved{% endif %}">
 	      <img title="Clubs" src="{% if team.rounds.clubs.solved %}{% static "r_solved.png" %}{% elif team.rounds.clubs.released %}{% static "r_released.png" %}{% else %}{% static "r_unreleased.png" %}{% endif %}" />
 	      {% for puzzle in team.rounds.clubs.puzzles %}
 	      <img title="{{ puzzle.puzzle.name }}" src="{% if puzzle.solved %}{% static "p_solved.png" %}{% elif puzzle.released %}{% static "p_released.png" %}{% else %}{% static "p_unreleased.png" %}{% endif %}" />
 	      {% endfor %}
 	    </td>
 	    <td>turtle:</td>
-	    <td>
+	    <td colspan="3" class="{% if team.rounds.mock_turtle.solved %}msolved{% endif %}">
 	      <img title="The Mock Turtle" src="{% if team.rounds.mock_turtle.solved %}{% static "r_solved.png" %}{% elif team.rounds.mock_turtle.released %}{% static "r_released.png" %}{% else %}{% static "r_unreleased.png" %}{% endif %}" />
 	      {% for puzzle in team.rounds.mock_turtle.puzzles %}
 	      <img title="{{ puzzle.puzzle.name }}" src="{% if puzzle.solved %}{% static "p_solved.png" %}{% elif puzzle.released %}{% static "p_released.png" %}{% else %}{% static "p_unreleased.png" %}{% endif %}" />
 	      {% endfor %}
 	    </td>
 	    <td>knights:</td>
-	    <td>
+	    <td class="{% if team.rounds.knights.solved %}msolved{% endif %}">
 	      <img title="The Red and White Knights" src="{% if team.rounds.knights.solved %}{% static "r_solved.png" %}{% elif team.rounds.knights.released %}{% static "r_released.png" %}{% else %}{% static "r_unreleased.png" %}{% endif %}" />
 	      {% for puzzle in team.rounds.knights.puzzles %}
 	      <img title="{{ puzzle.puzzle.name }}" src="{% if puzzle.solved %}{% static "p_solved.png" %}{% elif puzzle.released %}{% static "p_released.png" %}{% else %}{% static "p_unreleased.png" %}{% endif %}" />
@@ -82,21 +94,21 @@
 	  </tr>
 	  <tr>
 	    <td>diamonds:</td>
-	    <td>
+	    <td class="{% if team.rounds.diamonds.solved %}msolved{% endif %}">
 	      <img title="Diamonds" src="{% if team.rounds.diamonds.solved %}{% static "r_solved.png" %}{% elif team.rounds.diamonds.released %}{% static "r_released.png" %}{% else %}{% static "r_unreleased.png" %}{% endif %}" />
 	      {% for puzzle in team.rounds.diamonds.puzzles %}
 	      <img title="{{ puzzle.puzzle.name }}" src="{% if puzzle.solved %}{% static "p_solved.png" %}{% elif puzzle.released %}{% static "p_released.png" %}{% else %}{% static "p_unreleased.png" %}{% endif %}" />
 	      {% endfor %}
 	    </td>
 	    <td>queen:</td>
-	    <td>
+	    <td colspan="3" class="{% if team.rounds.white_queen.solved %}msolved{% endif %}">
 	      <img title="The White Queen" src="{% if team.rounds.white_queen.solved %}{% static "r_solved.png" %}{% elif team.rounds.white_queen.released %}{% static "r_released.png" %}{% else %}{% static "r_unreleased.png" %}{% endif %}" />
 	      {% for puzzle in team.rounds.white_queen.puzzles %}
 	      <img title="{{ puzzle.puzzle.name }}" src="{% if puzzle.solved %}{% static "p_solved.png" %}{% elif puzzle.released %}{% static "p_released.png" %}{% else %}{% static "p_unreleased.png" %}{% endif %}" />
 	      {% endfor %}
 	    </td>
 	    <td>humpty:</td>
-	    <td>
+	    <td class="{% if team.rounds.humpty_dumpty.solved %}msolved{% endif %}">
 	      <img title="Humpty Dumpty" src="{% if team.rounds.humpty_dumpty.solved %}{% static "r_solved.png" %}{% elif team.rounds.humpty_dumpty.released %}{% static "r_released.png" %}{% else %}{% static "r_unreleased.png" %}{% endif %}" />
 	      {% for puzzle in team.rounds.humpty_dumpty.puzzles %}
 	      <img title="{{ puzzle.puzzle.name }}" src="{% if puzzle.solved %}{% static "p_solved.png" %}{% elif puzzle.released %}{% static "p_released.png" %}{% else %}{% static "p_unreleased.png" %}{% endif %}" />
@@ -138,8 +150,5 @@
       </script>
       {% endfor %}
     </div>
-    <script type="text/javascript">
-      $(document).tooltip();
-    </script>
   </body>
 </html>

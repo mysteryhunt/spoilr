@@ -49,9 +49,12 @@
 	Time remaining: <span id="timer">{{ timer }}</span> second(s)<br />
       </div>
       <script type="text/javascript">
-	var t = {{ timer }};
+	var orig_t = {{ timer }};
+	var orig_date = new Date();
+	var t = orig_t;
         setInterval(function () {
-          t --;
+	  secs = Math.floor((new Date() - orig_date)/1000);
+          t = orig_t - secs;
           if (t > 0) {
             $('#timer').html(t);
           } else {
