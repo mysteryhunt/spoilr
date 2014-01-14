@@ -40,7 +40,7 @@
       {% csrf_token %}
       <input type="hidden" name="handled" value="true" />
       <div style="text-align: right;">
-	Signed in as {{ handler.name }}
+	Signed in as {{ handler.name }}{% if handler.hq_phone %}, using {{ handler.hq_phone }}{% endif %}
       </div>
       <div>
 	Handling <b>{{ team.name }}</b>
@@ -69,14 +69,14 @@
       </script>
       <br />
       <div>
-	Phone numbers in this set of submissions: (call one or more of these)<br />
+	Phone numbers in this set of submissions: ({% if handler.hq_phone %}click one of these and wait{% else %}call one or more of these{% endif %})<br />
 	{% for p in phones_now %}
-	&nbsp;&nbsp;&nbsp;<b>{{ p }}</b><br />
+	&nbsp;&nbsp;&nbsp;{% if handler.hq_phone %}<a href="http://photostein.xvm.mit.edu/call/?from={{ handler.hq_phone|urlencode:"" }}&to={{ p|urlencode:"" }}">{% endif %}<b>{{ p }}</b>{% if handler.hq_phone %}</a>{% endif %}<br />
 	{% endfor %}
 	{% if phones_other %}
 	Other phones for this team: (just in case)<br />
 	{% for p in phones_other %}
-	&nbsp;&nbsp;&nbsp;{{ p }}<br />
+	&nbsp;&nbsp;&nbsp;{% if handler.hq_phone %}<a href="http://photostein.xvm.mit.edu/call/?from={{ handler.hq_phone|urlencode:"" }}&to={{ p|urlencode:"" }}">{% endif %}<b>{{ p }}</b>{% if handler.hq_phone %}</a>{% endif %}<br />
 	{% endfor %}
 	{% endif %}
       </div>

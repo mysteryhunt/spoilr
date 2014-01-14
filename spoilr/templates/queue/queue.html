@@ -21,7 +21,7 @@
   <body>
     <div style="text-align: right;">
       {% if handler %}
-      Signed in as {{ handler.name }}:
+      Signed in as {{ handler.name }}{% if handler.hq_phone %}, using {{ handler.hq_phone }}{% endif %}
       <form action="." method="POST" style="display: inline;">
 	{% csrf_token %}
 	<input type="hidden" name="offduty" value="true" />
@@ -30,8 +30,11 @@
       {% else %}
       <form action="." method="POST" style="display: inline;">
 	{% csrf_token %}
-	Observing only.  Enter an email address here to sign in as a handler:
-	<input id="email" type="text" size="30" name="email" />
+	Observing only.  Enter an email address:
+	<input id="email" type="text" size="30" name="email" /><br/>
+	and your call center phone number:
+	<input id="phone" type="text" size="30" name="phone" /><br/>
+	to sign in as a handler:
 	<input type="submit" value="Go" />
       </form>
       {% endif %}

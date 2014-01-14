@@ -196,7 +196,7 @@ class ContactRequest(models.Model):
     team = models.ForeignKey(Team)
     phone = models.CharField(max_length=100)
     timestamp = models.DateTimeField(default=datetime.now)
-    comment = models.CharField(max_length=100)
+    comment = models.CharField(max_length=100, blank=True)
     resolved = models.BooleanField(default=False)
 
     def __str__(self):
@@ -211,6 +211,7 @@ class QueueHandler(models.Model):
     activity = models.DateTimeField(default=datetime.now)
     team = models.ForeignKey(Team, unique=True, blank=True, null=True)
     team_timestamp = models.DateTimeField(blank=True, null=True)
+    hq_phone = models.CharField(max_length=100, blank=True, null=True)
     
     def __str__(self):
         if self.team:

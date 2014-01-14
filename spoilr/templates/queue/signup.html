@@ -14,6 +14,7 @@
       {% csrf_token %}
       Otherwise, please enter your name below to get started.  Please try not to obscure your identity.<br />
       <input type="hidden" name="email" value="{{ email }}" />
+      <input type="hidden" name="phone" value="{{ phone }}" />
       <input type="text" size="30" name="name" />
       <input type="submit" value="Go" />
     </form>

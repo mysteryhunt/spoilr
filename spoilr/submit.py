@@ -389,6 +389,7 @@ def queue(request):
         handler = QueueHandler.objects.get(email=handler_email)
     if request.method == 'POST':
         if "offduty" in request.POST:
+            handler.hq_phone = None
             del request.session['handler_email']
         elif "claim" in request.POST:
             team = Team.objects.get(url=request.POST['claim'])
@@ -458,17 +459,22 @@ def queue(request):
             return HttpResponse(template.render(context))
         elif not handler and "email" in request.POST:
             handler_email = request.POST["email"]
+            handler_phone = request.POST["phone"]
             if QueueHandler.objects.filter(email=handler_email).exists():
                 handler = QueueHandler.objects.get(email=handler_email)
+                handler.hq_phone = handler_phone
             elif "name" in request.POST:
                 handler_name = request.POST["name"]
-                handler = QueueHandler.objects.create(email=handler_email,name=handler_name)
+                handler = QueueHandler.objects.create(email=handler_email,name=handler_name, hq_phone=handler_phone)
+                handler.save()
             else:
                 template = loader.get_template('queue/signup.html') 
                 context = RequestContext(request, {
                     'email': handler_email,
+                    'phone': handler_phone,
                 })
                 return HttpResponse(template.render(context))
+            handler.save()
             request.session['handler_email'] = handler_email
         return redirect(request.path)
 
