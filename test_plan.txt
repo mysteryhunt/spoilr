@@ -82,7 +82,7 @@ puzzle_answer_correct(t, Puzzle.objects.get(url='uncommon_nonsense'))
 interaction_accomplished(t, Interaction.objects.get(url='white_queen_gift'))
 
 metapuzzle_answer_correct(t, Metapuzzle.objects.get(url='tea_party'))
-# caucus race released
+# knights released
 
 metapuzzle_answer_correct(t, Metapuzzle.objects.get(url='white_queen_a05'))
 # clemens released
@@ -113,12 +113,17 @@ metapuzzle_answer_correct(t, Metapuzzle.objects.get(url='white_queen_a10'))
 
 grant_points(t, 14, 'because reasons')
 
+metapuzzle_answer_correct(t, Metapuzzle.objects.get(url='knights'))
+# caucus released
+
 puzzle_answer_correct(t, Puzzle.objects.get(url='modern_cubism_artist'))
+puzzle_answer_correct(t, Puzzle.objects.get(url='sat_iii'))
 # you've got some nerve / gone with the wind released
 # (updates 6 other puzzles)
-puzzle_answer_correct(t, Puzzle.objects.get(url='sat_iii'))
-# cruciform heraldry released
+puzzle_answer_correct(t, Puzzle.objects.get(url='gone_with_the_wind'))
+# cruciform heraldry released / growth and fixed costs
 puzzle_answer_correct(t, Puzzle.objects.get(url='cruciform_heraldry'))
+puzzle_answer_correct(t, Puzzle.objects.get(url='1_2_3_4_4649'))
 # let's meet / saturdy released
 
 puzzle_answer_correct(t, Puzzle.objects.get(url='one_tequila_two_tequila_three_tequila_floor'))
@@ -127,9 +132,6 @@ puzzle_answer_correct(t, Puzzle.objects.get(url='common_bonds'))
 puzzle_answer_correct(t, Puzzle.objects.get(url='round_tripper'))
 puzzle_answer_correct(t, Puzzle.objects.get(url='initial_impressions'))
 puzzle_answer_correct(t, Puzzle.objects.get(url='introduction_to_collegiate_notetaking'))
-
-metapuzzle_answer_correct(t, Metapuzzle.objects.get(url='caucus_race'))
-# knights released
 
 puzzle_answer_correct(t, Puzzle.objects.get(url='kroskuro'))
 puzzle_answer_correct(t, Puzzle.objects.get(url='walk_across_some_dungeons'))

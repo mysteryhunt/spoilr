@@ -228,23 +228,26 @@ def puzzle_answer_correct(team, puzzle):
                     logger.exception('error releasing puzzle %s for second set of white queen', p)
     elif puzzle.round.url == 'caucus_race': # 2014-specific
         # caucus race releases puzzles in pairs by bird
-        for abird in Y2014CaucusAnswerData.objects.all():
-            yes_puzzle = None
-            no_puzzle = None
-            try:
-                yes_puzzle = Puzzle.objects.get(round=puzzle.round, answer=abird.yes_answer)
-            except:
-                logger.exception('missing caucus puzzle, bird %d YES %s', abird.bird, abird.yes_answer)
-            try:
-                no_puzzle = Puzzle.objects.get(round=puzzle.round, answer=abird.no_answer)
-            except:
-                logger.exception('missing caucus puzzle, bird %d NO %s', abird.bird, abird.no_answer)
-            if (yes_puzzle and not PuzzleAccess.objects.filter(team=team, puzzle=yes_puzzle).exists()) or (no_puzzle and not PuzzleAccess.objects.filter(team=team, puzzle=no_puzzle).exists()):
-                if yes_puzzle:
-                    release_puzzle(team, yes_puzzle, 'solved "%s"' % puzzle.name)
-                if no_puzzle:
-                    release_puzzle(team, no_puzzle, 'solved "%s"' % puzzle.name)
-                break
+        # pairs are released on solves 2, 3, 5, 6, 8 (i.e. 2 solves, 1 solve, repeat)
+        count = PuzzleAccess.objects.filter(team=team, puzzle__round=puzzle.round, solved=True).count()
+        if count in [2, 3, 5, 6, 8, 9]:
+            for abird in Y2014CaucusAnswerData.objects.all():
+                yes_puzzle = None
+                no_puzzle = None
+                try:
+                    yes_puzzle = Puzzle.objects.get(round=puzzle.round, answer=abird.yes_answer)
+                except:
+                    logger.exception('missing caucus puzzle, bird %d YES %s', abird.bird, abird.yes_answer)
+                try:
+                    no_puzzle = Puzzle.objects.get(round=puzzle.round, answer=abird.no_answer)
+                except:
+                    logger.exception('missing caucus puzzle, bird %d NO %s', abird.bird, abird.no_answer)
+                if (yes_puzzle and not PuzzleAccess.objects.filter(team=team, puzzle=yes_puzzle).exists()) or (no_puzzle and not PuzzleAccess.objects.filter(team=team, puzzle=no_puzzle).exists()):
+                    if yes_puzzle:
+                        release_puzzle(team, yes_puzzle, 'solved "%s"' % puzzle.name)
+                    if no_puzzle:
+                        release_puzzle(team, no_puzzle, 'solved "%s"' % puzzle.name)
+                    break
     else:
         if puzzle.round.url == 'humpty_dumpty': # 2014-specific
             td = Y2014TeamData.objects.get(team=team)
