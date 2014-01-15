@@ -35,7 +35,7 @@
 	and your call center phone number:
 	<input id="phone" type="text" size="30" name="phone" /><br/>
 	to sign in as a handler:
-	<input type="submit" value="Go" />
+	<input id="go" type="submit" value="Go" />
       </form>
       {% endif %}
       <a href="/">Back to HQ Main</a>
@@ -94,7 +94,8 @@
     <script type="text/javascript">
       function r() {
         {% if not handler %}
-        if (document.activeElement.id == 'email')
+        var aid = document.activeElement.id;
+        if (aid == 'email' || aid == 'phone' || aid == 'go')
           return;
         {% endif %}
         window.location.reload(true);
