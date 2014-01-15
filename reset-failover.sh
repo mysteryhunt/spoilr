@@ -13,7 +13,7 @@ if (( "$UID" != "0" )); then
 	exit 255
 fi
 
-echo "This script recreates the /var/www/spoilr docroot and prepares for a republish in case we are failing over to a slave.  You want to run this on a slave after corey is shut down and DNS has been failed over. Press ENTER to continue."
+echo "This script recreates the /var/www/spoilr docroot and prepares for a republish_all in case we are failing over to a slave.  You want to run this on a slave after corey is shut down and DNS has been failed over. Press ENTER to continue."
 read WAIT
 
 umount -f /var/www/spoilr
@@ -71,7 +71,7 @@ echo "Backing old spoilr mysql database into /home/hunt/spoilr.sql..."
 
 # publish team files
 echo "Publishing hunt for teams..."
-su -c "$MANAGE republish --traceback" $OWNER
+su -c "$MANAGE republish_all --traceback" $OWNER
 
 # Install cron jobs
 echo "Installing Cron Jobs..."

@@ -128,7 +128,6 @@ puzzle_answer_correct(t, Puzzle.objects.get(url='1_2_3_4_4649'))
 
 puzzle_answer_correct(t, Puzzle.objects.get(url='one_tequila_two_tequila_three_tequila_floor'))
 
-puzzle_answer_correct(t, Puzzle.objects.get(url='common_bonds'))
 puzzle_answer_correct(t, Puzzle.objects.get(url='round_tripper'))
 puzzle_answer_correct(t, Puzzle.objects.get(url='initial_impressions'))
 puzzle_answer_correct(t, Puzzle.objects.get(url='introduction_to_collegiate_notetaking'))

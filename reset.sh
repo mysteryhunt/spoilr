@@ -88,7 +88,7 @@ su -c "$MANAGE load_data --traceback" $OWNER
 
 # publish team files
 echo "Publishing hunt for teams..."
-su -c "$MANAGE republish --traceback" $OWNER
+su -c "$MANAGE republish_all --traceback" $OWNER
 
 # Install cron jobs
 echo "Installing Cron Jobs..."
