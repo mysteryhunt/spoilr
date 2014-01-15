@@ -188,8 +188,12 @@ class RoundContext(TopContext): # todo don't inherit, it'll just slow things dow
             elif InteractionAccess.objects.filter(team=team, interaction__url='mit_runaround_start', accomplished=False).exists():
                 self['meta_status'] = 'runaround_start'
         if round.url == 'events': # 2014-specific
+            solves = 0
             for i in range(len(self['puzzles'])):
                 self['puzzle_'+str(i)] = self['puzzles'][i]
+                if self['puzzles'][i]['solved']:
+                    solves += 1
+            self['meta_ready'] = solves == 4
         if round.url == 'caucus_race': # 2014-specific
             birds = []
             for bird in Y2014CaucusAnswerData.objects.all():
