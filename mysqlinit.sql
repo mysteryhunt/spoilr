@@ -7,6 +7,8 @@ GRANT USAGE ON *.* to 'monitoring'@'%' IDENTIFIED BY 'dup3m3';
 GRANT USAGE ON *.* to 'monitoring'@'localhost' IDENTIFIED BY 'dup3m3';
 GRANT REPLICATION CLIENT on *.* to 'monitoring'@'%' identified by 'dup3m3';
 GRANT REPLICATION CLIENT on *.* to 'monitoring'@'localhost' identified by 'dup3m3';
+GRANT REPLICATION SLAVE on *.* to 'repl'@'%' identified by 'dup3m3';
+GRANT REPLICATION SLAVE on *.* to 'repl'@'localhost' identified by 'dup3m3';
 GRANT SELECT ON *.* to 'monitoring'@'%';
 GRANT SELECT ON *.* to 'monitoring'@'localhost';
 FLUSH PRIVILEGES;
