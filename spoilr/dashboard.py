@@ -143,6 +143,7 @@ def all_teams_update():
     i_teams = InteractionAccess.objects.filter(accomplished=False).values('team__url').distinct().count()
     
     context = Context({
+        'updated': datetime.now(),
         'teams': teams,
         'q_total': q_total,
         'q_teams': len(q_teams),
@@ -292,6 +293,7 @@ def all_puzzles_update():
         
     i_total = Interaction.objects.count()
     context = Context({
+        'updated': datetime.now(),
         'metas': metas,
         'interactions': interactions,
         't_total': t_total,
