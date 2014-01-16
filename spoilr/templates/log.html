@@ -1,6 +1,6 @@
 <html>
   <head>
-    <meta http-equiv="refresh" content="8">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
     <style type="text/css">
       body, td, input {
         font: 10pt Verdana;
@@ -34,6 +34,9 @@
 	</label>
       </form>
     </div>
+    <div>
+      Filter: <input id="filter" type="text" />
+    </div>
     <table>
     <tr><th>Time
       <th>Event Type
@@ -42,7 +45,7 @@
       <th>Object ID
     </tr>
     {% for e in entries %}
-    <tr><td>{{ e.timestamp|date:'D H:i:s' }}
+    <tr class="entry"><td>{{ e.timestamp|date:'D H:i:s' }}
       <td>{{ e.event_type }}
       <td>{{ e.message }}
       <td>{{ e.team }}
@@ -52,11 +55,32 @@
     </table>
     <script type="text/javascript">
       function r() {
-        var ar = document.getElementById("auto-refresh");
-        if (ar.checked)
+        if ($('#auto-refresh').prop('checked'))
           window.location.reload(true);
       }
       setInterval(r, 30000);
+      $('#filter').keyup(function() {
+        $('#auto-refresh').prop('checked', false);
+        var filter = $('#filter').val().toLowerCase();
+        if (filter === '') {
+          $('.entry').show();
+        } else {
+          $('.entry').each(function(index, element) {
+            element = $(element);
+            var text = element.children('td').text().toLowerCase();
+            var words = filter.split(' ');
+            var match = true;
+            for (var i = 0; match && i < words.length; i ++) {
+              if (text.indexOf(words[i]) < 0) 
+                match = false;
+            }
+            if (match)
+              element.show();
+            else
+              element.hide();
+          });
+        }
+      })
     </script>
   </body>
 </html>

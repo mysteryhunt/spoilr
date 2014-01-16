@@ -66,8 +66,7 @@
           var ae = document.activeElement;
           if (ae.nodeName == 'INPUT' || ae.nodeName == 'SELECT')
             return;
-          var ar = document.getElementById("auto-refresh");
-          if (ar.checked)
+          if ($('#auto-refresh').prop('checked'))
             window.location.reload(true);
 	}
 	setInterval(r, 30000);

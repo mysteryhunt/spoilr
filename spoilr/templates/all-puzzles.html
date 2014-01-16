@@ -3,7 +3,6 @@
 <html>
   <head>
     <title>All Puzzles Dashboard</title>
-    <meta http-equiv="refresh" content="30">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
     <style type="text/css">
       th { text-align: left; }
@@ -150,8 +149,7 @@
     </div>
     <script type="text/javascript">
       function r() {
-        var ar = document.getElementById("auto-refresh");
-        if (ar.checked)
+        if ($('#auto-refresh').prop('checked'))
           window.location.reload(true);
       }
       setInterval(r, 30000);
