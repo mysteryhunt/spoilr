@@ -94,8 +94,8 @@
     <script type="text/javascript">
       function r() {
         {% if not handler %}
-        var aid = document.activeElement.id;
-        if (aid == 'email' || aid == 'phone' || aid == 'go')
+        var ae = document.activeElement;
+        if (ae.nodeName == 'INPUT' || ae.nodeName == 'SELECT')
           return;
         {% endif %}
         window.location.reload(true);

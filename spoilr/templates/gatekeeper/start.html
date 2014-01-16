@@ -1,25 +1,34 @@
 {% load humanize %}
 <html>
   <head>
+    <title>Gatekeeper</title>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
   </head>
   <body>
     <div style="float: right;">
       <a href="/">Back to HQ Main</a>
     </div>
+    <form style="display: inline;">
+      <label for="auto-refresh">
+	(auto-refresh:<input id="auto-refresh" type="checkbox" name="auto-refresh" checked />)
+      </label>
+    </form>
     <h3>Admin actions (be very very careful)</h3>
     <p>
       <form action="interaction/" method="POST" style="display: inline;">
 	{% csrf_token %}
-	<b>Interaction:</b> Register that one or more teams have accomplished
-	<select name="interaction">
+	<b>Interaction:</b> Register that one or more teams have accomplished an interaction:<br />
+	&nbsp;&nbsp;&nbsp;
+	{% if interactions %}
+	<select name="interaction" size="{{interactions|length}}">
 	  {% for i in interactions %}
-	  {% if i.url != 'pwa_garciaparra_url' %}
-	  <option value="{{i.url}}">{{i.name}}</option>
-	  {% endif %}
+	  <option value="{{i.interaction.url}}">{{i.interaction.name}} ({{i.pending|length}} teams)</option>
 	  {% endfor %}
 	</select>
 	<input type="submit" value="Go" />
+	{% else %}
+	<em>No pending interactions</em>
+	{% endif %}
       </form>
     <p>
       <form action="points/" method="POST" style="display: inline;">
@@ -39,14 +48,29 @@
     <p>
       <form action="event/" method="POST" style="display: inline;">
 	{% csrf_token %}
-	<b>Event:</b> Release event 
-	<select name="event">
+	<b>Event:</b> Release event to all teams (do this only <em>after</em> the event occurs)<br />
+	&nbsp;&nbsp;&nbsp;
+	{% if events %}
+	<select name="event" size="{{events|length}}">
 	  {% for e in events %}
 	  <option value="{{e.url}}">{{e.name}}</option>
 	  {% endfor %}
 	</select>
-	to all teams (do this only <em>after</em> the event occurs)
 	<input type="submit" value="Go" />
+	{% else %}
+	<em>No more events to release</em>
+	{% endif %}
       </form>
+      <script type="text/javascript">
+	function r() {
+          var ae = document.activeElement;
+          if (ae.nodeName == 'INPUT' || ae.nodeName == 'SELECT')
+            return;
+          var ar = document.getElementById("auto-refresh");
+          if (ar.checked)
+            window.location.reload(true);
+	}
+	setInterval(r, 30000);
+      </script>
   </body>
 </html>

@@ -13,9 +13,26 @@ def gatekeeper_view(request):
     recent_points = SystemLog.objects.filter(event_type='admin-points').order_by('-id')
     if recent_points.exists():
         last_points = recent_points[0]
+    interactions = []
+    for interaction in Interaction.objects.all():
+        if interaction.url == 'pwa_garciaparra_url':
+            continue
+        pending = InteractionAccess.objects.filter(interaction=interaction, accomplished=False)
+        if pending.count() == 0:
+            continue
+        interactions.append({
+            'interaction': interaction,
+            'pending': pending,
+        })
+    t_total = Team.objects.count()
+    events = []
+    for event in Puzzle.objects.filter(round__url='events').order_by('order'):
+        if PuzzleAccess.objects.filter(puzzle=event).count() == t_total:
+            continue
+        events.append(event)
     context = RequestContext(request, {
-        'interactions': Interaction.objects.all(),
-        'events': Puzzle.objects.filter(round__url='events').order_by('order'),
+        'interactions': interactions,
+        'events': events,
         'last_points': last_points
     })
     return HttpResponse(template.render(context))

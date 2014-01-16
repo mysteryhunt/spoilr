@@ -63,6 +63,7 @@ def system_log_update():
     entries = SystemLog.objects.all().order_by('-id')
     template = loader.get_template('log.html') 
     context = Context({
+        'updated': datetime.now(),
         'entries': entries,
     })
     cache.set('system_log', template.render(context), 60*60)
