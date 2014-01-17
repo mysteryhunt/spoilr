@@ -76,16 +76,23 @@
   AuthType Basic
   AuthName "Identify Yourself"
   AuthUserFile /home/hunt/htpasswd/htpasswd
-  Require User bigjimmy
   Require User hunthq
+  Require User rtb
   </Location>
 
   <Location /dynamic/hq>
   AuthType Basic
   AuthName "Identify Yourself"
   AuthUserFile /home/hunt/htpasswd/htpasswd
-  Require User bigjimmy
   Require User hunthq
+  Require User rtb
+  </Location>
+
+  </Location /dynamic/hq/gatekeeper>
+  AuthType Basic
+  AuthName "Identify Yourself"
+  AuthUserFile /home/hunt/htpasswd/htpasswd
+  Require User rtb
   </Location>
 
   WSGIDaemonProcess aliceshrugged.com display-name=%{GROUP}
