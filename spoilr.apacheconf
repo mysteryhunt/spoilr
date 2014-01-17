@@ -1,5 +1,6 @@
 <VirtualHost *:80>
 	ServerName  www.aliceshrugged.com
+	ServerAlias www-dev.aliceshrugged.com
 	ServerAlias aliceshrugged.com
 	ServerAlias hq.aliceshrugged.com
         ServerAdmin webmaster@localhost
