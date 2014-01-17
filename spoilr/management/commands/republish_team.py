@@ -1,6 +1,6 @@
 from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
-from spoilr.publish import republish_all
+from spoilr.publish import republish_team
 from spoilr.models import Team
 
 class Command(BaseCommand):
