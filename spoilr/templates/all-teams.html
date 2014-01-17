@@ -136,26 +136,28 @@
 	    </td>
 	  </tr>
 	  <tr id="team_log1_{{ team.team.url }}" class="log1">
-	    <td colspan="8">
+	    <td id="team_log1_c_{{ team.team.url }}" colspan="8">
 	      Last Log Entry:
 	      {{ team.log1.timestamp|date:'D H:i:s' }}: {{ team.log1.message }}
 	    </td>
+	    <td>geoguessr: {% if team.pwa_garciaparra_url %}<a target="_blank" href="{{ team.pwa_garciaparra_url }}">{{ team.pwa_garciaparra_url }}</a>{% else %}not yet{% endif %}
 	  </tr>
 	  <tr id="team_logn_{{ team.team.url }}" class="logn" style="display: none;">
-	    <td colspan="6">
+	    <td id="team_logn_c_{{ team.team.url }}" colspan="8">
 	      Recent Log Entries:<br />
 	      {% for log in team.logn %}
 	      {{ log.timestamp|date:'D H:i:s' }}: {{ log.message }}<br />
 	      {% endfor %}
 	    </td>
+	    <td>geoguessr: {% if team.pwa_garciaparra_url %}<a target="_blank" href="{{ team.pwa_garciaparra_url }}">{{ team.pwa_garciaparra_url }}</a>{% else %}not yet{% endif %}
 	  </tr>
 	</table>
 	<script type="text/javascript">
-	  $('#team_log1_{{ team.team.url }}').click(function () {
+	  $('#team_log1_c_{{ team.team.url }}').click(function () {
 	    $('#team_log1_{{ team.team.url }}').hide()
 	    $('#team_logn_{{ team.team.url }}').show()
 	  });
-	  $('#team_logn_{{ team.team.url }}').click(function () {
+	  $('#team_logn_c_{{ team.team.url }}').click(function () {
 	    $('#team_logn_{{ team.team.url }}').hide()
 	    $('#team_log1_{{ team.team.url }}').show()
 	  });

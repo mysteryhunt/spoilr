@@ -287,3 +287,12 @@ class Y2014PartyAnswerDataAdmin(admin.ModelAdmin):
     list_filter = ('type1', 'type2', 'level')
 
 admin.site.register(Y2014PartyAnswerData, Y2014PartyAnswerDataAdmin)
+
+class Y2014PwaGarciaparraUrlSubmissionAdmin(admin.ModelAdmin):
+    list_display = ('__str__', 'timestamp', 'team', 'phone', 'resolved')
+    list_filter = ('team__name', 'resolved')
+    search_fields = ['team__name']
+    ordering = ['timestamp']
+
+admin.site.register(Y2014PwaGarciaparraUrlSubmission, Y2014PwaGarciaparraUrlSubmissionAdmin)
+

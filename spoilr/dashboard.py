@@ -94,6 +94,12 @@ def TeamDict(team):
                 'solved': solved,
             }
             rounds[round.url]['puzzles'].append(p)
+    pwa_garciaparra_url = None # 2014-specific
+    if InteractionAccess.objects.filter(team=team, interaction__url='pwa_garciaparra_url', accomplished=True).exists(): # 2014-specific
+        try:
+            pwa_garciaparra_url = Y2014PwaGarciaparraUrlSubmission.objects.filter(team=team).order_by('-id')[0].url
+        except:
+            pwa_garciaparra_url = '???'
     return {
         'team': team,
         'rounds': rounds,
@@ -113,6 +119,7 @@ def TeamDict(team):
         'i_released': i_released,
         'i_solved': i_solved,
         'i_open': i_released - i_solved,
+        'pwa_garciaparra_url': pwa_garciaparra_url, # 2014-specific
         }
 
 def all_teams_update():
