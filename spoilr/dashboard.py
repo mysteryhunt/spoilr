@@ -1,7 +1,6 @@
 from django.http import HttpResponse
 from django.template import Context, loader
 from django.core.cache import cache
-from django.db.models import Q
 
 from .models import *
 from .constants import *
@@ -120,19 +119,18 @@ def all_teams_update():
     logger.info("updating all teams dashboard...")
     template = loader.get_template('all-teams.html') 
     teams = []
-    for team in Team.objects.filter(~Q(url='hunt_hq')):
+    for team in Team.objects.filter(is_special=False):
         teams.append(TeamDict(team))
     teams.sort(key=lambda team: -(team['r_solved'] * 5)-team['p_solved'])
-    f = ~Q(team__url='hunt_hq') & Q(resolved=False)
-    q_total = PuzzleSubmission.objects.filter(f).count()
-    q_total += MetapuzzleSubmission.objects.filter(f).count()
-    q_total += Y2014MitMetapuzzleSubmission.objects.filter(f).count() # 2014-specific
+    q_total = PuzzleSubmission.objects.filter(team__is_special=False, resolved=False).count()
+    q_total += MetapuzzleSubmission.objects.filter(team__is_special=False, resolved=False).count()
+    q_total += Y2014MitMetapuzzleSubmission.objects.filter(team__is_special=False, resolved=False).count() # 2014-specific
     q_teams = set()
-    for x in PuzzleSubmission.objects.filter(f):
+    for x in PuzzleSubmission.objects.filter(team__is_special=False, resolved=False):
         q_teams.add(x.team.url)
-    for x in MetapuzzleSubmission.objects.filter(f):
+    for x in MetapuzzleSubmission.objects.filter(team__is_special=False, resolved=False):
         q_teams.add(x.team.url)
-    for x in Y2014MitMetapuzzleSubmission.objects.filter(f): # 2014-specific
+    for x in Y2014MitMetapuzzleSubmission.objects.filter(team__is_special=False, resolved=False): # 2014-specific
         q_teams.add(x.team.url)
     s_total = MAX_POINTS # 2014-specific
     p_total = Puzzle.objects.count()
@@ -163,7 +161,7 @@ def all_teams_view(request):
 def all_puzzles_update():
     logger.info("updating all puzzles dashboard...")
     template = loader.get_template('all-puzzles.html') 
-    t_total = Team.objects.filter(~Q(url='hunt_hq')).count()
+    t_total = Team.objects.filter(is_special=False).count()
     p_total = Puzzle.objects.count()
 
     def percent(n, d):
@@ -178,7 +176,7 @@ def all_puzzles_update():
     for mm in ['spades', 'clubs', 'diamonds']: # 2014-specific
         meta = Metapuzzle.objects.get(url=mm)
         released = t_total
-        solved = MetapuzzleSolve.objects.filter(~Q(team__url='hunt_hq') & Q(metapuzzle=meta)).count()
+        solved = MetapuzzleSolve.objects.filter(team__is_special=False, metapuzzle=meta).count()
         puzzles = []
 
         m = {
@@ -191,16 +189,16 @@ def all_puzzles_update():
         }
         metas.append(m)
     for mitdata in Y2014MitPuzzleData.objects.all().order_by('id'): # 2014-specific
-        pf = PuzzleAccess.objects.filter(~Q(team__url='hunt_hq') & Q(puzzle=mitdata.puzzle))
+        pf = PuzzleAccess.objects.filter(team__is_special=False, puzzle=mitdata.puzzle)
         released = pf.count()
-        solved = PuzzleAccess.objects.filter(~Q(team__url='hunt_hq') & Q(puzzle=mitdata.puzzle) & Q(solved=True)).count()
+        solved = PuzzleAccess.objects.filter(team__is_special=False, puzzle=mitdata.puzzle, solved=False).count()
         first_release = None
         if released > 0:
             first_release = pf.order_by('id')[0].timestamp
             p_released += 1
         if solved > 0:
             p_solved += 1
-        surveys = PuzzleSurvey.objects.filter(~Q(team__url='hunt_hq') & Q(puzzle=mitdata.puzzle)).values('team__url').distinct().count()
+        surveys = PuzzleSurvey.objects.filter(team__is_special=False, puzzle=mitdata.puzzle).values('team__url').distinct().count()
         p = {
             'puzzle': mitdata.puzzle,
             'info': mitdata.card.name,
@@ -223,10 +221,10 @@ def all_puzzles_update():
         meta = Metapuzzle.objects.get(url=round.url)
         puzzles = []
         for puzzle in Puzzle.objects.filter(round=round).order_by('id'):
-            pf = PuzzleAccess.objects.filter(~Q(team__url='hunt_hq') & Q(puzzle=puzzle))
+            pf = PuzzleAccess.objects.filter(team__is_special=False, puzzle=puzzle)
             released = pf.count()
-            solved = PuzzleAccess.objects.filter(~Q(team__url='hunt_hq') & Q(puzzle=puzzle) & Q(solved=True)).count()
-            surveys = PuzzleSurvey.objects.filter(~Q(team__url='hunt_hq') & Q(puzzle=mitdata.puzzle)).values('team__url').distinct().count()
+            solved = PuzzleAccess.objects.filter(team__is_special=False, puzzle=puzzle, solved=True).count()
+            surveys = PuzzleSurvey.objects.filter(team__is_special=False, puzzle=mitdata.puzzle).values('team__url').distinct().count()
             info = ''
             if round.url == 'tea_party':
                 rounddata = Y2014PartyAnswerData.objects.get(answer=puzzle.answer)
@@ -262,9 +260,9 @@ def all_puzzles_update():
                 'solvedp': percent(solved, released),
             }
             puzzles.append(p)
-        rf = RoundAccess.objects.filter(~Q(team__url='hunt_hq') & Q(round=round))
+        rf = RoundAccess.objects.filter(team__is_special=False, round=round)
         released = rf.count()
-        solved = MetapuzzleSolve.objects.filter(~Q(team__url='hunt_hq') & Q(metapuzzle=meta)).count()
+        solved = MetapuzzleSolve.objects.filter(team__is_special=False, metapuzzle=meta).count()
         first_release = None
         if released > 0:
             first_release = rf.order_by('id')[0].timestamp
@@ -280,8 +278,8 @@ def all_puzzles_update():
         metas.append(m)
     interactions = []
     for interaction in Interaction.objects.all().order_by('id'):
-        released = InteractionAccess.objects.filter(~Q(team__url='hunt_hq') & Q(interaction=interaction)).count()
-        solved = InteractionAccess.objects.filter(~Q(team__url='hunt_hq') & Q(interaction=interaction) & Q(accomplished=True)).count()
+        released = InteractionAccess.objects.filter(team__is_special=False, interaction=interaction).count()
+        solved = InteractionAccess.objects.filter(team__is_special=False, interaction=interaction, accomplished=True).count()
         i = {
             'interaction': interaction,
             'released': released,

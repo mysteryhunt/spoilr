@@ -364,8 +364,7 @@ def publish_team_round(team, round, suffix=None):
             return
     round_context = RoundContext(team, round)
     publish_dir(round_context, os.path.join(settings.HUNT_DATA_DIR, 'round', round.url, 'round'), round_dir, '../..')
-    # --- 2014-specific ---
-    if team.url == 'hunt_hq':
+    if team.is_admin:
         solution_context = RoundContext(team, round)
         solution_context['name'] = round.name
         solution_context['url'] = 'round/' + round.url
@@ -392,6 +391,7 @@ def publish_team_round(team, round, suffix=None):
             publish_dir(solution_context, os.path.join(settings.HUNT_DATA_DIR, 'round', round.url, 'solution'), solution_dir, '../..')
         else:
             logger.warning('no solution for round %s', round.url)
+    # --- 2014-specific ---
     if round.url == 'humpty_dumpty':
         jigsaw = Y2014TeamData.objects.get(team=team).humpty_pieces
         if not os.path.isdir(os.path.join(round_dir, 'jigsaw')):
@@ -450,8 +450,7 @@ def publish_team_puzzle(team, puzzle, suffix=None):
         with open(os.path.join(puzzle_source, 'puzzle.js'), 'r') as puzzle_js_file:
             puzzle_context['puzzle_js'] = puzzle_js_file.read()
     publish_dir(puzzle_context, os.path.join(settings.HUNT_DATA_DIR, 'round', puzzle.round.url, 'puzzle'), puzzle_dir, '../..')
-    # --- 2014-specific ---
-    if team.url == 'hunt_hq':
+    if team.is_admin:
         solution_context = PuzzleContext(team, puzzle)
         solution_context['name'] = puzzle.name + ' (' + puzzle.round.name + ')'
         solution_context['url'] = 'puzzle/' + puzzle.url
@@ -478,6 +477,7 @@ def publish_team_puzzle(team, puzzle, suffix=None):
             publish_dir(solution_context, os.path.join(settings.HUNT_DATA_DIR, 'round', puzzle.round.url, 'solution'), solution_dir, '../..')
         else:
             logger.warning('no solution for puzzle %s', puzzle.url)
+    # --- 2014-specific ---
     if puzzle.round.url == 'mit':
         try:
             card = Y2014MitPuzzleData.objects.get(puzzle=puzzle).card

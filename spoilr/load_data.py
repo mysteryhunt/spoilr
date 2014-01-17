@@ -67,6 +67,10 @@ def load_teams():
             if Team.objects.filter(url=row["url"]).exists():
                 continue
             logger.info("  Team \"%s\"...", row["name"])
+            if row["url"] in ['_hunthq']:
+                row["is_admin"] = True
+            if row["url"] in ['_hunthq', '_test1', '_test2', '_test3']:
+                row["is_special"] = True
             team = Team.objects.create(**row)
             team.save() 
             system_log('load-team', 'Loaded team "%s"' % team.name, object_id=team.url)
@@ -182,8 +186,8 @@ def load_all_inner():
     load_party_data() # 2014-specific
     load_teams()
     load_team_phones()
-    if Team.objects.filter(url='hunt_hq').exists():
-        this_team_can_see_everything(Team.objects.get(url='hunt_hq'))
+    for team in Team.objects.filter(is_admin=True):
+        this_team_can_see_everything(team)
 
 def load_all():
     try:
