@@ -89,6 +89,7 @@ def load_teams():
 
 def load_team_phones():
     logger.info("Loading team phones from team_phones.txt...")
+    TeamPhone.objects.all().delete()
     with open(os.path.join(settings.LOAD_DIR, 'team_phones.txt'), 'r') as team_file:
         for row in csv.DictReader(team_file, delimiter='\t'):
             try:
@@ -96,7 +97,6 @@ def load_team_phones():
             except:
                 logger.exception('no such team %s for team phone %s', row["team"], row["phone"])
                 continue
-            TeamPhone.objects.filter(phone=row["phone"]).delete()
             TeamPhone.objects.create(team=team, phone=row["phone"]).save()
     logger.info("Done loading team phones")
 

@@ -551,9 +551,5 @@ def republish_all():
     teams = Team.objects.all()
     logger.info('Republishing hunt for %d teams...', len(teams))
     for team in teams:
-        logger.info('  Start Team "%s"...', team.url)
-        republish_team_start(team)
-    for team in teams:
-        logger.info('  Finish Team "%s"...', team.url)
-        republish_team_finish(team)
+        republish_team(team)
     logger.info('Done republishing hunt')
