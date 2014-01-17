@@ -270,12 +270,16 @@ def submit_mit_metapuzzle(request): # 2014-specific
     solved = []
     for x in ['spades', 'clubs', 'diamonds', 'jabberwock']:
         for y in MetapuzzleSolve.objects.filter(team=team, metapuzzle__url=x):
+            message = 'Bait accepted'
             if x == 'spades':
-                message = 'The Dormouse took the bait'
+                if InteractionAccess.objects.filter(team=team, interaction__url='dormouse', accomplished=True).exists():
+                    message = 'The Dormouse took the bait'
             elif x == 'clubs':
-                message = 'The Caterpillar took the bait'
+                if InteractionAccess.objects.filter(team=team, interaction__url='caterpillar', accomplished=True).exists():
+                    message = 'The Caterpillar took the bait'
             elif x == 'diamonds':
-                message = 'Tweedledee and Tweedledum took the bait'
+                if InteractionAccess.objects.filter(team=team, interaction__url='tweedles', accomplished=True).exists():
+                    message = 'Tweedledee and Tweedledum took the bait'
             elif x == 'jabberwock':
                 message = 'You found the Jabberwock\'s secret message'
             solved.append({'meta': y.metapuzzle, 'message': message})
