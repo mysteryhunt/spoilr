@@ -317,3 +317,77 @@ def all_puzzles_update():
 
 def all_puzzles_view(request):
     return HttpResponse(cache.get('all_puzzles'))
+
+def one_team_view(request, team_url):
+    team = Team.objects.get(url=team_url)
+    rounds = []
+    for round in Round.objects.all():
+        try:
+            access = RoundAccess.objects.get(team=team, round=round)
+        except:
+            access = None
+        rounds.append({
+            'round': round,
+            'access': access,
+        })
+    metapuzzles = []
+    for metapuzzle in Metapuzzle.objects.all():
+        solved = MetapuzzleSolve.objects.filter(team=team, metapuzzle=metapuzzle).exists()
+        metapuzzles.append({
+            'metapuzzle': metapuzzle,
+            'solved': solved,
+        })
+    interactions = []
+    for interaction in Interaction.objects.all():
+        try:
+            access = InteractionAccess.objects.get(team=team, interaction=interaction)
+        except:
+            access = None
+        interactions.append({
+            'interaction': interaction,
+            'access': access,
+        })
+    puzzles = []
+    for puzzle in Puzzle.objects.all().order_by('round__order', 'order'):
+        try:
+            access = PuzzleAccess.objects.get(team=team, puzzle=puzzle)
+        except:
+            access = None
+        info = ''
+        if puzzle.round.url == 'mit':
+            rounddata = Y2014MitPuzzleData.objects.get(puzzle=puzzle)
+            info = rounddata.card.name
+        if puzzle.round.url == 'tea_party':
+            rounddata = Y2014PartyAnswerData.objects.get(answer=puzzle.answer)
+            if rounddata.type1 == 'chair':
+                info = rounddata.type1+' ('+rounddata.type2+')'
+            else:
+                info = rounddata.type1+' ('+rounddata.type2+', '+str(rounddata.level)+')'
+        if puzzle.round.url == 'caucus_race':
+            rounddata = Y2014CaucusAnswerData.objects.filter(yes_answer=puzzle.answer)
+            if rounddata.exists():
+                info = '%d YES' % rounddata[0].bird
+            else:
+                rounddata = Y2014CaucusAnswerData.objects.filter(no_answer=puzzle.answer)
+                if rounddata.exists():
+                    info = '%d NO' % rounddata[0].bird
+        if puzzle.round.url == 'knights':
+            rounddata = Y2014KnightsAnswerData.objects.get(answer=puzzle.answer)
+            info = '%s %s' % (rounddata.color, rounddata.piece)
+        puzzles.append({
+            'puzzle': puzzle,
+            'info': info,
+            'access': access,
+        })
+    context = Context({
+        'team': team,
+        'phones': TeamPhone.objects.filter(team=team),
+        'teamdata': Y2014TeamData.objects.get(team=team), # 2014-specific
+        'rounds': rounds,
+        'metapuzzles': metapuzzles,
+        'interactions': interactions,
+        'puzzles': puzzles,
+        'surveys': PuzzleSurvey.objects.filter(team=team).order_by('id'),
+    })
+    template = loader.get_template('one-team.html') 
+    return HttpResponse(template.render(context))

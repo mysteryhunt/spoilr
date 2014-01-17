@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+{% load staticfiles %}
+<html>
+  <head>
+    <title>One Team Dashboard: {{ team.name }}</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+    <style type="text/css">
+      .t {
+        margin-left: 20px;
+        border-collapse: collapse;
+      }
+      .t td {
+        padding: 0px 10px;
+        white-space: nowrap;
+        vertical-align: top;
+      }
+    </style>
+  </head>
+  <body>
+    <div style="font: 10pt monospace">
+      <div style="float: right;">
+	<a href="/">Back to HQ Main</a>
+      </div>
+      Team: <b>{{ team.name }}</b><br />
+      Email: {{ team.email }}<br />
+      Size: {{ team.size_desc }}<br />
+      Phones:<br />
+      <table class="t">
+	{% for p in phones %}
+	<tr><td>{{ p.phone }}</td></tr>
+	{% endfor %}
+      </table>
+      Misc:<br />
+      <table class="t">
+	<tr><td>Points gained: {{ teamdata.points }}</td></tr>
+      </table>
+      Rounds:<br />
+      <table class="t">
+	{% for x in rounds %}
+	<tr style="background: {% if x.access %}#dfd{% endif %};">
+	  <td>{{ x.round.name }}</td>
+	  <td>
+	    {% if x.access %}
+	    Released {{ x.access.timestamp|date:'D H:i:s' }}
+	    {% else %}
+	    Not Released
+	    {% endif %}
+	  </td>
+	</tr>
+	{% endfor %}
+      </table>
+      Metapuzzles:<br />
+      <table class="t">
+	{% for x in metapuzzles %}
+	<tr style="background: {% if x.solved %}#dfd{% else %}#fdd{% endif %};">
+	  <td>{{ x.metapuzzle.name }}</td>
+	  <td>
+	    {% if x.solved %}
+	    Solved
+	    {% else %}
+	    Not Solved
+	    {% endif %}
+	  </td>
+	  <td>{{ x.metapuzzle.answer }}</td>
+	</tr>
+	{% endfor %}
+      </table>
+      Interactions:<br />
+      <table class="t">
+	{% for x in interactions %}
+	<tr style="background: {% if x.access.accomplished %}#dfd{% elif x.access %}#fdd{% endif %};">
+	  <td>{{ x.interaction.name }}</td>
+	  <td>
+	    {% if x.access.accomplished %}
+	    Accomplished
+	    {% elif x.access %}
+	    Ready
+	    {% else %}
+	    Not Ready
+	    {% endif %}
+	  </td>
+	  <td>{{ x.metapuzzle.answer }}</td>
+	</tr>
+	{% endfor %}
+      </table>
+      Puzzles:<br />
+      <table class="t">
+	{% for x in puzzles %}
+	<tr style="background: {% if x.access.solved %}#dfd{% elif x.access %}#fdd{% endif %};">
+	  <td>{{ x.puzzle.round.name }}</td>
+	  <td>{{ x.info }}</td>
+	  <td>{{ x.puzzle.name|truncatechars:50 }}</td>
+	  <td>
+	    {% if x.access.solved %}
+	    Solved
+	    {% elif x.access %}
+	    Released {{ x.access.timestamp|date:'D H:i:s' }}
+	    {% else %}
+	    Not Released
+	    {% endif %}
+	  </td>
+	  <td>{{ x.puzzle.answer }}</td>
+	</tr>
+	{% endfor %}
+      </table>
+      Surveys:<br />
+      <table class="t">
+	{% for x in surveys %}
+	<tr>
+	  <td>{{ x.timestamp|date:'D H:i:s' }}</td>
+	  <td>{{ x.puzzle.name|truncatechars:50 }}</td>
+	  <td>f:{{ x.fun }}</td> 
+	  <td>d:{{ x.difficulty }}</td> 
+	  <td style="white-space: normal;">{{ x.comment }}</td> 
+	</tr>
+	{% endfor %}
+      </table>
+  </body>
+</html>

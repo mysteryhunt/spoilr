@@ -39,7 +39,7 @@
       <div id="team_{{ team.team.url }}" class="team" style="border-top: 1px solid black; border-radius 5px; padding: 3px;">
 	<table style="border-collapse: collapse; width: 100%">
 	  <tr>
-	    <td colspan="2"><b>{{ team.team.name|truncatechars:40 }}</b></td>
+	    <td colspan="2"><a href="../one-team/{{ team.team.url }}"><b>{{ team.team.name|truncatechars:40 }}</b></a></td>
 	    <td>events:</td>
 	    <td class="{% if team.rounds.events.solved %}msolved{% endif %}">
 	      <img title="Events" src="{% if team.rounds.events.solved %}{% static "r_solved.png" %}{% elif team.rounds.events.released %}{% static "r_released.png" %}{% else %}{% static "r_unreleased.png" %}{% endif %}" />
@@ -163,13 +163,6 @@
 	  });
 	</script>
       </div>
-      <script type="text/javascript">
-	$('#team_{{ team.team.url }}').hover(function () {
-          $('#team_{{ team.team.url }}').css("background-color", "#ffa");
-	}, function () {
-          $('#team_{{ team.team.url }}').css("background-color", "");
-	});
-      </script>
       {% endfor %}
     </div>
     <script type="text/javascript">

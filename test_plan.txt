@@ -7,7 +7,7 @@
 from spoilr.models import *
 from spoilr.actions import *
 
-t = Team.objects.get(url='spoiler_alert')
+t = Team.objects.get(url='_test1')
 
 p = Puzzle.objects.get(url='intersecting_personalities')
 puzzle_answer_incorrect(t, p, 'NOPE')
