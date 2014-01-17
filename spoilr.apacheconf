@@ -88,7 +88,7 @@
   Require User rtb
   </Location>
 
-  </Location /dynamic/hq/gatekeeper>
+  <Location /dynamic/hq/gatekeeper>
   AuthType Basic
   AuthName "Identify Yourself"
   AuthUserFile /home/hunt/htpasswd/htpasswd
