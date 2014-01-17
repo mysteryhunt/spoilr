@@ -39,16 +39,16 @@
     </div>
     <table>
     <tr><th>Time
-      <th>Event Type
+      <th>Team URL
       <th>Message
-      <th>Team
+      <th>Event Type
       <th>Object ID
     </tr>
     {% for e in entries %}
     <tr class="entry"><td>{{ e.timestamp|date:'D H:i:s' }}
-      <td>{{ e.event_type }}
+      <td>{{ e.team.url }}
       <td>{{ e.message }}
-      <td>{{ e.team }}
+      <td>{{ e.event_type }}
       <td>{{ e.object_id }}
     </tr>
     {% endfor %}
