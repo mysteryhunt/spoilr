@@ -567,20 +567,20 @@ def queue(request):
         return team_obj
     
     for sub in PuzzleSubmission.objects.filter(resolved=False):
-        team_obj(sub.team, sub.timestamp)["submissions"].append({"type": "puzzle", "thing": str(sub.puzzle), "timestamp": sub.timestamp})
+        team_obj(sub.team, sub.timestamp)["submissions"].append({"type": "puzzle", "thing": str(sub.puzzle), "timestamp": sub.timestamp, "info": sub.puzzle.handler_info})
     for sub in MetapuzzleSubmission.objects.filter(resolved=False):
-        team_obj(sub.team, sub.timestamp)["submissions"].append({"type": "metapuzzle", "thing": str(sub.metapuzzle), "timestamp": sub.timestamp})
+        team_obj(sub.team, sub.timestamp)["submissions"].append({"type": "metapuzzle", "thing": str(sub.metapuzzle), "timestamp": sub.timestamp, "info": sub.metapuzzle.handler_info})
     for sub in Y2014MitMetapuzzleSubmission.objects.filter(resolved=False): # 2014-specific
-        team_obj(sub.team, sub.timestamp)["submissions"].append({"type": "mit-metapuzzle", "thing": "", "timestamp": sub.timestamp})
+        team_obj(sub.team, sub.timestamp)["submissions"].append({"type": "mit-metapuzzle", "thing": "", "timestamp": sub.timestamp, "info": "if suit meta, make interaction card"})
     for sub in ContactRequest.objects.filter(resolved=False):
         team_obj(sub.team, sub.timestamp)["submissions"].append({"type": "contact", "thing": sub.comment, "timestamp": sub.timestamp})
     for sub in Y2014PwaGarciaparraUrlSubmission.objects.filter(resolved=False):
-        team_obj(sub.team, sub.timestamp)["submissions"].append({"type": "pwa-garciaparra-url", "thing": sub.url, "timestamp": sub.timestamp})
+        team_obj(sub.team, sub.timestamp)["submissions"].append({"type": "pwa-garciaparra-url", "thing": sub.url, "timestamp": sub.timestamp, "info": "check geoguessr score"})
     for team_obj in teams:
         team_obj["submissions"].sort(key=lambda sub: sub["timestamp"])
         handlers = QueueHandler.objects.filter(team=team_obj["team"])
         if handlers.exists():
-            team_obj["handler"] = handlers[0] 
+            team_obj["handler"] = handlers[0]
 
     teams.sort(key=lambda team: -team["oldest"])
 

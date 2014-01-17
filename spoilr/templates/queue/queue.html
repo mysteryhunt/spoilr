@@ -65,13 +65,14 @@
 	      {% elif s.type == "metapuzzle" %}
 	      Metapuzzle
 	      {% elif s.type == "mit-metapuzzle" %}
-	      MIT Bait
+	      MIT Meta
 	      {% elif s.type == "contact" %}
 	      Contact HQ
 	      {% elif s.type == "pwa-garciaparra-url" %}
 	      PWA GARCIAPARRA URL
 	      {% endif %}
-	    <td><i>{{s.thing}}</i>
+	    <td><b>{{s.thing}}</b>
+	    <td><i>{{s.info}}</i>
 	  </tr>
 	  {% endfor %}
 	</table>

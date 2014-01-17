@@ -20,6 +20,7 @@ class Metapuzzle(models.Model):
     name = models.CharField(max_length=200, unique=True)
     answer = models.CharField(max_length=100)
     order = models.IntegerField(unique=True)
+    handler_info = models.CharField(max_length=1000, blank=True, null=True)
 
     def __str__(self):
         return '%s' % (self.name)
@@ -44,6 +45,7 @@ class Puzzle(models.Model):
     name = models.CharField(max_length=200, unique=True)
     answer = models.CharField(max_length=100)
     order = models.IntegerField()
+    handler_info = models.CharField(max_length=1000, blank=True, null=True)
 
     def __str__(self):
         return '%s (%s)' % (self.name, self.round.name)
