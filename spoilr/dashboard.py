@@ -198,7 +198,7 @@ def all_puzzles_update():
     for mitdata in Y2014MitPuzzleData.objects.all().order_by('id'): # 2014-specific
         pf = PuzzleAccess.objects.filter(team__is_special=False, puzzle=mitdata.puzzle)
         released = pf.count()
-        solved = PuzzleAccess.objects.filter(team__is_special=False, puzzle=mitdata.puzzle, solved=False).count()
+        solved = PuzzleAccess.objects.filter(team__is_special=False, puzzle=mitdata.puzzle, solved=True).count()
         first_release = None
         if released > 0:
             first_release = pf.order_by('id')[0].timestamp
