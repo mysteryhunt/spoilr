@@ -297,6 +297,7 @@ def all_puzzles_update():
         interactions.append(i)
         
     i_total = Interaction.objects.count()
+    metas = metas[4:] + metas[:4]
     context = Context({
         'updated': datetime.now(),
         'metas': metas,
