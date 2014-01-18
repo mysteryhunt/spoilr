@@ -1,0 +1,18 @@
+average/best geoguessr score per team/hunt
+* most common wrong answers per puzzle/hunt
+* submit rate over time per team/hunt
+* funnest puzzles per team/round/hunt
+* hardest puzzles per team/round/hunt
+* average/median/best solve time per team/puzzle/round/hunt
+* released/open/solved/ratios puzzles over time per team/hunt
+time between QUAGMIRE and OPERATOR TEST
+best/worse solve ratios per puzzle/round
+* most surveys (and puzzles surveyed) per team/puzzle/round
+all surveys
+* all contact hq messages
+points over time per team
+food submissions
+red herring submissions
+best WASD wins
+WASD level over time
+

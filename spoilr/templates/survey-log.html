@@ -1,0 +1,118 @@
+<html>
+  <head>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+    <style type="text/css">
+      body, td, input {
+        font: 10pt Verdana;
+      }
+      table {
+        border-collapse: collapse;
+        padding: 0px;
+        margin: 0px;
+      }
+      td, th {
+        vertical-align: top;
+        padding: 2px 8px;
+        overflow: hidden;
+        white-space: nowrap;
+      }
+      th {
+        font: 10pt Verdana bold;
+        text-align: left;
+      }
+    </style>
+  </head>
+  <body>
+    <div>
+      <div style="float: right;">
+	<a href="/">Back to HQ Main</a>
+      </div>
+      <em>(This may be a minute or two behind, last updated {{ updated|date:'D H:i' }})</em>
+      <form style="display: inline;">
+	<label for="auto-refresh">
+	  (auto-refresh:<input id="auto-refresh" type="checkbox" name="auto-refresh" checked/>)
+	</label>
+      </form>
+    </div>
+    <div>
+      Filter: <input id="filter" type="text" />
+    </div>
+    <table>
+    <tr>
+      <th>Time</th>
+      <th>Team URL</th>
+      <th>Puzzle</th>
+      <th>Fun</th>
+      <th>Difficulty</th>
+      <th>Comment</th>
+    </tr>
+    {% for e in entries %}
+    <tr class="entry">
+      <td>{{ e.timestamp|date:'D H:i:s' }}</td>
+      <td>{{ e.team.url }}</td>
+      <td>{{ e.puzzle.name }}</td>
+      <td>{{ e.fun }}</td>
+      <td>{{ e.difficulty }}</td>
+      <td>{{ e.comment }}</td>
+    </tr>
+    {% endfor %}
+    </table>
+    <script type="text/javascript">
+      function r() {
+        if ($('#auto-refresh').prop('checked'))
+          window.location.reload(true);
+      }
+      setInterval(r, 30000);
+      var fid;
+      var fabort = false;
+      var curFilter;
+      function applyFilter() {
+        fabort = false;
+        var filter = $('#filter').val().toLowerCase();
+	if (filter === curFilter) return;
+        curFilter = filter;
+	if (filter === '') {
+	  $('.entry').show();
+	} else {
+	  var words = filter.split(' ');
+	  $('.entry').each(function(index, element) {
+	    if (fabort) return;
+	    element = $(element);
+	    var text = element.children('td').text().toLowerCase();
+	    var match = true;
+	    for (var i = 0; match && i < words.length; i++) {
+	      if (text.indexOf(words[i]) < 0)
+		match = false;
+	    }
+	    if (match)
+	      element.show();
+	    else
+	      element.hide();
+	  });
+	}
+      }
+      $('#filter').keyup(function() {
+	if (fid)
+	  clearTimeout(fid);
+	fabort = true;
+	fid = setTimeout(applyFilter, 250 /*ms*/);
+        try {
+          localStorage['surveyFilter'] = $('#filter').val();
+        } catch (e) {
+	  $('#auto-refresh').prop('checked', false);
+        }
+      });
+      window.onload = function() {
+        try {
+          var filter = localStorage['surveyFilter'];
+          if (filter) { 
+            $('#filter')[0].value = filter;
+            applyFilter();
+          }
+        } catch (e) {
+        }
+      }
+
+    </script>
+  </body>
+</html>
