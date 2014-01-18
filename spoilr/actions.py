@@ -228,9 +228,9 @@ def puzzle_answer_correct(team, puzzle):
                     logger.exception('error releasing puzzle %s for second set of white queen', p)
     elif puzzle.round.url == 'caucus_race': # 2014-specific
         # caucus race releases puzzles in pairs by bird
-        # pairs are released on solves 2, 3, 5, 6, 8 (i.e. 2 solves, 1 solve, repeat)
+        # pairs are released on solves 2, 4, 6, 8, 10 (i.e. 2 solves, repeat)
         count = PuzzleAccess.objects.filter(team=team, puzzle__round=puzzle.round, solved=True).count()
-        if count in [2, 3, 5, 6, 8, 9]:
+        if count in [2, 4, 6, 8, 10]:
             for abird in Y2014CaucusAnswerData.objects.all():
                 yes_puzzle = None
                 no_puzzle = None

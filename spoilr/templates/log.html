@@ -62,38 +62,53 @@
       var fid;
       var fabort = false;
       var curFilter;
-      applyFilter = function() {
-      fabort = false;
-      var filter = $('#filter').val().toLowerCase();
-      if (filter === curFilter) return;
-      curFilter = filter;
-      if (filter === '') {
-        $('.entry').show();
-      } else {
-        var words = filter.split(' ');
-        $('.entry').each(function(index, element) {
-          if (fabort) return;
-          element = $(element);
-          var text = element.children('td').text().toLowerCase();
-          var match = true;
-          for (var i = 0; match && i < words.length; i++) {
-            if (text.indexOf(words[i]) < 0)
-              match = false;
-          }
-          if (match)
-            element.show();
-          else
-            element.hide();
-	});
+      function applyFilter() {
+        fabort = false;
+        var filter = $('#filter').val().toLowerCase();
+	if (filter === curFilter) return;
+        curFilter = filter;
+	if (filter === '') {
+	  $('.entry').show();
+	} else {
+	  var words = filter.split(' ');
+	  $('.entry').each(function(index, element) {
+	    if (fabort) return;
+	    element = $(element);
+	    var text = element.children('td').text().toLowerCase();
+	    var match = true;
+	    for (var i = 0; match && i < words.length; i++) {
+	      if (text.indexOf(words[i]) < 0)
+		match = false;
+	    }
+	    if (match)
+	      element.show();
+	    else
+	      element.hide();
+	  });
+	}
       }
-    }
-    $('#filter').keyup(function() {
-      $('#auto-refresh').prop('checked', false);
-      if (fid)
-        clearTimeout(fid);
-      fabort = true;
-      fid = setTimeout(applyFilter, 250 /*ms*/);
-    });
+      $('#filter').keyup(function() {
+	if (fid)
+	  clearTimeout(fid);
+	fabort = true;
+	fid = setTimeout(applyFilter, 250 /*ms*/);
+        try {
+          localStorage['logFilter'] = $('#filter').val();
+        } catch (e) {
+	  $('#auto-refresh').prop('checked', false);
+        }
+      });
+      window.onload = function() {
+        try {
+          var filter = localStorage['logFilter'];
+          if (filter) { 
+            $('#filter')[0].value = filter;
+            applyFilter();
+          }
+        } catch (e) {
+        }
+      }
+
     </script>
   </body>
 </html>
