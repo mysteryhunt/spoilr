@@ -231,7 +231,7 @@ def all_puzzles_update():
             pf = PuzzleAccess.objects.filter(team__is_special=False, puzzle=puzzle)
             released = pf.count()
             solved = PuzzleAccess.objects.filter(team__is_special=False, puzzle=puzzle, solved=True).count()
-            surveys = PuzzleSurvey.objects.filter(team__is_special=False, puzzle=mitdata.puzzle).values('team__url').distinct().count()
+            surveys = PuzzleSurvey.objects.filter(team__is_special=False, puzzle=puzzle).values('team__url').distinct().count()
             info = ''
             if round.url == 'tea_party':
                 rounddata = Y2014PartyAnswerData.objects.get(answer=puzzle.answer)
@@ -297,7 +297,7 @@ def all_puzzles_update():
         interactions.append(i)
         
     i_total = Interaction.objects.count()
-    metas = metas[4:] + metas[:4]
+    #metas = metas[7:] + metas[:7]
     context = Context({
         'updated': datetime.now(),
         'metas': metas,

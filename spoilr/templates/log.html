@@ -27,6 +27,7 @@
       <div style="float: right;">
 	<a href="/">Back to HQ Main</a>
       </div>
+      <b>This is the short log</b>, for the full log see <a href="../longlog/">here</a>.<br />
       <em>(This may be a minute or two behind, last updated {{ updated|date:'D H:i' }})</em>
       <form style="display: inline;">
 	<label for="auto-refresh">
@@ -35,7 +36,7 @@
       </form>
     </div>
     <div>
-      Filter: <input id="filter" type="text" />
+      Filter: <input id="filter" type="text" autofocus />
     </div>
     <table>
     <tr><th>Time
@@ -58,7 +59,7 @@
         if ($('#auto-refresh').prop('checked'))
           window.location.reload(true);
       }
-      setInterval(r, 30000);
+      setInterval(r, 5000);
       var fid;
       var fabort = false;
       var curFilter;

@@ -248,6 +248,8 @@ def puzzle_answer_correct(team, puzzle):
                     if no_puzzle:
                         release_puzzle(team, no_puzzle, 'solved "%s"' % puzzle.name)
                     break
+    elif puzzle.round.url == 'events':
+        pass
     else:
         if puzzle.round.url == 'humpty_dumpty': # 2014-specific
             td = Y2014TeamData.objects.get(team=team)

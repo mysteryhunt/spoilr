@@ -1,4 +1,5 @@
 * * * * * root /home/djangoapps/spoilr/manage update_hq_log > /dev/null
+* * * * * root /home/djangoapps/spoilr/manage update_hq_longlog > /dev/null
 * * * * * root /home/djangoapps/spoilr/manage update_hq_survey_log > /dev/null
-*/10 * * * * root /home/djangoapps/spoilr/manage update_hq_all_teams > /dev/null
-*/5 * * * * root /home/djangoapps/spoilr/manage update_hq_all_puzzles > /dev/null
+*/2 * * * * root /home/djangoapps/spoilr/manage update_hq_all_teams > /dev/null
+* * * * * root /home/djangoapps/spoilr/manage update_hq_all_puzzles > /dev/null

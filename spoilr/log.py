@@ -5,6 +5,7 @@ from django.core.cache import cache
 from .models import *
 
 import logging
+import time
 logger = logging.getLogger(__name__)
 
 PUZZLE_ACCESS = 'puzzle-access'
@@ -61,13 +62,30 @@ def team_log_vial_filled_no_hole(team):
 def system_log_update():
     print("updating system log view...")
     entries = SystemLog.objects.all().order_by('-id')
-    template = loader.get_template('log.html') 
+    for i in range(11):
+        template = loader.get_template('log.html') 
+        context = Context({
+                'updated': datetime.now(),
+                'entries': entries[:200],
+                })
+        cache.set('system_log', template.render(context), 60*60)
+        print("...")
+        time.sleep(5)
+    print("...done")
+
+def system_longlog_update():
+    print("updating system longlog view...")
+    entries = SystemLog.objects.all().order_by('-id')
+    template = loader.get_template('longlog.html') 
     context = Context({
         'updated': datetime.now(),
         'entries': entries,
     })
-    cache.set('system_log', template.render(context), 60*60)
+    cache.set('system_longlog', template.render(context), 60*60)
     print("...done")
 
 def system_log_view(request):
     return HttpResponse(cache.get('system_log'))
+
+def system_longlog_view(request):
+    return HttpResponse(cache.get('system_longlog'))

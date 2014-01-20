@@ -28,41 +28,27 @@
 	<a href="/">Back to HQ Main</a>
       </div>
       <em>(This may be a minute or two behind, last updated {{ updated|date:'D H:i' }})</em>
-      <form style="display: inline;">
-	<label for="auto-refresh">
-	  (auto-refresh:<input id="auto-refresh" type="checkbox" name="auto-refresh" checked/>)
-	</label>
-      </form>
     </div>
     <div>
-      Filter: <input id="filter" type="text" autofocus />
+      Filter: <input id="filter" type="text" />
     </div>
     <table>
-    <tr>
-      <th>Time</th>
-      <th>Team URL</th>
-      <th>Puzzle</th>
-      <th>Fun</th>
-      <th>Difficulty</th>
-      <th>Comment</th>
+    <tr><th>Time
+      <th>Team URL
+      <th>Message
+      <th>Event Type
+      <th>Object ID
     </tr>
     {% for e in entries %}
-    <tr class="entry">
-      <td>{{ e.timestamp|date:'D H:i:s' }}</td>
-      <td>{{ e.team.url }}</td>
-      <td>{{ e.puzzle.name }}</td>
-      <td>{{ e.fun }}</td>
-      <td>{{ e.difficulty }}</td>
-      <td>{{ e.comment }}</td>
+    <tr class="entry"><td>{{ e.timestamp|date:'D H:i:s' }}
+      <td>{{ e.team.url }}
+      <td>{{ e.message }}
+      <td>{{ e.event_type }}
+      <td>{{ e.object_id }}
     </tr>
     {% endfor %}
     </table>
     <script type="text/javascript">
-      function r() {
-        if ($('#auto-refresh').prop('checked'))
-          window.location.reload(true);
-      }
-      setInterval(r, 30000);
       var fid;
       var fabort = false;
       var curFilter;
@@ -97,14 +83,14 @@
 	fabort = true;
 	fid = setTimeout(applyFilter, 250 /*ms*/);
         try {
-          localStorage['surveyFilter'] = $('#filter').val();
+          localStorage['logFilter'] = $('#filter').val();
         } catch (e) {
 	  $('#auto-refresh').prop('checked', false);
         }
       });
       window.onload = function() {
         try {
-          var filter = localStorage['surveyFilter'];
+          var filter = localStorage['logFilter'];
           if (filter) { 
             $('#filter')[0].value = filter;
             applyFilter();

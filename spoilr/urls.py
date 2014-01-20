@@ -6,7 +6,7 @@ admin.autodiscover()
 
 from .dashboard import all_teams_view, all_puzzles_view, one_team_view
 from .gatekeeper import *
-from .log import system_log_view
+from .log import system_log_view, system_longlog_view
 from .submit import *
 from .survey_log import survey_log_view
 
@@ -29,6 +29,7 @@ urlpatterns = patterns('',
     url(r'^hq/all-puzzles/$', all_puzzles_view),
     url(r'^hq/queue/$', queue),
     url(r'^hq/log/$', system_log_view),
+    url(r'^hq/longlog/$', system_longlog_view),
     url(r'^hq/survey-log/$', survey_log_view),
 
     url(r'^hq/gatekeeper/$', gatekeeper_view),
