@@ -39,13 +39,15 @@ class Command(BaseCommand):
         wa = dict()
         for s in PuzzleSubmission.objects.filter(team__is_special=False):
             if not compare_answers(s.answer, s.puzzle.answer):
-                k = '%s\t%s\t%s' % (s.puzzle.name, s.puzzle.round.name, s.answer)
+                a = re.sub(r'[^A-Z0-9]', '', s.answer)
+                k = '%s\t%s\t%s' % (s.puzzle.name, s.puzzle.round.name, a)
                 if k not in wa:
                     wa[k] = 0
                 wa[k] += 1
         for s in MetapuzzleSubmission.objects.filter(team__is_special=False):
             if not compare_answers(s.answer, s.metapuzzle.answer):
-                k = '%s\t\t%s' % (s.metapuzzle.name, s.answer)
+                a = re.sub(r'[^A-Z0-9]', '', s.answer)
+                k = '%s\t\t%s' % (s.metapuzzle.name, a)
                 if k not in wa:
                     wa[k] = 0
                 wa[k] += 1

@@ -141,14 +141,14 @@ def submit_survey(request, puzzle_url):
     except:
         logger.exception('cannot find puzzle %s', puzzle_url)
         return HttpResponseBadRequest('cannot find puzzle '+puzzle_url)
-    try:
-        access = PuzzleAccess.objects.get(team=team, puzzle=puzzle)
-    except:
-        logger.exception('team %s submitted for puzzle %s, but does not have access to it - shenanigans?', team, puzzle)
-        return HttpResponseBadRequest('cannot find puzzle '+puzzle_url)
-    if not access.solved:
-        logger.exception('team %s requesting survey for puzzle %s, but has not solved it - shenanigans?', team, puzzle)
-        return HttpResponseBadRequest('cannot request survey until the puzzle is solved')
+    #try:
+    #    access = PuzzleAccess.objects.get(team=team, puzzle=puzzle)
+    #except:
+    #    logger.exception('team %s submitted for puzzle %s, but does not have access to it - shenanigans?', team, puzzle)
+    #    return HttpResponseBadRequest('cannot find puzzle '+puzzle_url)
+    #if not access.solved:
+    #    logger.exception('team %s requesting survey for puzzle %s, but has not solved it - shenanigans?', team, puzzle)
+    #    return HttpResponseBadRequest('cannot request survey until the puzzle is solved')
     template = loader.get_template('submit/survey.html') 
     complete = False
     if request.method == "POST":
@@ -167,6 +167,50 @@ def submit_survey(request, puzzle_url):
     context = RequestContext(request, {
         'team': team,
         'puzzle': puzzle,
+        'count': count,
+        'commentlen': commentlen,
+        'complete': complete,
+    })
+    return HttpResponse(template.render(context))
+
+def submit_meta_survey(request, metapuzzle_url):
+    username = request.META['REMOTE_USER']
+    try:
+        team = Team.objects.get(username=username)
+    except:
+        logger.exception('cannot find team for user %s', username)
+        return HttpResponseBadRequest('cannot find team for user '+username)
+    try:
+        metapuzzle = Metapuzzle.objects.get(url=metapuzzle_url)
+    except:
+        logger.exception('cannot find metapuzzle %s', metapuzzle_url)
+        return HttpResponseBadRequest('cannot find metapuzzle '+metapuzzle_url)
+    #try:
+    #    access = PuzzleAccess.objects.get(team=team, puzzle=puzzle)
+    #except:
+    #    logger.exception('team %s submitted for puzzle %s, but does not have access to it - shenanigans?', team, puzzle)
+    #    return HttpResponseBadRequest('cannot find puzzle '+puzzle_url)
+    #if not access.solved:
+    #    logger.exception('team %s requesting survey for puzzle %s, but has not solved it - shenanigans?', team, puzzle)
+    #    return HttpResponseBadRequest('cannot request survey until the puzzle is solved')
+    template = loader.get_template('submit/meta_survey.html') 
+    complete = False
+    if request.method == "POST":
+        maxlen = MetapuzzleSurvey._meta.get_field('comment').max_length
+        comment = request.POST["comment"][:maxlen]
+        fun = request.POST["fun"]
+        if fun not in ['1','2','3','4','5']:
+            fun = None
+        difficulty = request.POST["difficulty"]
+        if difficulty not in ['1','2','3','4','5']:
+            difficulty = None
+        MetapuzzleSurvey.objects.create(team=team, metapuzzle=metapuzzle, fun=fun, difficulty=difficulty, comment=comment).save()
+        complete = True
+    commentlen = MetapuzzleSurvey._meta.get_field('comment').max_length
+    count = MetapuzzleSurvey.objects.filter(team=team, metapuzzle=metapuzzle).count()
+    context = RequestContext(request, {
+        'team': team,
+        'metapuzzle': metapuzzle,
         'count': count,
         'commentlen': commentlen,
         'complete': complete,

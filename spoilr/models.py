@@ -240,6 +240,20 @@ class PuzzleSurvey(models.Model):
     class Meta:
         ordering = ['timestamp']
     
+class MetapuzzleSurvey(models.Model):
+    metapuzzle = models.ForeignKey(Metapuzzle)
+    team = models.ForeignKey(Team)
+    fun = models.IntegerField(blank=True, null=True)
+    difficulty = models.IntegerField(blank=True, null=True)
+    comment = models.CharField(max_length=2000, blank=True)
+    timestamp = models.DateTimeField(default=datetime.now)
+
+    def __str__(self):
+        return '%s submitted the survey for %s' % (self.team.name, str(self.metapuzzle))
+
+    class Meta:
+        ordering = ['timestamp']
+    
 
 # ----------------------- 2014-specific stuff ---------------------
 
