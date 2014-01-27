@@ -1,0 +1,47 @@
+<html>
+  <head>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+  </head>
+  <body>
+    <div style="white-space: nowrap;">
+      {% if complete %}
+      Thank you for filling out the survey for {{ metapuzzle.name }}.<br />
+      <a href="/overview.html">Click here to return to the Team Overview</a>.
+      {% else %}
+      Team: {{ team.name }}<br>
+      Round: {{ metapuzzle.name }}<br>
+      Your team has submitted {{ count }} survey responses for this round.  Respond as many times as you like (within reason).
+      <form action="." method="POST">
+	{% csrf_token %}
+	Fun: <select id="fun" name="fun">
+	  <option value=" " selected="selected"> </option>
+	  <option value="1">1</option>
+	  <option value="2">2</option>
+	  <option value="3">3</option>
+	  <option value="4">4</option>
+	  <option value="5">5</option>
+	</select>
+	Difficulty: <select id="difficulty" name="difficulty">
+	  <option value=" " selected="selected"> </option>
+	  <option value="1">1</option>
+	  <option value="2">2</option>
+	  <option value="3">3</option>
+	  <option value="4">4</option>
+	  <option value="5">5</option>
+	</select><br/>
+	Comments: <span id="remaining">({{ commentlen }} characters max)</span><br/><textarea id="comment" name="comment" rows="15" cols="80" maxlength="{{commentlen }}"></textarea><br/>
+	<input type="hidden" name="survey" value="true">
+	<input id="submit" type="submit" value="Submit">
+      </form>
+      <script type="text/javascript">
+	$('#submit').bind('submit', function(e) {
+          $(this).find('input:submit').attr('disabled', 'disabled');
+	});
+	$('#comment').keyup(function(e) {
+          $('#remaining').text("(" + ({{commentlen}}-$(this).val().length) + " characters left)");
+        });
+      </script>
+      {% endif %}
+    </div>
+  </body>
+</html>
