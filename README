@@ -1,0 +1,25 @@
+SPOILR
+
+Mystery Hunt-Running Django App.
+
+
+Requires django >= 1.4
+Designed to run under apache with mod_wsgi
+
+Requires an actual hunt structure and info to be present in /home/hunt before this will work. This should be in some other git repo somewhere.
+
+Required config files:
+my.cnf (use my.cnf.EXAMPLE as a template)
+spoilr/settings.py (use settings.py.EXAMPLE as a template)
+
+Commands:
+reset.sh -- re-initializes everything based on hunt structure and team data (including wiping database)
+	will also install crontab and basic apache conf, syslog settings, and probably some other stuff
+
+./manage republish_all -- republishes hunt for all teams (based on hunt structure in /home/hunt)
+
+./manage load_data -- reloads data for all teams (based on team data in /home/hunt)
+
+Originally Created for 2014 Mystery Hunt
+By Jamie Clark (sbj@dimins.org) with some help from Ben O'Connor (benoc@alum.mit.edu)
+Team email: aliceshrugged@aliceshrugged.com
