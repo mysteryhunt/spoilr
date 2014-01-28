@@ -7,6 +7,8 @@
 #It then republishes them all
 #
 #DO NOT RUN THIS UNLESS YOU WANT TO DESTROY/RESTART THE HUNT or are in dev/testing mode
+#
+#Note:  /home/hunt repo with basic hunt structure and docroot needs to exist first
 ######
 
 OWNER="www-data"
