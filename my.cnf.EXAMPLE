@@ -1,0 +1,6 @@
+[client]
+host = your.database.server
+database = spoilr
+user = spoilr
+password = spoilr
+default-character-set = utf8

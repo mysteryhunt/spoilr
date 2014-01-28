@@ -1,3 +1,4 @@
 *.pyc
 *~
 my.cnf
+settings.py
