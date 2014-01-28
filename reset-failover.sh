@@ -1,5 +1,14 @@
 #!/bin/bash
 
+######
+# reset-failover.sh
+#
+# this script will re-initialize and republish all hunt team info and team directories
+# but will preserve the database
+# use this if you're failing over to a new server with an existing hunt database 
+# or if you otherwise just want to rebuild the system-side of the config but not destroy hunt
+######
+
 OWNER="www-data"
 
 cd /home/djangoapps/spoilr

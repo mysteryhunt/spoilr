@@ -1,5 +1,13 @@
 #!/bin/sh
 
+######
+# manage
+#
+# run this instead of manage.py to do stuff
+# it will make sure it's running as www-data so you don't fuck up permissions
+# and make hunt unreadable by the web server
+#
+
 OWNER="www-data"
 
 su -c "python /home/djangoapps/spoilr/manage.py $* --traceback" $OWNER

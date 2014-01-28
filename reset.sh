@@ -1,5 +1,14 @@
 #!/bin/bash
 
+####
+#reset.sh
+#
+#This script totally wipes and re-creates the hunt database and all team directories
+#It then republishes them all
+#
+#DO NOT RUN THIS UNLESS YOU WANT TO DESTROY/RESTART THE HUNT or are in dev/testing mode
+######
+
 OWNER="www-data"
 
 cd /home/djangoapps/spoilr

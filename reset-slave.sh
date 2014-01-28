@@ -1,5 +1,12 @@
 #!/bin/bash
 
+#####
+# reset-slave.sh
+#
+# this script just sets up what needs to be set up on a slave / read-only hunt server
+#
+#####
+
 OWNER="www-data"
 
 cd /home/djangoapps/spoilr
