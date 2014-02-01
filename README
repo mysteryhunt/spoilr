@@ -2,6 +2,7 @@ SPOILR
 
 Mystery Hunt-Running Django App.
 
+Requirements:
 
 Requires django >= 1.4
 Designed to run under apache with mod_wsgi
@@ -13,12 +14,18 @@ my.cnf (use my.cnf.EXAMPLE as a template)
 spoilr/settings.py (use settings.py.EXAMPLE as a template)
 
 Commands:
-reset.sh -- re-initializes everything based on hunt structure and team data (including wiping database)
+./reset.sh -- re-initializes everything based on hunt structure and team data (including wiping database)
 	will also install crontab and basic apache conf, syslog settings, and probably some other stuff
 
 ./manage republish_all -- republishes hunt for all teams (based on hunt structure in /home/hunt)
 
+./manage republish_team <team_url> -- republished hunt for just one team
+
 ./manage load_data -- reloads data for all teams (based on team data in /home/hunt)
+
+Known Issues:
+
+Race condition in republish_all / republish_team will erase any progress made while republish is running for that ream.  Do not run while hunt queue is being processed (i.e. make sure progress is frozen). Or fix it to be transactional.
 
 Originally Created for 2014 Mystery Hunt
 By Jamie Clark (sbj@dimins.org) with some help from Ben O'Connor (benoc@alum.mit.edu)
